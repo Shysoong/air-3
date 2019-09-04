@@ -217,7 +217,7 @@ function Perfbar(nodeIdx, nodeName, nodePort, numCores) {
             this.pbCtx.fillStyle = "black";
             if (cpuTicks.length == 0) {
                 this.pbCtx.fillText(
-                    "[Not Linux]",
+                    "[非Linux]",
                     0,
                     PB_PIXEL_HEIGHT_LINEOFTEXT);
             }
@@ -337,13 +337,13 @@ function initializeNode(nodeIdx, nodeName, nodePort) {
                 var legend = "" +
                     "<div style='max-width: 300px;'>" +
                     "<br/>" +
-                    "<h3>Legend</h3>" +
-                    "<p>Each bar represents one CPU.</p>" +
+                    "<h3>图例</h3>" +
+                    "<p>每跟柱子代表一个CPU。</p>" +
                     "<table class='table'>" +
-                    "  <tr><td>Blue:</td><td>idle time</td></tr>" +
-                    "  <tr><td>Green:</td><td>user time</td></tr>" +
-                    "  <tr><td>Red:</td><td>system time</td></tr>" +
-                    "  <tr><td>White:</td><td>other time (e.g. i/o)</td></tr>" +
+                    "  <tr><td>蓝色:</td><td>空闲时间</td></tr>" +
+                    "  <tr><td>绿色:</td><td>用户时间</td></tr>" +
+                    "  <tr><td>红色:</td><td>系统时间</td></tr>" +
+                    "  <tr><td>白色:</td><td>其他时间(例如 i/o)</td></tr>" +
                     "</table>" +
                     "</d" + "iv>";
                 appendBody(legend);
