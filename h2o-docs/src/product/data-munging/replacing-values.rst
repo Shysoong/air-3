@@ -1,7 +1,7 @@
-Replacing Values in a Frame
+在数据帧中替换数值
 ---------------------------
 
-This example shows how to replace numeric values in a frame of data. Note that it is currently not possible to replace categorical value in a column.
+这个例子展示了如何替换数据帧中的数值。请注意，目前无法替换列中的分类值。
 
 .. example-code::
    .. code-block:: r

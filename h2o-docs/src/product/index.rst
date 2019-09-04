@@ -4,18 +4,18 @@
    contain the root `toctree` directive.
 
 ========
-Overview
+概述
 ========
 
-Welcome to the H2O documentation site! Depending on your area of interest, select a learning path from the sidebar, or look at the full content outline below.
+欢迎来到AIR文档站点！根据您感兴趣的领域，选择侧边栏中的学习路径，或者查看下面的完整内容大纲。
 
-We're glad you're interested in learning more about H2O. If you have questions or ideas to share, please post them to the `H2O community site on Stack Overflow <http://stackoverflow.com/questions/tagged/h2o>`__.
+们很高兴你对学习更多关于AIR的知识感兴趣。如果您有任何问题或想法要分享，请将它们发布到 `H2O community site on Stack Overflow <http://stackoverflow.com/questions/tagged/h2o>`__.
 
-Additional Resources:
+额外的资源：
 
-- See how are customers are using H2O at https://www.h2o.ai/customers/.
-- Keep up to date with the latest H2O blogs at https://www.h2o.ai/blog/.
-- Review projects, applications, research papers, tutorials, courses, and books that use H2O at https://github.com/h2oai/awesome-h2o.
+- 在 https://www.h2o.ai/customers/ 查看客户如何使用AIR.
+- 关注最新的AIR博客 https://www.h2o.ai/blog/。
+- 在 https://github.com/h2oai/awesome-h2o 回顾使用H2O的项目、应用程序、研究论文、教程、课程和书籍。
 
 .. toctree::
    :maxdepth: 2

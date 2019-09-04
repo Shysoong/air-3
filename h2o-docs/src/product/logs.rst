@@ -1,6 +1,6 @@
 .. _logs:
 
-Downloading Logs
+下载日志
 ================
 
 This section describes how non-Hadoop and Hadoop users can access logs. 

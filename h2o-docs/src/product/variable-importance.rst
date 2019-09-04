@@ -1,6 +1,6 @@
 .. _variable-importance:
 
-Variable Importance
+变量重要性
 ===================
 
 This section describes how variable importance is calculated for tree-based models. For examples, this section uses the cars dataset to classify whether or not a car is fuel efficient based on its weight and the year it was built. 

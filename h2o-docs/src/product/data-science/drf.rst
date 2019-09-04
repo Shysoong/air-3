@@ -1,4 +1,4 @@
-Distributed Random Forest (DRF)
+分布式随机森林(DRF)
 -------------------------------
 
 Introduction

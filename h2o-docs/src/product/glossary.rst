@@ -1,6 +1,6 @@
 .. _glossary:
 
-Glossary
+术语
 ========
 
 .. glossary::

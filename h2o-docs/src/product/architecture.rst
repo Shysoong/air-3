@@ -1,187 +1,149 @@
-H2O Architecture
+AIR架构
 ================
 
-H2O Software Stack
+AIR技术栈
 ------------------
 
-The diagram below shows most of the different components that work
-together to form the H2O software stack. The diagram is split into a top
-and bottom section, with the network cloud dividing the two sections.
+下图显示了组成AIR软件栈的大部分不同组件。图被划分为顶部和底部两个部分，网络云将这两个部分划分开来。
 
-The top section shows some of the different REST API clients that exist
-for H2O.
+顶部部分显示了AIR存在的一些不同的REST API客户端。
 
-The bottom section shows different components that run within an H2O JVM
-process.
+底部部分显示了在AIR JVM进程中运行的不同组件。
 
-The color scheme in the diagram shows each layer in a consistent color
-but always shows user-added customer algorithm code as gray.
+图中的配色方案以一致的颜色显示每一层，但始终将用户添加的自定义算法代码显示为灰色。
 
 .. image:: images/h2o_stack.png
-   :alt: H2O stack
+   :alt: AIR stack
    
 
-REST API Clients
+REST API 客户端
 ------------------
-All REST API clients communicate with H2O over a socket connection.
+所有REST API客户端都通过socket连接与AIR通信。
 
 
 **JavaScript**
- The embedded H2O Web UI is written in JavaScript, and uses the standard REST API.
+ 嵌入式AIR Web UI是用JavaScript编写的，并使用标准的REST API。
 
 **R**
- R scripts can use the H2O R package ['library(h2o)']. Users can write their own R functions that run on H2O with 'apply' or 'ddply'.
+ R脚本可以使用AIR的R包 ['library(air)']。用户可以编写自己的R函数，在AIR上运行 'apply' 或 'ddply'。
 
 **Python**
- Python scripts currently must use the REST API directly. An H2O client API for python is planned.
+ Python脚本当前必须直接使用REST API。为python开发一个AIR客户端API已在规划中。
 
 **Excel**
- An H2O worksheet for Microsoft Excel is available. It allows you to import big datasets into H2O and run algorithms like GLM directly from Excel.
+ 可以使用Microsoft Excel的AIR工作表。它允许您将大数据集导入AIR并直接从Excel中运行GLM之类的算法。
 
 **Tableau**
- Users can pull results from H2O for visualization in Tableau.
+ 用户可以从AIR中提取结果，以便在Tableau中进行可视化。
 
 **Flow**
- H2O Flow is the notebook style Web UI for H2O.
+ AIR Flow是AIR的笔记型Web UI。
 
 
-JVM Components
+JVM组件
 ~~~~~~~~~~~~~~
 
-An H2O cluster consists of one or more nodes. Each node is a single JVM
-process. Each JVM process is split into three layers: language,
-algorithms, and core infrastructure.
+AIR集群由一个或多个节点组成。每个节点都是一个JVM进程。每个JVM进程被分成三个层:语言、算法和核心基础设施。
 
-The language layer consists of an expression evaluation engine for R and
-the Shalala Scala layer. The R evaluation layer is a slave to the R REST
-client front-end. The Scala layer, however, is a first-class citizen in
-which you can write native programs and algorithms that use H2O.
+语言层由R的表达式计算引擎和Shalala Scala层组成。R评估层是R REST客户端前端的一个从属层。Scala层是一等公民，您可以在其中编写使用AIR的本地程序和算法。
 
-The algorithms layer contains those algorithms automatically provided
-with H2O. These are the parse algorithm used for importing datasets, the
-math and machine learning algorithms like GLM, and the prediction and
-scoring engine for model evaluation.
+算法层包含内置提供的AIR算法。这些是用于导入数据集的解析算法、数学和机器学习算法(如GLM)，以及用于模型评估的预测和评分引擎。
 
-The bottom (core) layer handles resource management. Memory and CPU are
-managed at this level.
+底层(核心)处理资源管理。内存和CPU在这个级别上进行管理。
 
-Memory Management
+内存管理
 ^^^^^^^^^^^^^^^^^
 
 **Fluid Vector Frame**
- A Frame is an H2O Data Frame, the basic unit of data storage exposed to users. "Fluid Vector" is an internal engineering term that caught on. It refers to the ability to add and update and remove columns in a frame "fluidly" (as opposed to the frame being rigid and immutable). The Frame->Vector->Chunk->Element taxonomy that stores data in memory is described in Javadoc. The Fluid Vector (or fvec) code is the column-compressed store implementation.
+ Frame是AIR的数据帧，向用户暴露的基本数据存储单元。 "Fluid Vector"（流体矢量） 是一个流行的内部工程术语。它指的是能够“流畅地”添加、更新和删除框架中的列（相对于帧是刚性和不可变的）。存储在内存中的Frame->向量->块->Element taxonomy在Javadoc有具体描述。流体矢量(或fvec)代码是用列压缩存储实现的。
 
-**Distributed K/V store**
- Atomic and distributed in-memory storage spread across the cluster.
+**分布式K/V存储**
+ 分散在集群中的原子的、分布式的内存存储。
 
-**Non-blocking Hash Map**
- Used in the K/V store implementation.
+**非阻塞 Hash Map**
+ 用于K/V存储实现。
 
-CPU Management
+CPU管理
 ^^^^^^^^^^^^^^
 
 **Job**
- Jobs are large pieces of work that have progress bars and can be monitored in the Web UI. Model creation is an example of a job.
+ 作业是具有进度条的大型工作，可以在Web UI中监视。模型创建是作业的一个例子。
 
 **MRTask**
- MRTask stands for MapReduce Task. This is an H2O in-memory MapReduce Task, not to be confused with a Hadoop MapReduce task.
+ MRTask代表MapReduce任务。这是一个AIR内存中的MapReduce任务，不要与Hadoop MapReduce任务混淆。 
 
 **Fork/Join**
- A modified JSR166y lightweight task execution framework.
+ 修改过的JSR166y轻量级任务执行框架。
 
 
-How R (and Python) Interacts with H2O
+R(和Python)如何与AIR交互
 -------------------------------------
 
-The H2O package for R allows R users to control an H2O cluster from an R
-script. The R script is a REST API client of the H2O cluster. The data
-never flows through R.
+R的AIR包允许R用户从R脚本控制AIR集群。R脚本是AIR集群的一个REST API客户端，数据本身不在R中计算。
 
-Note that although these examples are for R, Python and the H2O package
-for Python behave exactly the same way.
+注意，尽管这些示例是针对R的，但Python和Python的AIR包的行为完全相同。
 
-How R Scripts Tell H2O to Ingest Data
+R脚本如何告诉AIR读取数据
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following sequence of three steps shows how an R program tells an
-H2O cluster to read data from HDFS into a distributed H2O Frame.
+以下三个步骤的序列展示了R程序如何告诉AIR集群将数据从HDFS读入分布式AIR数据帧。
 
-**Step 1: The R user calls the importFile function**
+**Step 1: R用户调用importFile函数**
 
 
 .. image:: images/r_hdfs_read_step1.png
    :alt: r_hdfs_read_step1
 
-**Step 2: The R client tells the cluster to read the data**
+**Step 2: R客户端告诉集群读取数据**
 
-The thin arrows show control information.
+细箭头展示了控制信息。
 
 .. image:: images/r_hdfs_read_step2.png
    :alt: r_hdfs_read_step2
 
-**Step 3: The data is returned from HDFS into a distributed H2O Frame**
+**Step 3: 数据从HDFS转化为分布式AIR帧后返回**
 
-The thin arrows show control information. The thick arrows show data
-being returned from HDFS. The blocks of data live in the distributed H2O
-Frame cluster memory.
+细箭头展示了控制信息。粗箭头表示从HDFS返回的数据。数据块位于分布式AIR帧集群内存中。
 
 .. image:: images/r_hdfs_read_step3.png
    :alt: r_hdfs_read_step3
 
-How R Scripts Call H2O GLM
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+R脚本如何调用AIR广义线性模型
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The following diagram shows the different software layers involved when
-a user runs an R program that starts a GLM on H2O.
+下图显示了当用户运行一个在AIR上启动GLM的R程序时所涉及的不同软件层。
 
-The left side shows the steps that run the the R process and the right
-side shows the steps that run in the H2O cluster. The top layer is the
-TCP/IP network code that enables the two processes to communicate with
-each other.
+左边显示运行R进程的步骤，右边显示在H2O集群中运行的步骤。 顶层是TCP/IP网络代码，它使两个进程能够彼此通信。
 
-The solid line shows an R->H2O request and the dashed line shows the
-response for that request.
+实线显示一个R->AIR请求，虚线显示该请求的响应。
 
-In the R program, the different components are:
+在R程序中，涉及到的不同的组件是:
 
--  the R script itself
--  the H2O R package
--  dependent packages (RCurl, rjson, etc.)
--  the R core runtime
+-  R脚本自身
+-  AIR的R包
+-  依赖包 (RCurl, rjson等)
+-  R核心运行时
 
 .. figure:: images/start_glm_from_r.png
    :alt: start_glm_from_r
 
-The following diagram shows the R program retrieving the resulting GLM
-model. (Not shown: the GLM model executing subtasks within H2O and
-depositing the result into the K/V store or R polling the /3/Jobs URL
-for the GLM model to complete.)
+下图显示了检索得到的GLM模型的R程序。(未展现部分：GLM模型执行AIR中的子任务，并将结果保存到K/V存储区或R轮询 /3/Jobs 作业URL，以便GLM模型完成。
 
 .. figure:: images/retrieve_glm_result_from_r.png
    :alt: retrieve_glm_result_from_r
 
-An end-to-end sequence diagram of the same transaction is below. This
-gives a different perspective of the R and H2O interactions for the same
-GLM request and the resulting model.
+下面是同一事务的端到端序列图。这为相同的GLM请求和生成的模型提供了R和AIR交互的不同视角。
 
 .. figure:: images/run_glm_from_r.png
    :alt: run_glm_from_r
 
-How R Expressions are Sent to H2O for Evaluation
+R表达式如何发送到AIR进行计算
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-An H2O data frame is represented in R by an S3 object of class H2OFrame.
-The S3 object has an ``id`` attribute which is a reference to the big
-data object inside H2O.
+H2O数据帧在R中由类AIRFrame的S3对象表示。S3对象有一个 ``id`` 属性，它引用AIR中的大数据对象。
 
-The H2O R package overloads generic operations like 'summary' and '+'
-for this new H2OFrame class. The R core parser makes callbacks into the
-H2O R package, and these operations get sent to the H2O cluster over an
-HTTP connection.
+AIR的R包为这个新的AIRFrame类重载了诸如 'summary' 和 '+' 之类的通用操作。R核心解析器回调AIR的R包，这些操作通过HTTP连接发送到AIR集群。
 
-The H2O cluster performs the big data operation (for example, '+' on two
-columns of a dataset imported into H2O) and returns a reference to the
-result. This reference is stored in a new H2OFrame S3 object inside R.
+AIR集群对导入AIR的数据集的两列执行大数据操作(例如，'+' )，并返回对结果的引用。这个引用存储在R中的一个新的AIRFrame S3对象中。
 
-Complicated expressions are turned into expression trees and evaluated
-by the Rapids expression engine in the H2O back-end.
+复杂的表达式被转换成表达式树，并由后端AIR中的Rapids表达式引擎进行计算。

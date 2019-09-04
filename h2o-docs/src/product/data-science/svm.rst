@@ -1,4 +1,4 @@
-Support Vector Machine (SVM)
+支持向量机(SVM)
 ----------------------------
 
 **Note**: This is an alpha version of the documentation.

@@ -1,4 +1,4 @@
-Downloading & Installing H2O
+下载和安装AIR
 ============================
 
 This section describes how to download and install the latest stable version of H2O. These instructions are also available on the `H2O Download page <http://h2o-release.s3.amazonaws.com/h2o/latest_stable.html>`__. 

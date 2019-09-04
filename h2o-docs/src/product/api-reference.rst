@@ -1,4 +1,4 @@
-Appendix B - API Reference
+附录B - API参考
 ==========================
 
 The links below point to more detailed API/developer documentation.

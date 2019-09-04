@@ -1,9 +1,9 @@
-Merging Two Datasets
+合并两个数据集
 --------------------
 
-You can use the `merge` function to combine two datasets that share a common column name. By default, all columns in common are used as the merge key; uncommon will be ignored. Also, if you want to use only a subset of the columns in common, rename the other columns so the columns are unique in the merged result.
+可以使用 `merge` 函数以合并两个共享公共列名的数据集。默认情况下，所有公共列都用作合并键，非公用列会被忽略。此外，如果您希望仅使用公共列的一个子集，请重命名其他列，以便合并结果中的列是惟一的。
 
-Note that in order for a merge to work in multinode clusters, one of the datasets must be small enough to exist in every node.  
+注意，为了使合并在多节点集群中工作，其中一个数据集必须足够小，以存在于每个节点中。  
 
 
 .. example-code::

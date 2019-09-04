@@ -1,4 +1,4 @@
-Principal Component Analysis (PCA)
+主成分分析(PCA)
 ----------------------------------
 
 Introduction

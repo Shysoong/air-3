@@ -1,4 +1,4 @@
-K-Means Clustering
+K-Means聚类
 ------------------
 
 Introduction

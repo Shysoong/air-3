@@ -1,6 +1,6 @@
 .. _tokenize:
 
-Tokenize Strings
+分割字符串
 ~~~~~~~~~~~~~~~~
 
 A ``tokenize`` function is available in H2O-3, which converts strings into tokens, then stores the tokenized text into a single column, making it easier for additional processing. 

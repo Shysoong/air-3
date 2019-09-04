@@ -1,4 +1,4 @@
-Generalized Linear Model (GLM)
+广义线性模型(GLM)
 ------------------------------
 
 Introduction

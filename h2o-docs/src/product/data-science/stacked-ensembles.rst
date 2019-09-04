@@ -1,4 +1,4 @@
-Stacked Ensembles
+堆叠集成
 -----------------
 
 Introduction

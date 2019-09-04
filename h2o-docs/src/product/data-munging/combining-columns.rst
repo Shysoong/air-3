@@ -1,7 +1,7 @@
-Combining Columns from Two Datasets
+合并来自两个数据集的列
 -----------------------------------
 
-The ``cbind`` function allows you to combine datasets by adding columns from one dataset into another. Note that when using ``cbind``, the two datasets must have the same number of rows. In addition, if the datasets contain common column names, H2O will append the joined column with ``0``. 
+``cbind`` 函数允许您通过将一个数据集中的列添加到另一个数据集中来组合数据集。注意，在使用 ``cbind`` 时，两个数据集必须拥有相同数量的行。此外，如果数据集包含公共列名，AIR将用``0``附加连接列。 
 
 .. example-code::
    .. code-block:: r

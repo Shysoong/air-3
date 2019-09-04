@@ -1,12 +1,12 @@
 .. _Data_Science:
 
 
-Algorithms
+算法
 ==========
 
-This section provides an overview of each algorithm available in H2O. For detailed information about the parameters that can be used for building models, refer to `Appendix A - Parameters <parameters.html>`__.
+本节概述AIR中可用的每种算法。有关可用于构建模型的参数的详细信息，请参阅 `附录A - 参数 <parameters.html>`__.
 
-Common
+通用
 ------
 
 .. toctree::
@@ -14,7 +14,7 @@ Common
 
    data-science/common
 
-Supervised
+有监督
 ----------
 
 .. toctree::
@@ -30,7 +30,7 @@ Supervised
    data-science/svm
    data-science/xgboost
 
-Unsupervised
+无监督
 ------------
 
 .. toctree::
@@ -42,7 +42,7 @@ Unsupervised
    data-science/k-means
    data-science/pca
 
-Miscellaneous
+混合的
 -------------
 
 .. toctree::
@@ -50,7 +50,7 @@ Miscellaneous
 
    data-science/word2vec
 
-MOJO Models
+MOJO模型
 --------------
 
 .. toctree::

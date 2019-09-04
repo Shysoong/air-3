@@ -1,7 +1,7 @@
-Slicing Rows
+分割行
 ------------
 
-H2O lazily slices out rows of data and will only materialize a shared copy upon IO. This example shows how to slice rows from a frame of data.
+AIR会延迟分割数据行，并且只会在某种类型的触发IO时才实现共享副本。 这个例子展示了如何从数据帧中分割行。
 
 .. example-code::
    .. code-block:: r

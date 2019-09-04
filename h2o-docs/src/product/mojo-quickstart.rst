@@ -1,46 +1,46 @@
 .. _mojo_quickstart:
 
-MOJO Quick Start
+MOJO快速入门
 ----------------
 
-This section describes how to build and implement a MOJO (Model Object, Optimized) to use predictive scoring. Java developers should refer to the `Javadoc <http://docs.h2o.ai/h2o/latest-stable/h2o-genmodel/javadoc/index.html>`__ for more information, including packages.
+本节描述如何构建和实现一个MOJO(经过优化的模型对象)来使用预测评分。Java开发人员应该参考该 `Javadoc <http://docs.h2o.ai/h2o/latest-stable/h2o-genmodel/javadoc/index.html>`__ 获得更多信息。
 
-What is a MOJO?
+什么是MOJO?
 ~~~~~~~~~~~~~~~
 
-A MOJO (Model Object, Optimized) is an alternative to H2O's POJO. As with POJOs, H2O allows you to convert models that you build to MOJOs, which can then be deployed for scoring in real time.
+MOJO(优化的模型对象)是AIR POJO的替代方案。与POJOs一样，H2O允许您将构建的模型转换为MOJOs，然后可以部署MOJOs进行实时评分。
 
-**Notes**: 
+**注意**: 
 
-- MOJOs are supported for AutoML, Deep Learning, DRF, GBM, GLM, GLRM, K-Means, Stacked Ensembles, SVM, Word2vec, and XGBoost models.
-- MOJOs are only supported for encodings that are either default or ``enum``. 
-- MOJO predict cannot parse columns enclosed in double quotes (for example, ""2"").  
+- MOJOs支持AutoML, Deep Learning, DRF, GBM, GLM, GLRM, K-Means, Stacked Ensembles, SVM, Word2vec和XGBoost模型。
+- MOJOs只支持默认编码或``enum``编码。 
+- MOJO预测不能解析双引号括起来的列（例如，""2""）。
 
-Benefits of MOJOs over POJOs
+MOJOs优于POJOs的优点
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-While POJOs continue to be supported, some customers encountered issues with large POJOs not compiling. (Note that POJOs are not supported for source files larger than 1G.) MOJOs do not have a size restriction and address the size issue by taking the tree out of the POJO and using generic tree-walker code to navigate the model. The resulting executable is much smaller and faster than a POJO.
+虽然仍然支持POJOs，但是一些客户遇到了大型POJOs不能编译的问题。（注意，对于大于1G的源文件，不支持POJO）MOJOs没有大小限制，它通过从POJO中把树抽取出来解决大小问题，并使用通用的树遍历代码来导航模型。生成的可执行文件比POJO小得多，速度也快得多。
 
-At large scale, new models are roughly 20-25 times smaller in disk space, 2-3 times faster during "hot" scoring (after JVM is able to optimize the typical execution paths), and 10-40 times faster in "cold" scoring (when JVM doesn't know yet know the execution paths) compared to POJOs. The efficiency gains are larger the bigger the size of the model.
+在大规模上，与POJOs相比，新模型的磁盘空间大约小20-25倍，“热”（在JVM能够优化典型的执行路径之后）评分快2-3倍，“冷”（当JVM还不知道执行路径时）评分快10-40倍。模型尺寸越大，效率增益越大。
 
-H2O conducted in-house testing using models with 5000 trees of depth 25. At very small scale (50 trees / 5 depth), POJOs were found to perform ≈10% faster than MOJOs for binomial and regression models, but 50% slower than MOJOs for multinomial models.
+AIR使用深度为25的5000棵树的模型进行了内部测试，在非常小的规模（50棵树/深度为5），在二项式和回归模型中，POJOs的执行速度比MOJOs快大约10%，但是在多项式模型中慢了50%。
 
-Building a MOJO
+构建一个MOJO
 ~~~~~~~~~~~~~~~
 
-MOJOs are built in much the same way as POJOs. The example code below shows how to start H2O, build a model using either R or Python, and then compile and run the MOJO. This example uses GBM, but any supported algorithm can be used to build a model and run the MOJO. 
+MOJOs的构建方式与POJOs非常相似。下边的示例代码展示了何如启动AIR，使用R或Python构建模型，然后编译并运行MOJO。本例使用GBM，但是任何受支持的算法都可以用来构建模型并运行MOJO。
 
-The examples below describe how to start H2O and create a model using R and Python. The ``download_mojo()`` function saves the model as a zip file. You can unzip the file to view the options used to build the file along with each tree built in the model. Note that each tree file is saved as a binary file type.
+下面的示例描述了如何启动AIR并使用R和Python创建模型。 ``download_mojo()`` 函数的作用是将模型保存为一个zip文件。您可以解压缩文件，以查看用于构建文件的选项以及模型中构建的每棵树。注意，每个树文件都保存为二进制文件类型。
 
-Step 1: Build and Extract a Model
+步骤1：构建并提取一个模型
 '''''''''''''''''''''''''''''''''
 
 .. example-code::
    .. code-block:: r
 
-    # 1. Open a terminal window and start R.
+    # 1. 打开终端窗口并启动R。
 
-    # 2. Run the following commands to build a simple GBM model.
+    # 2. 运行以下命令构建一个简单的GBM模型。
     library(h2o)
     h2o.init(nthreads=-1)
     path <- system.file("extdata", "prostate.csv", package="h2o")
@@ -65,9 +65,9 @@ Step 1: Build and Extract a Model
 
    .. code-block:: python
 
-    # 1. Open a terminal window and start python.
+    # 1. 打开终端窗口并启动python。
     
-    # 2. Run the following commands to build a simple GBM model. 
+    # 2. 运行以下命令构建一个简单的GBM模型。
     # The model, along with the **h2o-genmodel.jar** file will 
     # then be downloaded to an **experiment** folder.
     import h2o
@@ -388,16 +388,16 @@ Step 1: Build and Extract a Model
       }
     }
 
-Step 2: Compile and Run the MOJO
+步骤2： 编译和运行MOJO
 ''''''''''''''''''''''''''''''''
 
-1. Open a *new* terminal window and change directories to the **experiment** folder:
+1. 打开一个 *新* 终端窗口，将目录更改为 **experiment** 文件夹：
  
    ::
 
        $ cd experiment
 
-2. Create your main program in the **experiment** folder by creating a new file called main.java (for example, using "vim main.java"). Include the following contents. Note that this file references the GBM model created above using R.
+2. 通过在 **experiment** 文件夹创建一个main.java文件的新文件来创建您的主程序（例如，使用 "vim main.java"），该文件包含以下内容。注意，这个文件引用了上面使用R创建的GBM模型。
 
    .. code:: java
 
@@ -431,9 +431,9 @@ Step 2: Compile and Run the MOJO
          }
        }
 
- GBM and DRF return classProbabilities, but not all MOJOs will return a classProbabilities field. Refer to the ModelPrediction definition for each algorithm to find the correct field(s) to access. This is available in the H2O-3 GitHub repo at: https://github.com/h2oai/h2o-3/tree/master/h2o-genmodel/src/main/java/hex/genmodel/easy/prediction. You can also view the hex.genmodel.easy.prediction classes in the `Javadoc <http://docs.h2o.ai/h2o/latest-stable/h2o-genmodel/javadoc/index.html>`__.
+ GBM和DRF会返回classProbabilities，但是不是所有MOJOs都会返回classProbabilities属性。参考每个算法的模型预测定义，找到要访问的正确字段。这可以在AIR-3的GitHub repo上找到：https://github.com/Shysoong/air-3/tree/master/h2o-genmodel/src/main/java/hex/genmodel/easy/prediction。您也可以在 `Javadoc <http://docs.h2o.ai/h2o/latest-stable/h2o-genmodel/javadoc/index.html>`__ 查看hex.genmodel.easy.prediction包下的类。
 
- In addition to classProbabilities, in GBM and DRF you can choose to generate the ``leafNodeAssignments`` field, which will show the decision path through each tree. Note that this may slow down the MOJO as it adds computation. Below is the Java code showing how return the leaf node assignment:
+ 除了classProbabilities，在GBM和DRF中，您还可以选择生成 ``leafNodeAssignments`` 属性，它将显示通过每棵树的决策路径。注意，这可能会降低MOJO的速度，因为它会增加计算量。下面的Java代码显示了如何返回叶节点赋值：
 
  .. code:: java
 
@@ -475,7 +475,7 @@ Step 2: Compile and Run the MOJO
        }
      }
 
- For GLRM, the returned field is the X coefficients for the archetypes by default. In addition to that, you can choose to generate the reconstructed data row as well. Again, this may slow down the MOJO due to added computation. Below is the Java code showing how to obtain both the X factors and the reconstructed data after you have generated the GLRM MOJO:
+ 对于GLRM，默认情况下返回的字段是原型的X系数。此外，还可以选择生成重构的数据行。同样，由于增加了计算，这可能会降低MOJO的速度。下面的Java代码展示了如何在生成GLRM MOJO之后获得X系数和重构数据：
 
  .. code:: java
 
@@ -521,13 +521,13 @@ Step 2: Compile and Run the MOJO
      }
 
 
-3. Compile in terminal window 2.
+3. 在终端窗口2编译。
 
    .. code:: bash
 
        $ javac -cp h2o-genmodel.jar -J-Xms2g -J-XX:MaxPermSize=128m main.java
 
-4. Run in terminal window 2.
+4. 在终端窗口2运行。
 
    .. code:: bash
 
@@ -537,14 +537,14 @@ Step 2: Compile and Run the MOJO
        # Windows users
        $ java -cp .;h2o-genmodel.jar main  
 
- The following output displays:
+ 下列输出会被打印出来：
 
  .. code:: bash
 
   Has penetrated the prostatic capsule (1 yes; 0 no): 0
   Class probabilities: 0.8059929056296662,0.19400709437033375
 
- If you have chosen to enable leaf node assignments, you will also see 100 leaf node assignments for your data row:
+ 如果选择启用叶节点赋值，还将看到数据行有100个叶节点赋值：
 
  .. code:: bash
 
@@ -552,7 +552,7 @@ Step 2: Compile and Run the MOJO
   Class probabilities: 0.8059929056296662,0.19400709437033375
   Leaf node assignments:   RRRR,RRR,RRRR,RRR,RRL,RRRR,RLRR,RRR,RRR,RRR,RLRR,...
 
- For the GLRM MOJO, after running the Java code, you will see the following:
+ 对于GLRM MOJO，在运行Java代码之后，您将看到以下内容：
 
  .. code:: bash
 
@@ -570,20 +570,20 @@ Step 2: Compile and Run the MOJO
   VOL: 0.7123169431687857,
   GLEASON: 6.625024806196047
 
-Viewing a MOJO Model
+查看MOJO模型
 ~~~~~~~~~~~~~~~~~~~~
 
-A java tool for converting binary mojo files into human viewable graphs is packaged with H2O. This tool produces output that "dot" (which is part of Graphviz) can turn into an image. (See the `Graphviz home page <http://www.graphviz.org/>`__ for more information.)
+一个用于将二进制MOJO文件转换为人类可读图形的java工具打包在了AIR中。该工具生成的输出的"点"(Graphviz的一部分)可以转换成图像。(查看 `Graphviz官网 <http://www.graphviz.org/>`__ 以了解更多信息。)
 
-Here is an example output for a GBM model:
+下面是一个GBM模型的示例输出：
 
 .. figure:: images/gbm_mojo_graph.png
    :alt: GBM MOJO model
 
-The following code snippet shows how to download a MOJO from R and run the PrintMojo tool on the command line to make a .png file. To better control the look and feel of your tree, we provide two options for PrintMojo:
+下面的代码片段展示了如何通过R下载MOJO并在命令行上运行PrintMojo工具来生成.png文件。为了更好地控制树的外观和感觉，我们为PrintMojo提供了两个选项：
 
-- ``--decimalplaces`` (or ``-d``) allows you to control the  number of decimal points shown for numbers. 
-- ``--fontsize`` (or ``-f``) controls the font size.  The default font size is 14. When using this option, be careful not to choose a font size that  is so large that you cannot see your whole tree. We recommend using a font size no larger than  20.
+- ``--decimalplaces`` (或 ``-d``) 允许您控制数字显示的小数点数目。
+- ``--fontsize`` (或 ``-f``) 控制字体大小。默认字体大小是14。使用此选项时，请注意不要选择太大字体而无法看到整个树。我们建议使用不大于20的字体。
 
 ::
 
@@ -609,9 +609,9 @@ The following code snippet shows how to download a MOJO from R and run the Print
 FAQ
 ~~~
 
--  **How can I use an XGBoost MOJO with Maven?**
+-  **如何在Maven中使用XGBoost MOJO?**
 
-  If you declare a dependency on h2o-genmodel, then you also have to include the h2o-genmodel-ext-xgboost dependency if you are planning to use XGBoost models. For example:
+  如果您声明了对h2o-genmodel的依赖关系，那么如果您计划使用XGBoost模型，还必须包含h2o-genmodel-ext-xgboost依赖关系。例如：
 
   ::
 

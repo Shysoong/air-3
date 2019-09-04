@@ -1,7 +1,7 @@
-Slicing Columns
+分割列
 ---------------
 
-H2O lazily slices out columns of data and will only materialize a shared copy upon some type of triggering IO. This example shows how to slice columns from a frame of data.
+AIR会延迟分割数据列，并且只会在某种类型的触发IO时才实现共享副本。 这个例子展示了如何从数据帧中分割列。
 
 .. example-code::
    .. code-block:: r

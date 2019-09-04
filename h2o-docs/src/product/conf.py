@@ -54,9 +54,9 @@ source_suffix = ['.md', '.rst']
 master_doc = 'index'
 
 # General information about the project.
-project = u'H2O'
-copyright = u'2016-2019 H2O.ai'
-author = u'h2o'
+project = u'AIR'
+copyright = u'2016-2019 skyease.io'
+author = u'air'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

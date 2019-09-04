@@ -1,11 +1,11 @@
-Target Encoding
+均值编码
 ---------------
 
-Target encoding is the process of replacing a categorical value with the mean of the target variable. In this example, we will be trying to predict ``bad_loan`` using our cleaned lending club data: https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv.
+均值编码是用目标变量的均值替换分类值的过程。在本例中，我们将尝试使用清理后的贷款俱乐部数据预测 ``bad_loan``： https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv.
 
-One of the predictors is ``addr_state``, a categorical column with 50 unique values. To perform target encoding on ``addr_state``, we will calculate the average of ``bad_loan`` per state (since ``bad_loan`` is binomial, this will translate to the proportion of records with ``bad_loan = 1``).
+其中一个预测因子是 ``addr_state``，包含50个惟一值的分类列。在 ``addr_state`` 上执行均值编码，将计算每一个州的 ``bad_loan`` 平均值（由于 ``bad_loan`` 是二项的，这将转化为 ``bad_loan = 1`` 占记录的比例）
 
-For example, target encoding for ``addr_state`` could be:
+例如，``addr_state`` 的均值编码可以是：
 
 +---------------+---------------------+
 | addr\_state   | average bad\_loan   |
@@ -23,21 +23,21 @@ For example, target encoding for ``addr_state`` could be:
 | CO            | 0.1433022           |
 +---------------+---------------------+
 
-Instead of using state as a predictor in our model, we could use the target encoding of state.
+我们可以使用状态的均值编码，而不是在模型中使用状态作为预测因子。
 
-In this topic, we will walk through the steps for using target encoding to convert categorical columns to numeric. This can help improve machine learning accuracy since algorithms tend to have a hard time dealing with high cardinality columns.
+在本主题中，我们将介绍使用均值编码将分类列转换为数字列的步骤。这有助于提高机器学习的准确性，因为算法往往很难处理高基数列。
 
-The jupyter notebook, `categorical predictors with tree based model <https://github.com/h2oai/h2o-tutorials/blob/master/best-practices/categorical-predictors/gbm_drf.ipynb>`__, discusses two methods for dealing with high cardinality columns:
+jupyter notebook， `categorical predictors with tree based model <https://github.com/h2oai/h2o-tutorials/blob/master/best-practices/categorical-predictors/gbm_drf.ipynb>`__, 讨论处理高基数列的两种方法：
 
--  Comparing model performance after removing high cardinality columns
--  Parameter tuning (specifically tuning ``nbins_cats`` and ``categorical_encoding``)
+-  比较删除高基数列后的模型性能
+-  参数调整（特别是调整 ``nbins_cats`` 和 ``categorical_encoding`` 参数
 
-In this topic, we will try using target encoding to improve our model performance.
+在本主题中，我们将尝试使用均值编码来改进模型性能。
 
-Train Baseline Model
+训练基线模型
 ~~~~~~~~~~~~~~~~~~~~
 
-The examples below show how to train a baseline model. 
+下面的例子展示了如何训练基线模型。
 
 .. example-code::
    .. code-block:: r
@@ -133,7 +133,7 @@ The examples below show how to train a baseline model.
     0.707018686126265
 
 
-Our training data has much higher AUC than our validation data. Review the Variable Importance values to see the variables with the greatest importance.
+我们的训练数据比我们的验证数据有更高的AUC。查看变量重要性值，以查看最重要的变量。
 
 .. example-code::
    .. code-block:: r
@@ -151,9 +151,9 @@ Our training data has much higher AUC than our validation data. Review the Varia
    :height: 348
    :width: 325
 
-The variables with the greatest importance are ``int_rate``, ``addr_state``, ``annual_inc``, and ``term``. It makes sense that the ``int_rate`` has such high variable importance because this is related to loan default, but it is surprising that ``addr_state`` has such high variable importance. The high variable importance could be because our model is memorizing the training data through this high cardinality categorical column.
+最重要的变量是 ``int_rate`` ，``addr_state`` ，``annual_inc`` 和 ``term``。 ``int_rate`` 具有如此高的变量重要性是有道理的，因为它与贷款违约有关，但令人惊讶的是， ``addr_state`` 有如此高的变量重要性。高变量重要性可能是因为我们的模型通过这个高基数分类列来记忆训练数据。
 
-See if the AUC improves on the test data if we remove the ``addr_state`` predictor. This can indicate that the model is memorizing the training data.
+如果我们移除 ``addr_state`` 预测因子，看看AUC在测试数据上是否提升。这说明模型正在记忆训练数据。
 
 .. example-code::
    .. code-block:: r
@@ -207,20 +207,20 @@ See if the AUC improves on the test data if we remove the ``addr_state`` predict
     auc_nostate
     0.7076197256885596
 
-We see a slight improvement in our test AUC if we do not include the ``addr_state`` predictor. This is a good indication that the GBM model may be overfitting with this column.
+如果我们不包括 ``addr_state`` 状态预测因子，我们的测试AUC会有轻微的改善。这是一个很好的迹象，GBM模型可能与这一列过度拟合。
 
-Target Encoding in H2O-3
+在AIR-3中进行均值编码
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
-Now we will perform target encoding on ``addr_state`` to see if this representation improves our model performance.
+现在，我们将在 ``addr_state`` 上执行均值编码，看看这种表示形式是否提高了模型性能。
 
-Target encoding in H2O-3 is performed in two steps:
+AIR-3中的均值编码分两步执行：
 
-1. Create (fit) a target encoding map using ``target_encode_fit``. This will contain the sum of the response column and the count. This can include an optional ``fold_column``.
+1. 使用 ``target_encode_fit`` 创建（拟合）均值编码映射。这将包含响应列和计数的和。这可以包括一个可选的 ``fold_column`` 。
 
-2. Transform a target encoding map using ``target_encode_transform`` . The target encoding map is applied to the data by adding new columns with the target encoding values.
+2. 使用 ``target_encode_transform`` 转化均值编码映射。通过添加带有均值编码值的新列，将均值编码映射应用于数据。
 
-The following options are available when performing target encoding, with some options preventing overfitting:
+执行均值编码时可以使用以下选项，其中一些选项可以防止过拟合：
 
 -  ``holdout_type``
 -  ``blended_avg``
@@ -233,56 +233,56 @@ The following options are available when performing target encoding, with some o
 Holdout Type
 ''''''''''''
 
-The ``holdout_type`` parameter defines whether the target average should be constructed on all rows of data. Overfitting can be prevented by removing some holdout data when calculating the target average on the training data.
+``holdout_type`` 参数定义是否应该在所有数据行上构造目标平均值。在计算训练数据的目标平均时，可以通过去除一些不匹配数据来防止过拟合。
 
-The following holdout types can be specified:
+可以指定以下holdout类型：
 
--  ``none``: no holdout. The mean is calculating on all rows of data \*\*. This should be used for test data
--  ``loo``: mean is calculating on all rows of data excluding the row itself.
+-  ``none``: 均值对所有数据行进行计算 \*\* 。 这应该用于测试数据
+-  ``loo``: 均值是对除行本身之外的所有数据行进行计算。
 
-   -  This can be used for the training data. The target of the row itself is not included in the average to prevent overfitting.
+   - 这可以用于训练数据集。行本身的目标不包括在平均值中，以防止过拟合。
 
--  ``kfold``: The mean is calculating on out-of-fold data only. (This options requires a fold column.)
+-  ``kfold``: 平均值仅在非折叠数据上计算。（此选项需要折叠列。）
 
-   -  This can be used for the training data. The target average is calculated on the out of fold data to prevent overfitting
+   -  这可以用于训练数据集。 为了防止过拟合，目标均值是根据叠外数据计算的。
 
 Blended Average
 '''''''''''''''
 
-The ``blended_avg`` parameter defines whether the target average should be weighted based on the count of the group. It is often the case, that some groups may have a small number of records and the target average will be unreliable. To prevent this, the blended average takes a weighted average of the group's target value and the global target value.
+``blended_avg`` 参数定义是否应基于组的计数对目标平均值进行加权。通常情况下，一些组可能只有少量记录，目标平均值将不可靠。 为了防止这种情况发生，混合平均值取组目标值和全局目标值的加权平均值。
 
 Noise
 '''''
 
-If random noise should be added to the target average, the ``noise`` parameter can be used to specify the amount of noise to be added. This value defaults to 0.01 \* range of y of random noise.
+如果要将随机噪声添加到目标平均值中，可以使用 ``noise`` 参数指定要添加的噪声量。该值默认为0.01 \* 随机噪声的y范围。
 
 Fold Column
 '''''''''''
 
-Specify the name or column index of the fold column in the data. This defaults to NULL (no ``fold_column``).
+指定数据中折叠列的名称或列索引。该值默认为NULL (没有 ``fold_column``).
 
 Smoothing
 '''''''''
 
-The smoothing value is used for blending and to calculate ``lambda``. Smoothing controls the rate of transition between the particular level's posterior probability and the prior probability. For smoothing values approaching infinity, it becomes a hard threshold between the posterior and the prior probability. This value defaults to 20.
+平滑值用于混合和计算 ``lambda``。平滑控制特定水平的后验概率与先验概率之间的转换速率。对于接近无穷大的平滑值，它成为后验概率和先验概率之间的一个硬阈值。该值默认为20。
 
 Inflection Point
 ''''''''''''''''
 
-The inflection point value is used for blending and to calculate ``lambda``. This determines half of the minimal sample size for which we completely trust the estimate based on the sample in the particular level of the categorical variable. This value defaults value to 10.
+拐点值用于混合和计算 ``lambda``。这决定了最小样本量的一半，我们完全相信在分类变量的特定级别上基于样本量的估计。该值默认为10。
 
 Seed
 ''''
 
-Specify a random seed used to generate draws from the uniform distribution for random noise. This defaults to -1.
+指定一个随机种子，用于从随机噪声的均匀分布中生成绘图。该值默认为-1。
 
 
-Perform Target Encoding
+执行均值编码
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Start by fitting the target encoding map. This has the number of bad loans per state (``numerator``) and the number of rows per state (``denominator``). After fitting the target encoding map, apply (transform) the target encoding per state.
+首先拟合均值编码映射。这含有每个州的不良贷款数据（``numerator``）和每个州的行数（``denominator``）。 拟合均值编码映射后，对每个州应用(转换)均值编码。
 
-Fit the Target Encoding Map
+拟合均值编码映射
 '''''''''''''''''''''''''''
 
 .. example-code::
@@ -315,12 +315,12 @@ Fit the Target Encoding Map
                                    seed=1234)
     target_encoder.fit(train)
 
-Transform Target Encoding
+转化均值编码
 '''''''''''''''''''''''''
 
-Apply the target encoding to our training and testing data. 
+将均值编码应用到我们的训练和测试数据中。
 
-**Apply Target Encoding to Training Dataset** 
+**将均值编码应用于训练数据集** 
 
 .. example-code::
    .. code-block:: r
@@ -337,9 +337,9 @@ Apply the target encoding to our training and testing data.
     # noise = 0.2 will be applied
     encoded_train = target_encoder.transform(frame=train, holdout_type="kfold", noise=0.2, seed=1234)
 
-**Apply Target Encoding to Testing Dataset**
+**将均值编码应用于测试数据集**
 
-We do not need to apply any of the overfitting prevention techniques because our target encoding map was created on the training data, not the testing data.
+我们不需要应用任何过拟合预防技术，因为我们的均值编码映射是在训练数据上创建的，而不是在测试数据上。
 
 -  ``holdout_type="none"``
 -  ``blended_avg=FALSE``
@@ -362,10 +362,10 @@ We do not need to apply any of the overfitting prevention techniques because our
     encoded_test = target_encoder_test.transform(frame=test, holdout_type="none", noise=0.0, seed=1234)
 
 
-Train Model with KFold Target Encoding
+用K折均值编码训练模型
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Train a new model, this time replacing the ``addr_state`` with the ``addr_state_te``.
+训练一个新模型，这次用 ``addr_state_te`` 替换 ``addr_state`` 。
 
 .. example-code::
    .. code-block:: r
@@ -405,7 +405,7 @@ Train a new model, this time replacing the ``addr_state`` with the ``addr_state_
                        training_frame=encoded_train, 
                        validation_frame=encoded_test)
 
-The AUC three models are shown below:
+三个模型的AUC如下所示：
 
 .. example-code::
    .. code-block:: r
@@ -440,7 +440,7 @@ The AUC three models are shown below:
     auc_state_te
     0.7072749724799465
 
-Now the ``addr_state_te`` has much smaller variable importance. It is no longer the second most important feature but the 10th.
+现在 ``addr_state_te`` 的变量重要性要小得多，它不再是第二重要的因素，而是第十重要的因素。  
 
 .. example-code::
    .. code-block:: r
@@ -457,7 +457,7 @@ Now the ``addr_state_te`` has much smaller variable importance. It is no longer 
    :alt: GBM Variable importance - second run
    :scale: 75%
 
-References
+参考
 ~~~~~~~~~~
 
 -  `Target Encoding in H2O-3 Demo <https://github.com/h2oai/h2o-3/blob/master/h2o-r/demos/rdemo.target_encode.R>`__

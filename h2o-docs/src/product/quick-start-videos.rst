@@ -1,8 +1,8 @@
-Quick Start Videos
+快速入门视频
 ==================
 
 
-H2O Quick Start with Flow
+通过Flow使用AIR快速入门
 -------------------------
 
 .. raw:: html
@@ -15,7 +15,7 @@ H2O Quick Start with Flow
 
 --------------
 
-H2O Quick Start with Python
+通过Python使用AIR快速入门
 ---------------------------
 
 .. raw:: html
@@ -28,7 +28,7 @@ H2O Quick Start with Python
 
 --------------
 
-H2O Quick Start on Hadoop
+在Hadoop上使用AIR快速入门
 -------------------------
 
 .. raw:: html
@@ -41,7 +41,7 @@ H2O Quick Start on Hadoop
 
 --------------
 
-H2O Quick Start with Sparkling Water
+Sparkling Water使用AIR快速入门
 ------------------------------------
 
 .. raw:: html
@@ -54,7 +54,7 @@ H2O Quick Start with Sparkling Water
 
 --------------
 
-H2O Quick Start with R
+通过R使用AIR快速入门
 ----------------------
 
 .. raw:: html

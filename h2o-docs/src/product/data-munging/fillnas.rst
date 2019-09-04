@@ -1,7 +1,7 @@
-Fill NAs
+填充NA值
 --------
 
-Use this function to fill in NA values in a sequential manner up to a specified limit. When using this function, you will specify whether the method to fill the NAs should go forward (default) or backward , whether the NAs should be filled along rows (default) or columns, and the maximum number of consecutive NAs to fill (defaults to 1). 
+使用此函数按顺序填充NA值，直到指定的限制为止。当使用这个函数时，您将指定填充NA值的方法应该向前(默认)还是向后，是否应该沿着行(默认)或列填充NA值，以及要填充的连续NA值的最大数量(默认为1)。 
 
 .. example-code::
    .. code-block:: r

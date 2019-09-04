@@ -1,14 +1,14 @@
-Sorting Columns
+列排序
 ---------------
 
-Use the ``sort`` function in Python or the ``arrange`` function in R to create a new frame that is sorted by column(s) in ascending (default) or descending order. Note that when using ``sort``, the original frame cannot contain any string columns. 
+在Python中使用 ``sort``函数或者在R中使用 ``arrange`` 函数以创建按列升序(默认)或降序排序的新数据帧。注意，当使用 ``sort`` 函数时，原始数据帧不能包含任何字符串列。
 
-If only one column is specified in the sort, then the final results are sorted according to that one single column either in ascending (default) or in descending order. However, if you specify more than one column in the sort, then H2O performs as described below:
+如果在排序中只指定了一列，那么最终的结果将根据这一列按升序(默认)或降序排序。但是，如果在排序中指定多个列，则AIR执行如下所述的操作：
 
-Assuming two columns, X (first column) and Y (second column):
+假设有两列，X(第一列)和Y(第二列)：
  
- - H2O will sort on the first specified column, so in the case of [0,1], the X column will be sorted first. Similarly, in the case of [1,0], the Y column will be sorted first.
- - H2O will sort on subsequent columns in the order they are specified, but only on those rows that have the same values as the first sorted column. No sorting will be done on subsequent columns if the values are not also duplicated in the first sorted column.
+ - AIR将对第一个指定列进行排序，在[0,1]这种情况下，X列会被首先排序。类似地，在[1,0]的情况下，Y列将首先排序。
+ - AIR将按照指定的顺序对后续列进行排序，但仅对与第一个排序列具有相同值的行进行排序。如果在第一个排序列中没有重复值，则不会对后续列执行排序。
 
 .. example-code::
    .. code-block:: r

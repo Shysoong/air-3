@@ -1,4 +1,4 @@
-Gradient Boosting Machine (GBM)
+梯度增强机(GBM)
 -------------------------------
 
 Introduction

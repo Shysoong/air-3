@@ -1,56 +1,56 @@
-Group By
+分组
 --------
 
-The ``group_by`` function allows you to group one or more columns and apply a function to the result. Specifically, the ``group_by`` function performs the following actions on an H2O Frame:
+``group_by`` 函数允许您对一个或多个列进行分组，并对结果应用一个函数。具体来说 ``group_by`` 函数在AIR数据帧上执行以下操作：
 
-- splits the data into groups based on some criteria
-- applies a function to each group independently
-- combines the results into an H2OFrame
+- 根据一些标准将数据分成组
+- 将一个函数独立地应用于每个组
+- 将结果合并到AIR数据帧中
 
-The result is a new H2OFrame with columns equivalent to the number of groups created. The returned groups are sorted by the natural group-by column sort.
+结果是一个新的IR数据帧，列数与创建的组数相等。返回的组按自然顺序按列排序。
 
-The ``group_by`` function accepts the following parameters:
+``group_by`` 函数接受以下参数：
 
-**Python and R**
+**Python和R都可用**
 
- - H2O Frame: This specifies the H2OFrame that you want the group by operation to be performed on.
- - ``by``: The ``by`` option can take a list of columns if you want to group by more than one column to compute the summary. 
+ - H2O Frame: 这指定要对group by操作执行的AIR数据帧。
+ - ``by``: ``by`` 选项可以获取列列表，如果您希望按多个列进行分组以计算摘要。 
 
-**Python Only**
+**Python独占**
 
-- ``na``, which controls treatment of NA values during the calculation. It can be one of:
+- ``na``, 在计算过程中控制NA值的处理。它可以是其中之一：
 
-  - ``all`` (default): any NAs are used in the calculation as-is; which usually results in the final result being NA too.
-  - ``ignore``: NA entries are not included in calculations, but the total number of entries is taken as the total number of rows. For example, ``mean([1, 2, 3, nan], na="ignore")`` will produce ``1.5``.
-  - ``rm``: entries are skipped during the calculations, reducing the total effective count of entries. For example, ``mean([1, 2, 3, nan], na="rm")`` will produce ``2``.
+  - ``all`` (默认): 计算中按原样使用任何NA值，这通常会导致最终结果也是NA。
+  - ``ignore``: NA项不包括在计算中，但是总项数作为总行数。例如， ``mean([1, 2, 3, nan], na="ignore")`` 结果是 ``1.5`` 。
+  - ``rm``: 在计算期间跳过条目，从而减少了条目的有效总数。例如， ``mean([1, 2, 3, nan], na="rm")`` 结果是 ``2`` 。
 
-**R Only**
+**R独占**
 
- - ``gb.control``: In R, the ``gb.control`` option specifies how to handle NA values in the dataset as well as how to name output columns. Note that to specify a list of column names in the ``gb.control`` list, you must add the ``col.names`` argument. 
- - ``nrow``: Specify the name of the generated column.
- - ``na.methods``, which controls treatment of NA values during the calculation. It can be one of:
+ - ``gb.control``: 在R中，``gb.control`` 选项指定如何处理数据集中的NA值以及如何命名输出列。注意，要在``gb.control``列表中指定列名列表，必须增加 ``col.names`` 参数。
+ - ``nrow``: 指定生成列的名称。
+ - ``na.methods``, 在计算过程中控制NA值的处理。它可以是其中之一：
 
-  - ``all`` (default): any NAs are used in the calculation as-is; which usually results in the final result being NA too.
-  - ``ignore``: NA entries are not included in calculations, but the total number of entries is taken as the total number of rows. For example, ``mean([1, 2, 3, nan], na="ignore")`` will produce ``1.5``.
-  - ``rm``: entries are skipped during the calculations, reducing the total effective count of entries. For example, ``mean([1, 2, 3, nan], na="rm")`` will produce ``2``.
+  - ``all`` (默认): 计算中按原样使用任何NA值，这通常会导致最终结果也是NA。
+  - ``ignore``: NA项不包括在计算中，但是总项数作为总行数。例如， ``mean([1, 2, 3, nan], na="ignore")`` 结果是 ``1.5``。
+  - ``rm``: 在计算期间跳过条目，从而减少了条目的有效总数。例如， ``mean([1, 2, 3, nan], na="rm")`` 结果是 ``2`` 。
 
-  **Note**: If a list smaller than the number of columns groups is supplied, then the list will be padded by ``ignore``.
+  **注意**: 如果提供的列表小于列组的数量，则列表将由``ignore``填充。 
 
-In addition to the above parameters, any number of the following aggregations can be chained together in the ``group_by`` function: 
+除了上述参数外，任何数量的以下聚合都可以通过 ``group_by`` 函数链接到组中: 
 
-- ``count``: Count the number of rows in each group of a GroupBy object.
-- ``max``: Calculate the maximum of each column specified in ``col`` for each group of a GroupBy object. 
-- ``mean``: Calculate the mean of each column specified in ``col`` for each group of a GroupBy object. 
-- ``min``: Calculate the minimum of each column specified in ``col`` for each group of a GroupBy object. 
-- ``mode``: Calculate the mode of each column specified in ``col`` for each group of a GroupBy object. 
-- ``sd``: Calculate the standard deviation of each column specified in ``col`` for each group of a GroupBy object. 
-- ``ss``: Calculate the sum of squares of each column specified in ``col`` for each group of a GroupBy object. 
-- ``sum``: Calculate the sum of each column specified in ``col`` for each group of a GroupBy object. 
-- ``var``: Calculate the variance of each column specified in ``col`` for each group of a GroupBy object. 
+- ``count``: 计算GroupBy对象的每个组中的行数。
+- ``max``: 计算GroupBy对象的每个组在 ``col`` 中指定的每个列的最大值。
+- ``mean``: 计算GroupBy对象的每组在 ``col`` 中指定的每一列的平均值。
+- ``min``: 计算GroupBy对象的每个组在 ``col`` 中指定的每个列的最小值。
+- ``mode``: 计算GroupBy对象的每个组在 ``col`` 中指定的每个列的模式。
+- ``sd``: 计算GroupBy对象的每组在 ``col`` 中指定的每一列的标准差。
+- ``ss``: 计算GroupBy对象的每组在 ``col`` 中指定的每一列的平方和。
+- ``sum``: 计算GroupBy对象的每组在 ``col`` 中指定的每一列的和。 
+- ``var``: 计算GroupBy对象的每组在 ``col`` 中指定的每一列的方差。
 
- If no arguments are given to the aggregation (e.g., ``max()`` in ``grouped.sum(col="X1", na="all").mean(col="X5", na="all").max()``), then it is assumed that the aggregation should apply to all columns except the GroupBy columns.
+ 如果没有为聚合提供参数（例如， ``grouped.sum(col="X1", na="all").mean(col="X5", na="all").max()`` 中的 ``max()``），这时应该认为聚合函数应用于除GroupBy列之外的所有列。  
 
-Note that once the aggregation operations are complete, calling the GroupBy object with a new set of aggregations will yield no effect. You must generate a new GroupBy object in order to apply a new aggregation on it. In addition, certain aggregations are only defined for numerical or categorical columns. An error will be thrown for calling aggregation on the wrong data types.
+注意，一旦聚合操作完成，使用一组新的聚合调用GroupBy对象将不会产生任何效果。必须生成一个新的GroupBy对象，以便对其应用新的聚合。此外，某些聚合只定义为数值列或分类列。在错误的数据类型上调用聚合将引发错误。
 
 .. example-code::
    .. code-block:: r

@@ -88,8 +88,8 @@ task installBowerPackages(type: Exec) {
 }
 
 task copyFlowToWebRoot(type: Copy) {
-  from 'lib/h2o-flow/build'
-  into 'src/main/resources/www/flow'
+  // from 'lib/h2o-flow/build'
+  // into 'src/main/resources/www/flow'
 }
 
 task copyGenModelJarToWebRoot(type: Copy) {

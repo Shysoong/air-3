@@ -1,17 +1,17 @@
-Imputing Data
+数据填充
 -------------
 
-The impute function allows you to perform in-place imputation by filling missing values with aggregates computed on the "na.rm’d" vector. Additionally, you can also perform imputation based on groupings of columns from within the dataset. These columns can be passed by index or by column name to the ``by`` parameter. Note that if a factor column is supplied, then the method must be ``mode``.
+impute函数允许您通过使用 "na.rm’d" 向量上计算的聚合填充缺失的值来执行原位计算。此外，还可以根据数据集中列的分组执行计算。这些列可以通过索引或列名传递给``by``参数。注意，如果提供了因子列，那么方法必须是 ``mode`` 。
 
-The ``impute`` function accepts the following arguments:
+ ``impute`` 函数接受以下参数：
 
-- ``dataset``: The dataset containing the column to impute
-- ``column``: A specific column to impute. The default of ``0`` specifies to impute the entire frame.
-- ``method``: The type of imputation to perform. ``mean`` replaces NAs with the column mean; ``median`` replaces NAs with the column median; ``mode`` replaces with the most common factor (for factor columns only).
-- ``combine_method``: If method is ``median``, then choose how to combine quantiles on even sample sizes. This parameter is ignored in all other cases. Available options for ``combine_method`` include ``interpolate``, ``average``, ``low``, and ``high``. 
-- ``by``: Group by columns
-- ``groupByFrame`` or ``group_by_frame``: Impute the column with this pre-computed grouped frame.
-- ``values``:  A vector of impute values (one per column). NaN indicates to skip the column.
+- ``dataset``: 包含要填充的列的数据集
+- ``column``: 指定要填充的列。默认值 ``0`` 指定填充整个帧。
+- ``method``: 要执行的填充类型。``mean`` 用列平均值替换NA值，``median`` 用列中位数替换NA值; ``mode`` 用最常见的因子替换（只适用于因子列）。
+- ``combine_method``: 如果方法是 ``median``，然后选择如何组合均匀样本大小的分位数，在所有其他情况下都忽略此参数。 ``combine_method`` 可用选项包括插值、平均值、低值和高值。
+- ``by``: 分组列
+- ``groupByFrame`` 或 ``group_by_frame``: 用这个预先计算好的分组帧填充列。
+- ``values``:  输入值的向量（每列一个）。NaN代表跳过该列。
 
 .. example-code::
    .. code-block:: r

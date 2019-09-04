@@ -1,4 +1,4 @@
-Starting H2O
+启动AIR
 ============
 
 There are a variety of ways to start H2O, depending on which client you would like to use. The instructions below assume that you already downloaded and installed H2O. If you have not, then please refer to the `Downloading & Installing H2O <downloading.html>`__ section.

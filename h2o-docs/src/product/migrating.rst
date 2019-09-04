@@ -1,9 +1,9 @@
 .. _migration:
 
-Migration Guide
+迁移指南
 ===============
 
-Migrating Between H2O-3 versions
+AIR-3版本间的迁移
 --------------------------------
 
 H2O-3 does its best to keep backwards compatibility between major versions, but sometimes breaking changes are needed in order to improve code quality and to address issues.
@@ -30,7 +30,7 @@ The following classes were moved and/or renamed:
 
 Some internal methods of ``StackedEnsemble`` and ``StackedEnsembleModel`` are no longer public, but this should not impact anyone.
 
-Migrating to H2O-3
+迁移到AIR-3
 ------------------
 
 H2O-3 offers a lot of improvements over H2O 2, including:

@@ -1,22 +1,22 @@
-Importing Multiple Files
+导入多个文件
 ------------------------
 
-The ``importFolder`` (R)/``import_file`` (Python) function can be used to import multiple local files by specifying a directory and a pattern. Example patterns include:
+ ``importFolder`` (R)/``import_file`` (Python) 函数可以通过指定目录和模式来导入多个本地文件。示例模式包括：
 
-- ``pattern="/A/.*/iris_.*"``: Import all files that have the pattern ``/A/.*/iris_.*`` in the specified directory.
-- ``pattern="/A/iris_.*"``: Import all files that have the pattern ``/A/iris_.*`` in the specified directory.
-- ``pattern="/A/B/iris_.*"``: Import all files that have the pattern ``/A/B/iris_.*`` in the specified directory.
-- ``pattern="iris_.*"``: Import all files that have the pattern ``iris_.*`` in the specified directory.
+- ``pattern="/A/.*/iris_.*"``: 导入指定目录下符合 ``/A/.*/iris_.*`` 模式的所有文件。
+- ``pattern="/A/iris_.*"``: 导入指定目录下符合 ``/A/iris_.*`` 模式的所有文件。
+- ``pattern="/A/B/iris_.*"``: 导入指定目录下符合 ``/A/B/iris_.*`` 模式的所有文件。
+- ``pattern="iris_.*"``: 导入指定目录下符合 ``iris_.*`` 模式的所有文件。
 
-**Notes**: 
+**注意**: 
 
-- All files that are specified to be included must have the same number and set of columns. 
-- When parsing a data file containing timestamps that do not include a timezone, the timestamps will be interpreted as UTC (GMT). You can override the parsing timezone using the following:
+- 指定要包含的所有文件必须具有相同的列数和列集。
+- 当解析包含不包含时区的时间戳的数据文件时，时间戳将被解析为为UTC (GMT)时间。您可以使用以下命令覆盖解析时区：
 
   - R: ``h2o.setTimezone("America/Los Angeles")``
   - Python: ``h2o.cluster().timezone = "America/Los Angeles"``
 
-- The examples below assumes that the H2O-3 GitHub repository has been cloned, and that the following command was run in the **h2o-3** folder to retrieve the **smalldata** datasets. 
+- 下面的示例假设已经克隆了AIR-3 GitHub存储库，并在 **air-3** 文件夹中运行以下命令来抓取 **smalldata** 数据集。
 
   :: 
 

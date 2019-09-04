@@ -1,16 +1,16 @@
-Cloud Integration
+云服务集成
 -----------------
 
-H2O is supported on a number of cloud environments, including
+许多云环境都支持AIR，包括
 
-- EC2 Instances and S3 Storage (RedHat AMI, Amazon Linux AMI, and Ubuntu AMI)
+- EC2实例和S3存储 (RedHat AMI, Amazon Linux AMI, and Ubuntu AMI)
 - Amazon AWS
 - Microsoft Azure
 - Databricks
 - IBM DSX
 - Nimbix Cloud
 
-Refer to the following topics:
+请参考以下主题：
 
 .. toctree::
    :maxdepth: 1

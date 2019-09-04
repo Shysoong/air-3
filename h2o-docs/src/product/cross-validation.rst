@@ -1,4 +1,4 @@
-Cross-Validation
+交叉验证
 ================
 
 `K-fold cross-validation <https://en.wikipedia.org/wiki/Cross-validation_(statistics)#k-fold_cross-validation>`__ is used to validate a model internally, i.e., estimate the model performance without having to sacrifice a validation split. Also, you avoid statistical issues with your validation split (it might be a “lucky” split, especially for imbalanced data). Good values for K are around 5 to 10. Comparing the K validation metrics is always a good idea, to check the stability of the estimation, before “trusting” the main model.

@@ -1,9 +1,9 @@
-Combining Rows from Two Datasets
+合并来自两个数据集的行
 --------------------------------
 
-You can use the ``rbind`` function to combine two similar datasets into a single large dataset. This can be used, for example, to create a larger dataset by combining data from a validation dataset with its training or testing dataset.
+可以使用``rbind`` 函数来合并两个相似的数据集为一个更大的数据集。例如，可以通过将来自验证数据集的数据与其训练集或测试集相结合来创建更大的数据集。
 
-Note that when using ``rbind``, the two datasets must have the same set of columns.
+注意，当使用 ``rbind``， 这两个数据集必须具有相同的列集。
 
 .. example-code::
    .. code-block:: r

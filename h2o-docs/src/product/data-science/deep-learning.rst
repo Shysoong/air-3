@@ -1,14 +1,14 @@
-Deep Learning (Neural Networks)
+深度学习(神经网络)
 -------------------------------
 
-Introduction
+介绍
 ~~~~~~~~~~~~
 
-H2O’s Deep Learning is based on a multi-layer `feedforward artificial neural network <https://en.wikipedia.org/wiki/Feedforward_neural_network>`__ that is trained with stochastic gradient descent using back-propagation. The network can contain a large number of hidden layers consisting of neurons with tanh, rectifier, and maxout activation functions. Advanced features such as adaptive learning rate, rate annealing, momentum training, dropout, L1 or L2 regularization, checkpointing, and grid search enable high predictive accuracy. Each compute node trains a copy of the global model parameters on its local data with multi-threading (asynchronously) and contributes periodically to the global model via model averaging across the network.
+AIR的深度学习是基于多层的 `前向人工神经网络 <https://en.wikipedia.org/wiki/Feedforward_neural_network>`__ 它使用后向传播的随机梯度下降来训练。该网络可以包含大量的隐藏层，由具有tanh、rectifier和maxout激活函数的神经元组成。诸如自适应学习率，学习率退火，动量训练，dropout，L1或L2正则化，检查点和网格搜索等高级特性可使预测准确度提高。每个计算节点使用多线程(异步地)在其本地数据上训练全局模型参数的副本，并通过网络上的模型平均定期向全局模型做出贡献。
 
-A feedforward artificial neural network (ANN) model, also known as deep neural network (DNN) or multi-layer perceptron (MLP), is the most common type of Deep Neural Network and the only type that is supported natively in H2O-3. Several other types of DNNs are popular as well, such as Convolutional Neural Networks (CNNs) and Recurrent Neural Networks (RNNs). MLPs work well on transactional (tabular) data; however if you have image data, then CNNs are a great choice. If you have sequential data (e.g. text, audio, time-series), then RNNs are a good choice. 
+前馈人工神经网络(ANN)模型，也称为深度神经网络(DNN)或多层感知器(MLP)，是最常见的深度神经网络类型，也是AIR-3中唯一一种本机支持的类型。其他几种神经网络也很受欢迎，如卷积神经网络(CNNs)和递归神经网络(RNNs)。 MLPs可以很好地处理交易(表格)数据，然而，如果您有图像数据，那么CNNs是一个很好的选择。如果您有序列数据(例如文本、音频、时间序列)，那么RNNs是一个不错的选择。
 
-Quick Start and Additional Resources
+快速入门及额外资源
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * `Deep Learning Booklet <http://h2o.ai/resources>`__
 * Deep Learning in H2O Tutorial (R): `[GitHub] <https://htmlpreview.github.io/?https://github.com/ledell/sldm4-h2o/blob/master/sldm4-deeplearning-h2o.html>`__
@@ -17,12 +17,11 @@ Quick Start and Additional Resources
 * Top 10 tips and tricks `[Youtube] <https://www.youtube.com/watch?v=LM255qs8Zsk/>`__
 * NYC Tour Deep Learning Panel: Tensorflow, Mxnet, Caffe `[Youtube] <https://www.youtube.com/watch?v=KWdkVoKJG3U/>`__
 
-Defining a Deep Learning Model
+定义深度学习模型
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-H2O Deep Learning models have many input parameters, many of which are only accessible via the expert mode. For most cases, use the default values. Please read the following instructions before building extensive Deep Learning models. The application of grid search and successive continuation of winning models via checkpoint restart is highly recommended, as model performance can vary greatly.
-
--  `model_id <algo-params/model_id.html>`__: (Optional) Specify a custom name for the model to use as a reference. By default, H2O automatically generates a destination key.
+AIR深度学习模型有许多输入参数，其中许多只能通过专家模式访问。对于大多数情况，使用默认值。在建立广泛的深度学习模型之前，请阅读以下说明。由于模型性能的差异很大，强烈建议采用网格搜索和通过检查点重启连续持续的领先模型。
+-  `model_id <algo-params/model_id.html>`__: (可选)指定要用作引用的模型的自定义名称。默认情况下，AIR自动生成一个目标键。
 
 -  `training_frame <algo-params/training_frame.html>`__: (Required) Specify the dataset used to build the model. **NOTE**: In Flow, if you click the **Build a model** button from the ``Parse`` cell, the training frame is entered automatically.
 
@@ -272,12 +271,10 @@ H2O Deep Learning models have many input parameters, many of which are only acce
 -  **verbose**: Print scoring history to the console. For Deep Learning, metrics are per epoch. This value defaults to FALSE.
 
 
-Interpreting a Deep Learning Model
+解释深度学习模型
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To view the results, click the View button. The output for the Deep
-Learning model includes the following information for both the training
-and testing sets:
+要查看结果，请单击查看按钮。深度学习模型的输出包括以下培训集和测试集的信息：
 
 -  Model parameters (hidden)
 -  A chart of the variable importances
@@ -433,7 +430,7 @@ FAQ
 
 --------------
 
-Deep Learning Tuning Guide
+深度学习调优指南
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Definitive Performance Tuning Guide for H2O Deep Learning
@@ -441,7 +438,7 @@ The Definitive Performance Tuning Guide for H2O Deep Learning
 * `R <https://github.com/h2oai/h2o-3/blob/master/h2o-docs/src/product/tutorials/dl/dlperf.Rmd>`__
 * `Blog <https://www.h2o.ai/blog/deep-learning-performance-august/>`__
 
-References
+参考
 ~~~~~~~~~~
 
 `"Deep Learning." *Wikipedia: The free encyclopedia*. Wikimedia

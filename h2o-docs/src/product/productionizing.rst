@@ -1,108 +1,108 @@
 .. _productionizing-h2o:
 
-Productionizing H2O
+产品化AIR
 ===================
 
 .. _about-pojo-mojo:
 
-About POJOs and MOJOs
+关于POJOs和MOJOs
 ---------------------
 
-H2O allows you to convert the models you have built to either a `Plain Old Java Object <https://en.wikipedia.org/wiki/Plain_Old_Java_Object>`__ (POJO) or a Model ObJect, Optimized (MOJO). 
+允许您将构建的模型转换为一个 `Plain Old Java Object <https://en.wikipedia.org/wiki/Plain_Old_Java_Object>`__ (POJO) 或者一个经过优化模型对象(MOJO)。
 
-H2O-generated MOJO and POJO models are intended to be easily embeddable in any Java environment. The only compilation and runtime dependency for a generated model is the ``h2o-genmodel.jar`` file produced as the build output of these packages. This file is a library that supports scoring. For POJOs, it contains the base classes from which the POJO is derived from. (You can see "extends GenModel" in a POJO class. The GenModel class is part of this library.) For MOJOs, it also contains the required readers and interpreters. The ``h2o-genmodel.jar`` file is required when POJO/MOJO models are deployed to production.
+AIR生成的MOJO和POJO模型可以很容易地嵌入到任何Java环境中。生成模型的惟一编译和运行时依赖项是``h2o-genmodel.jar``文件，作为这些包的构建输出生成的文件。这个文件是一个支持模型评价的库。对于POJO，它包含派生POJO的基类。（您可以在POJO类中看到"extends GenModel"，GenModel类是这个库的一部分）。对于MOJOs，它还包含所需的阅读器和解释器。当将POJO/MOJO模型部署到生产环境中时，需要``h2o-genmodel.jar``文件。
 
-Users can refer to the Quick Start topics that follow for more information about generating POJOs and MOJOs.
+有关生成POJOs和MOJOs的更多信息，用户可以参考后面的快速启动主题。
 
-Developers can refer to the the `POJO and MOJO Model Javadoc <http://docs.h2o.ai/h2o/latest-stable/h2o-genmodel/javadoc/index.html>`__.
+开发者可以参考 `POJO and MOJO Model Javadoc <http://docs.h2o.ai/h2o/latest-stable/h2o-genmodel/javadoc/index.html>`__.
 
 .. include:: mojo-quickstart.rst
 
 .. include:: pojo-quickstart.rst
 
 
-Example Design Patterns
+示例设计模式
 -----------------------
 
-Here is a collection of example design patterns for how to productionize H2O.
+下面是关于如何在生产环境中使用AIR的示例设计模式的集合。
 
 
 .. _app-consumer-loan:
 
-Consumer loan application
+消费者贷款应用
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ==================================================  ===========================================================
-Characteristic                                      Value
+特征                                                 值
 ==================================================  ===========================================================
-Pattern name                                        Jetty servlet
-Example training language                           R
-Example training data source                        CSV file
-Example scoring data source                         User input to Javascript application running in browser
-Scoring environment                                 REST API service provided by Jetty servlet
-Scoring engine                                      H2O POJO
-Scoring latency SLA                                 Real-time
+模式名称                                             Jetty servlet
+示例训练语言                                          R
+示例训练数据源                                        CSV文件
+示例评分数据源                                        在浏览器中运行的Javascript应用程序的用户输入
+评分环境                                             Jetty servlet提供的REST API服务
+评分引擎                                             AIR POJO
+评分延迟SLA                                          实时
 ==================================================  ===========================================================
 
 =========    ==================================================================================================
-Resource     Location
+资源          位置
 =========    ==================================================================================================
-Git repos    https://github.com/h2oai/app-consumer-loan
-Slides       http://docs.h2o.ai/h2o-tutorials/latest-stable/tutorials/building-a-smarter-application/index.html
-Videos       http://library.fora.tv/2015/11/09/building_a_smart_application_hands_on_tom
+Git库         https://github.com/h2oai/app-consumer-loan
+幻灯片        http://docs.h2o.ai/h2o-tutorials/latest-stable/tutorials/building-a-smarter-application/index.html
+视频          http://library.fora.tv/2015/11/09/building_a_smart_application_hands_on_tom
 =========    ==================================================================================================
 
 
-Craigslist application
+Craigslist应用
 ~~~~~~~~~~~~~~~~~~~~~~
 
 ==================================================  ===========================================================
-Characteristic                                      Value
+特征                                                 值
 ==================================================  ===========================================================
-Pattern name                                        Sparkling water streaming
-Example training language                           Scala
-Example training data source                        CSV file
-Example scoring data source                         User input to Javascript application running in browser
-Scoring engine                                      H2O cluster
-Scoring latency SLA                                 Real-time
+模式名称                                             Sparkling water streaming
+示例训练语言                                          Scala
+示例训练数据源                                        CSV文件
+示例评分数据源                                        在浏览器中运行的Javascript应用程序的用户输入
+评分引擎                                             AIR 集群
+评分延迟SLA                                          实时
 ==================================================  ===========================================================
 
 =========    ==================================================================================================
-Resource     Location
+资源          Location
 =========    ==================================================================================================
-Git repos    https://github.com/h2oai/app-ask-craig
+Git库        https://github.com/h2oai/app-ask-craig
 
-Blogs        https://www.h2o.ai/blog/ask-craig-sparkling-water/
+博客         https://www.h2o.ai/blog/ask-craig-sparkling-water/
 
              https://www.h2o.ai/blog/ask-craig-sparkling-water-2/
 
-Slides       http://www.slideshare.net/0xdata/sparkling-water-ask-craig
+幻灯片        http://www.slideshare.net/0xdata/sparkling-water-ask-craig
 
              http://www.slideshare.net/0xdata/sparkling-water-applications-meetup-072115
 =========    ==================================================================================================
 
 
-Malicious domain application
+恶意域名检测应用
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ==================================================  ===========================================================
-Characteristic                                      Value
+特征                                                 值
 ==================================================  ===========================================================
-Pattern name                                        AWS Lambda
-Example training language                           Python
-Example training data source                        CSV file
-Example scoring data source                         User input to Javascript application running in browser
-Scoring environment                                 AWS Lambda REST API endpoint
-Scoring engine                                      H2O POJO
-Scoring latency SLA                                 Real-time
+模式名称                                             AWS Lambda
+示例训练语言                                          Python
+示例训练数据源                                        CSV文件
+示例评分数据源                                        在浏览器中运行的Javascript应用程序的用户输入
+评分环境                                             AWS Lambda REST API endpoint
+评分引擎                                             AIR POJO
+评分延迟SLA                                          实时
 ==================================================  ===========================================================
 
 =========    ==================================================================================================
-Resource     Location
+资源          位置
 =========    ==================================================================================================
-Git repos    https://github.com/h2oai/app-malicious-domains
-Slides       https://github.com/h2oai/h2o-meetups/tree/master/2016_05_03_H2O_Open_Tour_Chicago_Application
-Videos       http://library.fora.tv/2016/05/03/design_patterns_for_smart_applications_and_data_products
+Git库        https://github.com/h2oai/app-malicious-domains
+幻灯片        https://github.com/h2oai/h2o-meetups/tree/master/2016_05_03_H2O_Open_Tour_Chicago_Application
+视频         http://library.fora.tv/2016/05/03/design_patterns_for_smart_applications_and_data_products
 =========    ==================================================================================================
 
 
@@ -110,38 +110,38 @@ Storm bolt
 ~~~~~~~~~~
 
 ==================================================  ===========================================================
-Characteristic                                      Value
+特征                                                值
 ==================================================  ===========================================================
-Pattern name                                        Storm bolt
-Example training language                           R
-Example training data source                        CSV file
-Example scoring data source                         Storm spout
-Scoring environment                                 POJO embedded in a Storm bolt
-Scoring engine                                      H2O POJO
-Scoring latency SLA                                 Real-time
+模式名称                                             Storm bolt
+示例训练语言                                          R
+示例训练数据源                                        CSV文件
+示例评分数据源                                        Storm spout
+评分环境                                             嵌入Storm bolt的POJO
+评分引擎                                             AIR POJO
+评分延迟SLA                                          实时
 ==================================================  ===========================================================
 
 =========    ==================================================================================================
-Resource     Location
+资源          位置
 =========    ==================================================================================================
-Git repos    https://github.com/h2oai/h2o-tutorials/tree/master/tutorials/streaming/storm
-Tutorials    http://docs.h2o.ai/h2o-tutorials/latest-stable/tutorials/streaming/storm/index.html
+Git库        https://github.com/h2oai/h2o-tutorials/tree/master/tutorials/streaming/storm
+教程          http://docs.h2o.ai/h2o-tutorials/latest-stable/tutorials/streaming/storm/index.html
 =========    ==================================================================================================
 
 
-Invoking POJO directly in R
+在R中直接调用POJO
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ==================================================  ===========================================================
-Characteristic                                      Value
+特征                                                值
 ==================================================  ===========================================================
-Pattern name                                        POJO in R
-Example training language                           R
-Example training data source                        (Need example)
-Example scoring data source                         (Need example)
-Scoring environment                                 R
-Scoring engine                                      H2O POJO
-Scoring latency SLA                                 Batch
+模式名称                                             R中的POJO
+示例训练语言                                          R
+示例训练数据源                                        (Need example)
+示例评分数据源                                        (Need example)
+评分环境                                             R
+评分引擎                                             AIR POJO
+评分延迟SLA                                          Batch
 ==================================================  ===========================================================
 
 
@@ -149,19 +149,19 @@ Hive UDF
 ~~~~~~~~
 
 ==================================================  ===========================================================
-Characteristic                                      Value
+特征                                                值
 ==================================================  ===========================================================
-Pattern name                                        Hive UDF
-Example training language                           R
-Example training data source                        HDFS directory with hive part files output by a SELECT
-Example scoring data source                         Hive
-Scoring environment                                 Hive SELECT query (parallel MapReduce) running UDF
-Scoring engine                                      H2O POJO
-Scoring latency SLA                                 Batch
+模式名称                                             Hive UDF
+示例训练语言                                          R
+示例训练数据源                                        HDFS directory with hive part files output by a SELECT
+示例评分数据源                                        Hive
+评分环境                                             Hive SELECT query (parallel MapReduce) running UDF
+评分引擎                                             AIR POJO
+评分延迟SLA                                          Batch
 ==================================================  ===========================================================
 
 =============    ==================================================================================================
-Resource         Location
+资源              位置
 =============    ==================================================================================================
 Git repos        https://github.com/h2oai/h2o-tutorials/tree/master/tutorials/hive_udf_template
 POJO Tutorial    http://docs.h2o.ai/h2o-tutorials/latest-stable/tutorials/hive_udf_template/hive_udf_pojo_template/index.html
@@ -169,25 +169,25 @@ MOJO Tutorial    http://docs.h2o.ai/h2o-tutorials/latest-stable/tutorials/hive_u
 =============    ==================================================================================================
 
 
-MOJO as a JAR Resource
+MOJO作为一个JAR资源
 ~~~~~~~~~~~~~~~~~~~~~~
 
 ==================================================  ============================================================
-Characteristic                                      Value
+特征                                                值
 ==================================================  ============================================================
-Pattern name                                        MOJO JAR
-Example training language                           R
-Example training data source                        Iris
-Example scoring data source                         Single Row
-Scoring environment                                 Portable
-Scoring engine                                      H2O MOJO
-Scoring latency SLA                                 Real-time example, but can be adapted (use in Hive UDF etc.)
+模式名称                                             MOJO JAR
+示例训练语言                                          R
+示例训练数据源                                        Iris
+示例评分数据源                                        单独一行
+评分环境                                             Portable
+评分引擎                                             AIR MOJO
+评分延迟SLA                                          实时的例子，但可以调整(如在Hive UDF中使用等)
 ==================================================  ============================================================
 
 =========    ===================================================================================================
-Resource     Location
+资源              位置
 =========    ===================================================================================================
-Git repos    https://github.com/h2oai/h2o-tutorials/tree/master/tutorials/mojo-resource
+Git库        https://github.com/h2oai/h2o-tutorials/tree/master/tutorials/mojo-resource
 =========    ===================================================================================================
 
 
@@ -210,14 +210,14 @@ Resource     Location
 Web sites    http://www.h2o.ai/steam/
 =========    ==================================================================================================
 
-Scoring Server on AWS
+AWS上的评分服务器
 ~~~~~~~~~~~~~~~~~~~~~
 
-You can deploy a RESTful server on AWS using the marketplace AMI (H2O Inference server - Hourly). Notice that this is a paid AMI. 
+您可以使用marketplace AMI在AWS上部署RESTful服务器（AIR推理服务器-每小时一次）。注意，这是一个付费AMI。 
 
-Transfer the MOJO file into the /tmp folder of this instance before launching. If your MOJO is in S3, assign a role that provides S3 access to the instance. 
+开始之前传输MOJO文件到/tmp文件夹内。如果您的MOJO在S3中，请分配一个角色，该角色提供S3对实例的访问。
 
-Run following bash script as "userdata" to transfer your MOJO into the instance before you launch the instance. Be sure you change the ``mojofile`` path below.
+以"userdata"角色运行以下bash脚本，在启动实例之前将MOJO传输到实例中。请确保更改下面的``mojofile``路径。
 
 .. code::
 
@@ -226,14 +226,14 @@ Run following bash script as "userdata" to transfer your MOJO into the instance 
    export mojofile="s3://yourbucket/yourmojo.zip"
    aws s3 cp $mojofile /tmp/pipeline.mojo
 
-After this instance has launched, you can make real time inference using the following command. Remember to change the IP address. Input data is provided through the ``row`` parameter in the URL.
+启动此实例后，可以使用以下命令进行实时推理。记得更改IP地址。通过在URL中的``row``参数提供输入数据。
 
 .. code::
 
    curl "http://<yourIP>:8080/model?type=1&row=2000,2000"
 
-Additional Resources
+额外资源
 --------------------
 
-* `H2O Generated POJO Model javadoc <http://docs.h2o.ai/h2o/latest-stable/h2o-genmodel/javadoc/index.html>`_
-* `H2O Open Tour 2016 New York City: Ways to Productionize H2O <https://github.com/h2oai/h2o-meetups/tree/master/2016_07_19_H2O_Open_Tour_NYC_Prod/>`_
+* `AIR Generated POJO Model javadoc <http://docs.h2o.ai/h2o/latest-stable/h2o-genmodel/javadoc/index.html>`_
+* `AIR Open Tour 2016 New York City: Ways to Productionize H2O <https://github.com/h2oai/h2o-meetups/tree/master/2016_07_19_H2O_Open_Tour_NYC_Prod/>`_

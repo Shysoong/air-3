@@ -1,13 +1,13 @@
-Pivoting Tables
+透视数据表
 ---------------
 
-Use this function to pivot tables. This is performed by designating three columns: index, column, and value. Index is the column where pivoted rows should be aligned on; column represents the column to pivot; and value specifies the values of the pivoted table. For cases with multiple indexes for a column label, the aggregation method is to pick the first occurrence in the data frame.
+使用这个函数来透视表。这是通过指定三个列来执行的：索引、列和值。 Index is the column where pivoted rows should be aligned on; column represents the column to pivot; and value specifies the values of the pivoted table. For cases with multiple indexes for a column label, the aggregation method is to pick the first occurrence in the data frame.
 
-**Notes**: 
+**注意**: 
 
- - All rows of a single index value must fit on one node. 
+ - 单个索引值的所有行必须装载于一个节点。
 
- - The maximum rows for a single index value and column label is ``Chunk size * Chunk size``.
+ - 单个索引值和列标签的最大行数为 ``Chunk size * Chunk size``.
 
 .. example-code::
    .. code-block:: r

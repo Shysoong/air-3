@@ -1,4 +1,4 @@
-Checkpointing Models
+检查点模型
 ====================
 
 In real-world scenarios, data can change. For example, you may have a model currently in production that was built using 1 million records. At a later date, you may receive several hundred thousand more records. Rather than building a new model from scratch, you can use the ``checkpoint`` option to create a new model based on the existing model. 

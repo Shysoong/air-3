@@ -1,4 +1,4 @@
-Generalized Low Rank Models (GLRM)
+广义低阶模型(GLRM)
 ----------------------------------
 
 Introduction

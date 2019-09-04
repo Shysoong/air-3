@@ -1,42 +1,42 @@
-Quantiles
+分位数
 ---------
 
-**Note**: The quantile results in Flow are computed lazily on-demand and cached. It is a fast approximation (max - min / 1024) that is very accurate for most use cases. If the distribution is skewed, the quantile results may not be as accurate as the results obtained using ``h2o.quantile`` in R or ``H2OFrame.quantile`` in Python.
+**注意**: Flow中的分位数结果按需延迟计算并缓存。对于大多数用例来说，这是一个非常精确的快速近似（max - min / 1024）。如果分布是偏态的，分位数结果可能不如在R中使用 ``h2o.quantile`` 或Python中使用 ``H2OFrame.quantile`` 精确。
 
-Early Stopping
+早停
 --------------
 
-All of the H2O supervised learning algorithms allow for early stopping during model building and scoring. 
+所有的AIR监督学习算法都允许在模型构建和评分过程中尽早停止。
 
-Early Stopping in All Supervised Algorithms
+所有有监督算法中的早停
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-- :ref:`max_runtime_secs` (Defaults to 0/disabled.)
+- :ref:`max_runtime_secs` (默认为 0/disabled)
 
-The ``max_runtime_secs`` option specifes the maximum runtime in seconds that you want to allot in order to complete the model. If this maximum runtime is exceeded before the model build is completed, then the model will fail. When performing a grid search, this option specifies the maximum runtime in seconds for the entire grid. This option can also be combined with ``max_runtime_secs`` in the model parameters. If ``max_runtime_secs`` is not set in the model parameters, then each model build is launched with a limit equal to the remainder of the grid time. On the other hand, if ``max_runtime_secs`` is set in the model parameters, then each build is launched with a limit equal to the minimum of the model time limit and the remaining time for the grid.
+``max_runtime_secs`` 选项指定要分配的最大运行时(以秒为单位)，以便完成模型。如果在模型构建完成之前超过了这个最大运行时，那么模型就会失败。执行网格搜索时，此选项指定整个网格的最大运行时(以秒为单位)。 在模型参数中该选项也可以和 ``max_runtime_secs`` 结合使用。如果 ``max_runtime_secs`` 没有在模型参数中设置，则启动每个模型构建时的限制为网格剩余时间。另一方面，如果在模型参数中设置了 ``max_runtime_secs``，则每次启动构建时的限制都等于模型时间限制的最小值和网格的剩余时间。
 
-Early Stopping in AutoML, Grid Search, Deep Learning, DRF, GBM, and XGBoost
+AutoML、网格搜索、深度学习、DRF、GBM和XGBoost中的早停
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In AutoML, Grid Search, Deep Learning, DRF, GBM, and XGBoost, the following additional parameters are used for early stopping:
+在AutoML、网格搜索、深度学习、DRF、GBM和XGBoost中以下附加参数用于提前停止：
 
-- :ref:`stopping_rounds` (Defaults to 3 in AutoML; defaults to 5 in Deep Learning; defaults to 0/disabled in DRF, GBM, XGBoost.)
-- :ref:`stopping_tolerance` (Defaults to 0.001. In AutoML for datasets with more than 1 million rows, this defaults to a larger valued determined by the size of the dataset and the non-NA-rate.)
-- :ref:`stopping_metric` (Defaults to "logloss" for classification and "deviance" for regression.)
+- :ref:`stopping_rounds` (在AutoML中默认为3，深度学习中默认为5，在DRF、GBM、XGBoost中默认为0/disabled)
+- :ref:`stopping_tolerance` (默认为0.001。 在AutoML中，对于超过100万行的数据集，这默认为较大的值，由数据集的大小和非NA率决定)
+- :ref:`stopping_metric` (分类默认为 "logloss" ，回归默认为 "deviance")
 
-The simplest way to turn on early stopping in these algorithms is to use a number >=1 in ``stopping_rounds``. The default values for the other two parameters will work fairly well, but a ``stopping_tolerance`` of 0 is a common alternative to the default.
+在这些算法中，启动提前停止的最简单方法是在 ``stopping_rounds`` 选项中使用 number >=1。其他两个参数的默认值可以很好地工作，但是对于 ``stopping_tolerance`` 0是默认值的常见替代。
 
-Additionally, take :ref:`score_tree_interval` and/or :ref:`score_each_iteration` into account when using these early stopping methods. The stopping rounds applies to the number of scoring iterations H2O has performed, so regular scoring iterations of small size can help control early stopping the most (though there is a speed tradeoff to scoring more often). The default is to use H2O’s assessment of a reasonable ratio of training time to scoring time, which often results in inconsistent scoring gaps.
+此外，在使用这些早期停止方法时，要考虑 :ref:`score_tree_interval` 和/或  :ref:`score_each_iteration`。停止循环适用于AIR已经执行的计分迭代的数量，因此，较小规模的常规计分迭代可以帮助控制尽早停止的次数最多(尽管为了更频繁地计分，需要在速度上进行权衡)。默认情况下是使用AIR的对一个合理的训练时间与评分时间的比例的评价，这常常导致不一致的得分差距。
 
-Early Stopping in GLM
+广义线性模型中的早停
 ~~~~~~~~~~~~~~~~~~~~~
 
-In GLM, the following parameters additional are used for early stopping:
+在广义线性模型中，以下附加参数用于提前停止：
 
-- :ref:`early_stopping` (Default is enabled.)
-- :ref:`max_active_predictors` (Default can vary based on the solver.)
+- :ref:`early_stopping` (默认启用)
+- :ref:`max_active_predictors` (默认值可以根据求解程序的不同而变化)
 
-When ``early_stopping`` is enabled, GLM will automatically stop building a model when there is no more relative improvement on the training or validation (if provided) set. This option prevents expensive model building with many predictors when no more improvements are occurring.
+当 ``early_stopping`` 被启用， 当对训练集或验证集(如果提供)没有更多的相对改进时，GLM将自动停止构建模型。当没有更多的改进发生时，这个选项可以防止使用许多预测因子构建耗时的模型。
 
-The ``max_active_predictors`` option limits the number of active predictors. (Note that the actual number of non-zero predictors in the model is going to be slightly lower). This is useful when obtaining a sparse solution to avoid costly computation of models with too many predictors. When using the :math:`\lambda_1` penalty with lambda search, this option will stop the search before it completes. Models built at the beginning of the lambda search have higher lambda values, consider fewer predictors, and take less time to calculate the model. Models built at the end of the lambda search have lower lambda values, incorporate more predictors, and take a longer time to calculate the model. Set the ``nlambdas`` parameter for a lambda search to specify the number of models attempted across the search. 
+``max_active_predictors`` 选项限制活跃预测因子的数量。（注意，模型中非零预测因子的实际数量会稍微低一些）。这在获得稀疏解时非常有用，可以避免使用过多的预测因子对模型进行耗时的计算。当使用 :math:`\lambda_1` 惩罚和搜索时，此选项将在搜索完成之前停止搜索。在lambda搜索开始时构建的模型具有更高的lambda值，考虑更少的预测因子，并且花费更少的时间来计算模型。为lambda搜索设置 ``nlambdas`` 参数，以指定整个搜索中尝试的模型数量。 
 

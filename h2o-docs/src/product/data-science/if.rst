@@ -1,4 +1,4 @@
-Isolation Forest
+孤立森林
 ----------------
 
 Introduction

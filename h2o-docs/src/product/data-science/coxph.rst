@@ -1,87 +1,87 @@
-Cox Proportional Hazards (CoxPH)
+比例风险回归模型(CoxPH)
 --------------------------------
 
-**Note** CoxPH is not yet supported in Python. It is supported in R and Flow only.
+**注意** Python版本中还不支持CoxPH，它只在R和Flow版本中支持。
 
-Cox proportional hazards models are the most widely used approach for modeling time to event data. As the name suggests, the *hazard function*, which computes the instantaneous rate of an event occurrence and is expressed mathematically as
+Cox比例风险模型是对事件的发生时间建模最广泛使用的方法。顾名思义， *hazard function* ,它计算事件发生的瞬时概率，并以数学形式 
 
 :math:`h(t) = \lim_{\Delta t \downarrow 0} \frac{Pr[t \le T < t + \Delta t \mid T \ge t]}{\Delta t},`
 
-is assumed to be the product of a *baseline hazard function* and a *risk score*. Consequently, the hazard function for observation :math:`i` in a Cox proportional hazards model is defined as
+表示它被认为是 *baseline hazard function* 和 *risk score* 的乘积。因此, 在比例风险回归模型中，对于观察变量 :math:`i` 的风险函数被定义为
 
 :math:`h_i(t) = \lambda(t)\exp(\mathbf{x}_i^T\beta)`
 
-where :math:`\lambda(t)` is the baseline hazard function shared by all observations and :math:`\exp(\mathbf{x}_i^T\beta)` is the risk score for observation :math:`i`, which is computed as the exponentiated linear combination of the covariate vector :math:`\mathbf{x}_i^T` using a coefficient vector :math:`\beta` common to all observations.
+:math:`\lambda(t)` 是所有观测值共享的一个与时间有关的基准危险率， :math:`\exp(\mathbf{x}_i^T\beta)` 是观察值 :math:`i` 的风险评分，这是通过使用了对所有观察值通用的系数变量  :math:`\beta` 的协变量向量  :math:`\mathbf{x}_i^T` 计算出来的。
 
-This combination of a non-parametric baseline hazard function and a parametric risk score results in Cox proportional hazards models being described as *semi-parametric*. In addition, a simple rearrangement of terms shows that unlike generalized linear models, an intercept (constant) term in the risk score adds no value to the model fit, due to the inclusion of a baseline hazard function.
+这种结合非参数基准危险率和参数风险评分的Cox比例危险模型被描述为 *半参数* 。此外，模型名称也表明，与广义线性模型不同，风险评分中的截距(常数)项没有为模型的拟合增加任何值，这是由于包含了基准危险率。
 
-`An R demo is available here <https://github.com/h2oai/h2o-3/blob/master/h2o-r/demos/rdemo.coxph.R>`__. This uses the CoxPH algorithm along with the WA\_Fn-UseC\_-Telco-Customer-Churn.csv dataset. 
+`R展示程序可在这里找到 <https://github.com/h2oai/h2o-3/blob/master/h2o-r/demos/rdemo.coxph.R>`__。它在WA\_Fn-UseC\_-Telco-Customer-Churn.csv数据集上使用CoxPH算法。 
 
-Defining a CoxPH Model
+定义CoxPH模型
 ~~~~~~~~~~~~~~~~~~~~~~
 
--  `model_id <algo-params/model_id.html>`__: (Optional) Specify a custom name for the model to use as a reference. By default, H2O automatically generates a destination key.
+-  `model_id <algo-params/model_id.html>`__: (可选) 指定要用作引用的模型的自定义名称。默认情况下，AIR自动生成一个目标键。
 
--  `training_frame <algo-params/training_frame.html>`__: (Required) Specify the dataset used to build the model. **NOTE**: In Flow, if you click the **Build a model** button from the ``Parse`` cell, the training frame is entered automatically.
+-  `training_frame <algo-params/training_frame.html>`__: (必须) 指定用于构建模型的数据集。 **注意**：在Flow环境下， 如果您从 ``Parse`` 单元格单击 **构建模型** 按钮，训练数据帧会自动载入。
 
--  `start_column <algo-params/start_column.html>`__: (Optional) The name of an integer column in the **source** data set representing the start time. If supplied, the value of the **start_column** must be strictly less than the **stop_column** in each row.
+-  `start_column <algo-params/start_column.html>`__: (可选) **源** 数据集中表示开始时间的整数列的名称。如果提供，则 **start_column** （开始列）的值必须严格小于每行中的 **stop_column** （停止列）。
 
--  `stop_column <algo-params/stop_column.html>`__: (Required) The name of an integer column in the **source** data set representing the stop time. 
+-  `stop_column <algo-params/stop_column.html>`__: (必须) **源** 数据集中表示结束时间的整数列的名称。
 
--  `y <algo-params/y.html>`__: (Required) Specify the column to use as the dependent variable. The data can be numeric or categorical.
+-  `y <algo-params/y.html>`__: (必须) 指定要用作因变量的列。数据可以是数字的，也可以是分类的。
 
--  `ignored_columns <algo-params/ignored_columns.html>`__: (Optional, Python and Flow only) Specify the column or columns to be excluded from the model. In Flow, click the checkbox next to a column name to add it to the list of columns excluded from the model. To add all columns, click the **All** button. To remove a column from the list of ignored columns, click the X next to the column name. To remove all columns from the list of ignored columns, click the **None** button. To search for a specific column, type the column name in the **Search** field above the column list. To only show columns with a specific percentage of missing values, specify the percentage in the **Only show columns with more than 0% missing values** field. To change the selections for the hidden columns, use the **Select Visible** or **Deselect Visible** buttons.
+-  `ignored_columns <algo-params/ignored_columns.html>`__: (可选，Python和Flow独占) 指定要从模型中排除的列。在Flow中，单击列名旁边的复选框，将其添加到模型中排除的列列表中。要添加所有列，单击 **所有** 按钮。要从忽略列的列表中删除列，请单击列名旁边的X。要从忽略列列表中移除所有列，单击 **全不选** 按钮。要查找一个特定的列，在列列表上面的 **查找** 字段输入列名。 要只展示指定缺失值比例的列，在 **只展示缺失超过0%数据的列** 字段指定比例。更改隐藏列的选择，使用 **选择可见** 或 **取消选择可见** 按钮。
 
--  `weights_column <algo-params/weights_column.html>`__: Specify a column to use for the observation weights, which are used for bias correction. The specified  ``weights_column`` must be included in the specified ``training_frame``. 
+-  `weights_column <algo-params/weights_column.html>`__: 指定要用于观察权重的列，该列用于偏差校正。指定的 ``weights_column`` 必须被包含在指定的 ``training_frame`` 内。
    
-    *Python only*: To use a weights column when passing an H2OFrame to ``x`` instead of a list of column names, the specified ``training_frame`` must contain the specified ``weights_column``. 
+    *Python独占*: 若要在向 ``x`` 传递AIRFrame而不是列名列表时使用权重列，指定的 ``training_frame`` 必须包含指定的 ``weights_column``。
    
-    **Note**: Weights are per-row observation weights and do not increase the size of the data frame. This is typically the number of times a row is repeated, but non-integer values are supported as well. During training, rows with higher weights matter more, due to the larger loss function pre-factor.
+    **注意**: 权重是每行观察值的权重，不会增加数据帧的大小。这通常是一行重复的次数，但也支持非整数值。在训练过程中，由于损失函数的预因子较大，权重较高的行影响更大。
 
--  `offset_column <algo-params/offset_column.html>`__: Specify a column to use as the offset.
+-  `offset_column <algo-params/offset_column.html>`__: 指定要用作偏移量的列。
    
-	 **Note**: Offsets are per-row "bias values" that are used during model training. For Gaussian distributions, they can be seen as simple corrections to the response (y) column. Instead of learning to predict the response (y-row), the model learns to predict the (row) offset of the response column. For other distributions, the offset corrections are applied in the linearized space before applying the inverse link function to get the actual response values. For more information, refer to the following `link <http://www.idg.pl/mirrors/CRAN/web/packages/gbm/vignettes/gbm.pdf>`__. 
+	 **注意**: 偏移量是模型训练中使用的每行 "偏差值" 。对于高斯分布，它们可以看作是对响应(y)列的简单修正。模型不是学习预测响应(y-row)，而是学习预测响应列的(行)偏移量。对于其他分布，在应用反向链接函数得到实际响应值之前，先在线性化的空间中应用偏移校正。有关更多信息，请参考以下内容 `链接 <http://www.idg.pl/mirrors/CRAN/web/packages/gbm/vignettes/gbm.pdf>`__. 
 
--  **stratify_by**: A list of columns to use for stratification.
+-  **stratify_by**: 用于分层的列的列表。
 
--  `ties <algo-params/ties.html>`__: The approximation method for handling ties in the partial likelihood. This can be either **efron** (default) or **breslow**). See the :ref:`coxph_model_details` section below for more information about these options.
+-  `ties <algo-params/ties.html>`__: 处理部分似然关系的近似方法。可以是 **efron** (默认) 或者 **breslow**。 更多关于这些选项的信息请查看下边的 :ref:`coxph_model_details` 一节。
 
--  **init**: (Optional) Initial values for the coefficients in the model. This value defaults to 0.
+-  **init**: (可选) 模型中系数的初值。这个值默认为0。
 
--  **lre_min**: A positive number to use as the minimum log-relative error (LRE) of subsequent log partial likelihood calculations to determine algorithmic convergence. The role this parameter plays in the stopping criteria of the model fitting algorithm is explained in the :ref:`coxph_algorithm` section below. This value defaults to 9.
+-  **lre_min**: 一个正数，用作后续对数部分似然计算的最小对数相对误差(LRE)，以确定算法的收敛性。这个参数在模型拟合算法的停止条件中所起的作用在 :ref:`coxph_algorithm` 一节中进行来说明。该值默认为9。
 
--  `max_iterations <algo-params/max_iterations.html>`__: A positive integer defining the maximum number of iterations during model training. The role this parameter plays in the stopping criteria of the model-fitting algorithm is explained in the :ref:`coxph_algorithm` section below. This value defaults to 20.
+-  `max_iterations <algo-params/max_iterations.html>`__: 定义模型训练期间最大迭代次数的正整数。这个参数在模型拟合算法的停止条件中所起的作用在 :ref:`coxph_algorithm` 一节中进行来说明。该值默认为20。
 
--  `interactions <algo-params/interactions.html>`__: Specify a list of predictor column indices to interact. All pairwise combinations will be computed for this list. 
+-  `interactions <algo-params/interactions.html>`__: 指定要交互的预测因子列索引列表。所有成对的组合将为该列表作计算。
 
--  `interaction_pairs <algo-params/interaction_pairs.html>`__: (Internal only.) When defining interactions, use this option to specify a list of pairwise column interactions (interactions between two variables). Note that this is different than ``interactions``, which will compute all pairwise combinations of specified columns. This option is disabled by default.
+-  `interaction_pairs <algo-params/interaction_pairs.html>`__: (与interactions联合使用) 定义interactions时，使用此选项指定成对交互的列表（两个变量之间的相互作用）。注意该选项和 ``interactions`` 不同，它将计算指定列的所有成对组合。 该选项默认不开启。
 
--  `export_checkpoints_dir <algo-params/export_checkpoints_dir.html>`__: Specify a directory to which generated models will automatically be exported.
+-  `export_checkpoints_dir <algo-params/export_checkpoints_dir.html>`__: 指定将自动导出生成模型的目录。
 
-Cox Proportional Hazards Model Results
+CoxPH模型结果
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Data
-''''
+数据
+''''''''
 
-- Number of Complete Cases: The number of observations without missing values in any of the input columns.
-- Number of Non Complete Cases: The number of observations with at least one missing value in any of the input columns.
-- Number of Events in Complete Cases: The number of observed events in the complete cases.
+- Number of Complete Cases: 在任何输入列中没有缺失值的观察值的数量。
+- Number of Non Complete Cases: 在任何输入列中至少缺少一个值的观察值的数目。
+- Number of Events in Complete Cases: 在全部案例中观察到的事件数。
 
-Coefficients
+系数
 ''''''''''''
 
-:math:`\tt{name}`: The name given to the coefficient. If the predictor column is numeric, the corresponding coefficient has the same name. If the predictor column is categorical, the corresponding coefficients are a concatenation of the name of the column with the name of the categorical level the coefficient represents.
+:math:`\tt{name}`: 系数的名字。如果预测因子列是数值的，则对应的系数具有相同的名称。如果预测因子列是分类的，对应的系数是列的名称与系数表示的类别级别的名称的串联。
 
-:math:`\tt{coef}`: The estimated coefficient value.
+:math:`\tt{coef}`: 估计系数值。
 
-:math:`\tt{exp(coef)}`: The exponentiated coefficient value estimate.
+:math:`\tt{exp(coef)}`: 指数系数值估计。
 
-:math:`\tt{se(coef)}`: The standard error of the coefficient estimate.
+:math:`\tt{se(coef)}`: 系数估计的标准误差。
 
-:math:`\tt{z}`: The z statistic, which is the ratio of the coefficient estimate to its standard error.
+:math:`\tt{z}`: z统计量，即系数估计值与其标准误差之比。
 
-Model Statistics
+模型统计
 ''''''''''''''''
 
 - Cox and Snell Generalized :math:`R^2`
@@ -92,20 +92,20 @@ Model Statistics
 
   :math:`\tt{Max. R^2} := 1 - \exp\big(\frac{2 pl(\beta^{(0)})}{n}\big)`
 
-- Likelihood Ratio Test
+- 似然比检验
 
   :math:`2\big(pl(\hat{\beta}) - pl(\beta^{(0)})\big)`, which under the null
   hypothesis of :math:`\hat{beta} = \beta^{(0)}` follows a chi-square
   distribution with :math:`p` degrees of freedom.
 
-Wald Test
+沃尔德检验
   :math:`\big(\hat{\beta} - \beta^{(0)}\big)^T I\big(\hat{\beta}\big) \big(\hat{\beta} - \beta^{(0)}\big)`,
   which under the null hypothesis of :math:`\hat{beta} = \beta^{(0)}` follows a
   chi-square distribution with :math:`p` degrees of freedom. When there is a
   single coefficient in the model, the Wald test statistic value is that
   coefficient's z statistic.
 
-Score (Log-Rank) Test
+Score (Log-Rank)校验
   :math:`U\big(\beta^{(0)}\big)^T \hat{I}\big(\beta^{0}\big)^{-1} U\big(\beta^{(0)}\big)`,
   which under the null hypothesis of :math:`\hat{beta} = \beta^{(0)}` follows a
   chi-square distribution with :math:`p` degrees of freedom.
@@ -127,8 +127,8 @@ where
 
 .. _coxph_model_details:
 
-Cox Proportional Hazards Model Details
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CoxPH模型详情
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A Cox proportional hazards model measures time on a scale defined by the ranking of the :math:`M` distinct observed event occurrence times, :math:`t_1 < t_2 < \dots < t_M`. When no two events occur at the same time, the partial likelihood for the observations is given by
 
@@ -160,10 +160,10 @@ Under Breslow's approximation, the partial likelihood and log partial likelihood
 
 .. _coxph_algorithm:
 
-Cox Proportional Hazards Model Algorithm
+CoxPH模型算法
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-H2O uses the Newton-Raphson algorithm to maximize the partial log-likelihood, an iterative procedure defined by the steps:
+AIR使用Newton-Raphson算法来最大化局部对数似然，这是一个由步骤定义的迭代过程：
 
 To add numeric stability to the model fitting calculations, the numeric predictors and offsets are demeaned during the model fitting process.
 
@@ -189,7 +189,7 @@ To add numeric stability to the model fitting calculations, the numeric predicto
      :math:`LRE(x, y) = - \log_{10}(\mid x \mid)`, if :math:`y = 0`
 
 
-References
+参考
 ~~~~~~~~~~
 
 Andersen, P. and Gill, R. (1982). Cox's regression model for counting processes, a large sample study. *Annals of Statistics* **10**, 1100-1120.

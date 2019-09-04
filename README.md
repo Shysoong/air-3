@@ -1,16 +1,16 @@
-# H2O
+# AIR
 
 [![Join the chat at https://gitter.im/h2oai/h2o-3](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/h2oai/h2o-3?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-H2O is an in-memory platform for distributed, scalable machine learning. H2O uses familiar interfaces like R, Python, Scala, Java, JSON and the Flow notebook/web interface, and works seamlessly with big data technologies like Hadoop and Spark. H2O provides implementations of many popular algorithms such as [GBM](https://en.wikipedia.org/wiki/Gradient_boosting), [Random Forest](https://en.wikipedia.org/wiki/Random_forest), [Deep Neural Networks](https://en.wikipedia.org/wiki/Deep_neural_networks), [Word2Vec](https://en.wikipedia.org/wiki/Word2vec) and [Stacked Ensembles](https://en.wikipedia.org/wiki/Ensemble_learning).  H2O is extensible so that developers can add data transformations and custom algorithms of their choice and access them through all of those clients.  
+AIR是一个用于分布式、可伸缩机器学习的内存平台。AIR使用熟悉的编程接口，如R、Python、Scala、Java、JSON和内置的流程笔记/web界面接口，并且与Hadoop、Spark等大数据技术无缝对接。AIR提供了许多流行算法的实现，比如 [GBM](https://en.wikipedia.org/wiki/Gradient_boosting)、[Random Forest](https://en.wikipedia.org/wiki/Random_forest)、[Deep Neural Networks](https://en.wikipedia.org/wiki/Deep_neural_networks)、[Word2Vec](https://en.wikipedia.org/wiki/Word2vec)和[Stacked Ensembles](https://en.wikipedia.org/wiki/Ensemble_learning)。AIR是可扩展的，因此开发人员可以添加自己选择的数据转换和自定义算法，并通过所有这些客户端访问它们。
 
-Data collection is easy. Decision making is hard. H2O makes it fast and easy to derive insights from your data through faster and better predictive modeling. H2O allows online scoring and modeling in a single platform.
+数据收集很容易，但做决策很难。AIR通过更快更好的预测建模，使从数据中获得洞见变得更快更容易。AIR允许在一个单一平台上在线评分和建模。
 
-H2O-3 (this repository) is the third incarnation of H2O, and the successor to [H2O-2](https://github.com/h2oai/h2o-2).  
+AIR-3 (本库) 是H2O的汉化版版本，H2O的第三代版本，[H2O-2](https://github.com/h2oai/h2o-2)的继任者。  
 
-### Table of Contents
+### 目录
 
-* [Downloading H2O-3](#Downloading)
+* [下载AIR-3](#Downloading)
 * [Open Source Resources](#Resources)
     * [Issue Tracking and Feature Requests](#IssueTracking)
     * [List of H2O Resources](#OpenSourceResources)

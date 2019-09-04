@@ -1,4 +1,4 @@
-Welcome to H2O 3
+欢迎来到 AIR 3
 ================
 
 H2O is an open source, in-memory, distributed, fast, and scalable machine learning and predictive analytics platform that allows you to build machine learning models on big data and provides easy productionalization of those models in an enterprise environment.
@@ -9,33 +9,33 @@ H2O’s REST API allows access to all the capabilities of H2O from an external p
 
 The speed, quality, ease-of-use, and model-deployment for the various cutting edge Supervised and Unsupervised algorithms like Deep Learning, Tree Ensembles, and GLRM make H2O a highly sought after API for big data data science.
 
-Requirements
+要求
 ------------
 
-At a minimum, we recommend the following for compatibility with H2O:
+为了与AIR兼容，最低要求我们建议如下：
 
--  **Operating Systems**:
+-  **操作系统**:
 
-   -  Windows 7 or later
-   -  OS X 10.9 or later
+   -  Windows 7 或更高版本
+   -  OS X 10.9 或更高版本
    -  Ubuntu 12.04
-   -  RHEL/CentOS 6 or later
+   -  RHEL/CentOS 6 或更高版本
 
--  **Languages**: Scala, R, and Python are not required to use H2O unless you want to use H2O in those environments, but Java is always required. Supported versions include:
+-  **语言**: Scala, R, and Python are not required to use H2O unless you want to use H2O in those environments, but Java is always required. Supported versions include:
 
-   -  Java 8 or later
+   -  Java 8 或更高版本
 
       - To build H2O or run H2O tests, the 64-bit JDK is required.
       - To run the H2O binary using either the command line, R, or Python packages, only 64-bit JRE is required.
       - Both of these are available on the `Java download page <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`__.
 
-   -  Scala 2.10 or later
-   -  R version 3 or later
+   -  Scala 2.10 或更高版本
+   -  R version 3 或更高版本
    -  Python 2.7.x, 3.5.x, 3.6.x 
 
--  **Browser**: An internet browser is required to use H2O's web UI, Flow. Supported versions include the latest version of Chrome, Firefox, Safari, or Internet Explorer.
+-  **浏览器**: An internet browser is required to use H2O's web UI, Flow. Supported versions include the latest version of Chrome, Firefox, Safari, or Internet Explorer.
 
-Additional Requirements
+附加要求
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 -  **Hadoop**: Hadoop is not required to run H2O unless you want to deploy H2O on a Hadoop cluster. Supported versions are listed on the `Download page <http://www.h2o.ai/download/>`_ (when you select the Install on Hadoop tab) and include:
@@ -52,7 +52,7 @@ Additional Requirements
 -  **Spark**: Version 2.1, 2.2, or 2.3. Spark is only required if you want to run `Sparkling Water <https://github.com/h2oai/sparkling-water>`__.
 
 
-New Users
+新用户
 ---------
 
 If you're just getting started with H2O, here are some links to help you
@@ -78,7 +78,7 @@ learn more:
 
 -  `GitHub Help <https://help.github.com/>`_: The GitHub Help system is a useful resource for becoming familiar with Git.
 
-New User Quick Start
+新用户快速开始
 ~~~~~~~~~~~~~~~~~~~~
 
 New users can follow the steps below to quickly get up and running with H2O directly from the **h2o-3** repository. These steps guide you through cloning the repository, starting H2O, and importing a dataset. Once you're up and running, you'll be better able to follow examples included within this user guide.
@@ -208,7 +208,7 @@ At this point, determine whether you want to complete this quick start in either
     <bound method H2OFrame.summary of >
     >>>
 
-Experienced Users
+有经验的用户
 -----------------
 
 If you've used previous versions of H2O, the following links will help guide you through the process of upgrading to H2O-3.
@@ -219,12 +219,12 @@ If you've used previous versions of H2O, the following links will help guide you
 
 -  `Contributing code <https://github.com/h2oai/h2o-3/blob/master/CONTRIBUTING.md>`_: If you're interested in contributing code to H2O, we appreciate your assistance! This document describes how to access our list of Jiras that are suggested tasks for contributors and how to contact us.
 
-Flow Users
+Flow用户
 ----------
 
 H2O Flow is a notebook-style open-source user interface for H2O. It is a web-based interactive environment that allows you to combine code execution, text, mathematics, plots, and rich media in a single document, similar to iPython Notebooks. An entire section dedicated to starting and using the features available in Flow is available `later in this document <flow.html>`__.
 
-Sparkling Water Users
+Sparkling Water用户
 ---------------------
 
 Sparkling Water is a gradle project with the following submodules:
@@ -242,7 +242,7 @@ Users of our Spark-compatible solution, Sparkling Water, should be aware that Sp
 
 Sparkling Water is versioned according to the Spark versioning, so make sure to use the Sparkling Water version that corresponds to the installed version of Spark.
 
-Getting Started with Sparkling Water
+在Sparkling Water上开始
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `Download Sparkling Water <http://www.h2o.ai/download/>`_: Go here to download Sparkling Water.
@@ -265,7 +265,7 @@ Getting Started with Sparkling Water
 
 -  `Connecting RStudio to Sparkling Water <https://github.com/h2oai/h2o-3/blob/master/h2o-docs/src/product/howto/Connecting_RStudio_to_Sparkling_Water.md>`_: This illustrated tutorial describes how to use RStudio to connect to Sparkling Water.
 
-Sparkling Water Blog Posts
+Sparkling Water博客文章
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `How Sparkling Water Brings H2O to Spark <https://www.h2o.ai/blog/how-sparkling-water-brings-h2o-to-spark/>`_
@@ -274,7 +274,7 @@ Sparkling Water Blog Posts
 
 -  `In-memory Big Data: Spark + H2O <https://www.h2o.ai/blog/spark-h2o/>`_
 
-Sparkling Water Meetup Slide Decks
+Sparkling Water 交流会幻灯片
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 -  `Sparkling Water Meetups <http://www.slideshare.net/0xdata/spa-43755759>`_
@@ -306,7 +306,7 @@ The rsparkling package uses sparklyr for Spark job deployment and initialization
 
 Refer to the `Sparkling Water User Guide <http://docs.h2o.ai/#sparkling-water>`__ for more information.
 
-Python Users
+Python用户
 --------------
 
 Pythonistas will be glad to know that H2O now provides support for this popular programming language. Python users can also use H2O with IPython notebooks. For more information, refer to the following links.
@@ -320,12 +320,12 @@ Pythonistas will be glad to know that H2O now provides support for this popular 
 
 .. _anaconda:
 
-Anaconda Cloud Users
+Anaconda Cloud用户
 ~~~~~~~~~~~~~~~~~~~~
 
 You can run H2O in an Anaconda Cloud environment. Conda 2.7, 3.5, and 3.6 repos are supported as are a number of H2O versions. Refer to `https://anaconda.org/h2oai/h2o/files <https://anaconda.org/h2oai/h2o/files>`__ to view a list of available H2O versions. Anaconda users can refer to the `Install on Anaconda Cloud <downloading.html#install-on-anaconda-cloud>`__ section for information about installing H2O in an Anaconda Cloud.
 
-R Users
+R用户
 -------
 
 Currently, the only version of R that is known to be incompatible with H2O is R version 3.1.0 (codename "Spring Dance"). If you are using that version, we recommend upgrading the R version before using H2O.
@@ -343,7 +343,7 @@ To check which version of H2O is installed in R, use ``versions::installed.versi
 - On Ubuntu, run: ``apt-get install libcurl4-openssl-dev``
 - On CentOs, run: ``yum install libcurl-devel``
 
-API Users
+API用户
 ---------
 
 API users will be happy to know that the APIs have been more thoroughly documented in the latest release of H2O and additional capabilities (such as exporting weights and biases for Deep Learning models) have been added.
@@ -356,7 +356,7 @@ REST APIs are generated immediately out of the code, allowing users to implement
 
 -  `REST API Schema Reference <rest-api-reference.html#schema-reference>`_: This document represents the definitive guide to the H2O REST API schemas.
 
-Java Users
+Java用户
 --------------
 
 H2O-3 is supported with Java 8 and later. For Java developers, the following resources will help you create your own custom app that uses H2O.
@@ -369,7 +369,7 @@ H2O-3 is supported with Java 8 and later. For Java developers, the following res
 
 -  `h2o-genmodel (POJO/MOJO) Javadoc <../h2o-genmodel/javadoc/index.html>`_: Provides a step-by-step guide to creating and implementing POJOs or MOJOs in a Java application.
 
-Developers
+开发者
 ----------
 
 If you're looking to use H2O to help you develop your own apps, the following links will provide helpful references.
@@ -411,12 +411,12 @@ After starting multiple "worker" node processes in addition to the JUnit test pr
 
 .. _on-hadoop:
 
-Hadoop Users
+Hadoop用户
 ------------
 
 This section describes how to use H2O on Hadoop.
 
-Supported Versions
+支持的版本
 ~~~~~~~~~~~~~~~~~~
 
 -  CDH 5.4
@@ -444,7 +444,7 @@ Supported Versions
 -  MapR 5.2
 -  IOP 4.2
 
-**Important Points to Remember**:
+**要记住的要点**:
 
 -  The command used to launch H2O differs from previous versions. (Refer to the `Walkthrough`_ section.)
 -  Launching H2O on Hadoop requires at least 6 GB of memory
@@ -745,7 +745,7 @@ AWS access credential configuration is provided to H2O by the Hadoop environment
 
 Since Apache Hadoop 2.8, accessing multiple buckets with distinct credentials by means of the S3A protocol is possible. Please refer to the `Hadoop documentation <https://hadoop.apache.org/docs/current/hadoop-aws/tools/hadoop-aws/index.html>`__ for more information. Users of derived distributions are advised to follow the respective documentation of their distribution and the specific version they use.
 
-Docker Users
+Docker用户
 ------------
 
 This section describes how to use H2O on Docker and walks you through the followings steps:

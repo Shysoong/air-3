@@ -1,7 +1,7 @@
-Performance and Prediction
+性能和预测
 ==========================
 
-Model Performance
+模型性能
 -----------------
 
 This section describes how H2O-3 can be used to evaluate model performance through model metrics, stopping metrics, and performance graphs. 
@@ -471,7 +471,7 @@ Thus, the one-dimensional partial dependence of function :math:`g` on :math:`X_j
     :height: 483
     :width: 355
 
-Prediction
+预测
 ----------
 
 With H2O-3, you can generate predictions for a model based on samples in a test set using ``h2o.predict()`` or ``predict()``. This can be accomplished in memory or using MOJOs/POJOs.

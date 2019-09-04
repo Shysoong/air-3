@@ -1,6 +1,6 @@
 .. _Parameters:
 
-Appendix A - Parameters
+附录A - 参数
 =======================
 
 This Appendix provides detailed descriptions of parameters that can be specified in the H2O algorithms. In addition, each parameter also includes the algorithms that support the parameter, whether the parameter is a hyperparameter (can be used in grid search), links to any related parameters, and R and Python examples showing the parameter in use. 

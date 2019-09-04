@@ -1,9 +1,9 @@
-Splitting Datasets into Training/Testing/Validating 
+将数据分割为训练集/测试集/验证集
 ---------------------------------------------------
 
-This example shows how to split a single dataset into two datasets, one used for training and the other used for testing. 
+这个示例展示了如何将单个数据集拆分为两个数据集，一个用于训练，另一个用于测试。
 
-Note that when splitting frames, H2O does not give an exact split. It's designed to be efficient on big data using a probabilistic splitting method rather than an exact split. For example, when specifying a 0.75/0.25 split, H2O will produce a test/train split with an expected value of 0.75/0.25 rather than exactly 0.75/0.25. On small datasets, the sizes of the resulting splits will deviate from the expected value more than on big data, where they will be very close to exact.
+注意，当分割帧时，AIR不会给出一个精确的分割。它被设计成使用概率分裂方法而不是精确分裂来高效处理大数据。例如，当指定0.75/0.25分割，AIR将生成一个期望值为0.75/0.25的测试/训练分割，而不是恰好为0.75/0.25。在小数据集上，分割结果的大小将比大数据更偏离期望值，因为大数据非常接近于精确值。
 
 .. example-code::
    .. code-block:: r

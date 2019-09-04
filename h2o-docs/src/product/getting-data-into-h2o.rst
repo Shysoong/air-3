@@ -1,4 +1,4 @@
-Getting Data into Your H2O Cluster
+将数据放入AIR集群
 ==================================
 
 The first step toward building and scoring your models is getting your data into the H2O cluster/Java process that’s running on your local or remote machine. Whether you're importing data, uploading data, or retrieving data from HDFS or S3, be sure that your data is compatible with H2O.

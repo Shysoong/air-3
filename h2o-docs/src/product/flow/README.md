@@ -1,125 +1,123 @@
-# Flow Web UI ...
+# ... Flow网页用户界面 
 
->**Note**: This topic is no longer being maintained. Refer to the [Using Flow - H2O's Web UI](https://github.com/h2oai/h2o-3/blob/master/h2o-docs/src/product/flow.rst) topic for the most up-to-date documentation.
+>**注意**: 这个主题已经不再维护，关于最新文档的信息，请参阅 [使用Flow - AIR的Web用户界面](https://github.com/Shysoong/air-3/blob/master/h2o-docs/src/product/flow.rst) 主题。
 
-H2O Flow is an open-source user interface for H2O. It is a web-based interactive environment that allows you to combine code execution, text, mathematics, plots, and rich media in a single document. 
+AIR Flow 是一个AIR的开源用户界面。它是一个基于web的交互环境，允许您将代码执行、文本、数学、图表和富媒体组合到一个文档中。AIR Flow，您可以保存、重运行、注释、展现和共享您的工作流。AIR Flow允许您交互式地使用AIR导入文件、构建模型并迭代地改进它们。基于您的模型，您可以做出预测，并添加丰富的文本来创建工作的小插图——所有这些都在Flow，这个基于浏览器的环境中完成。
 
-With H2O Flow, you can capture, rerun, annotate, present, and share your workflow. H2O Flow allows you to use H2O interactively to import files, build models, and iteratively improve them. Based on your models, you can make predictions and add rich text to create vignettes of your work - all within Flow's browser-based environment. 
+Flow的混合用户界面无缝地融合了命令行计算和现代图形用户界面。然而，Flow并没有将输出显示为纯文本，而是为每个AIR操作提供了一个可链接和点击的用户界面。它允许您以组织良好的表格数据的形式访问任何H2O对象。
 
-Flow's hybrid user interface seamlessly blends command-line computing with a modern graphical user interface. However, rather than displaying output as plain text, Flow provides a point-and-click user interface for every H2O operation. It allows you to access any H2O object in the form of well-organized tabular data. 
+AIR Flow将命令作为可执行单元的序列发送给AIR。单元格可以修改、重新排列或保存到库中。每个单元格包含一个输入字段，允许您输入命令、定义函数、调用其他函数以及访问页面上的其他单元格或对象。当您执行单元格时，输出是一个图形对象，可以检查该图形对象以查看其他详细信息。
 
-H2O Flow sends commands to H2O as a sequence of executable cells. The cells can be modified, rearranged, or saved to a library. Each cell contains an input field that allows you to enter commands, define functions, call other functions, and access other cells or objects on the page. When you execute the cell, the output is a graphical object, which can be inspected to view additional details. 
+虽然AIR Flow支持REST API、R脚本和CoffeeScript，但是运行AIR Flow不需要任何编程经验。您可以通过点击AIR操作来完成任务，而无需编写任何代码。您甚至可以仅使用GUI禁用输入单元格来运行AIR Flow。AIR Flow旨在通过提供输入提示、交互帮助和示例流来指导您的每一步。
 
-While H2O Flow supports REST API, R scripts, and CoffeeScript, no programming experience is required to run H2O Flow. You can click your way through any H2O operation without ever writing a single line of code. You can even disable the input cells to run H2O Flow using only the GUI. H2O Flow is designed to guide you every step of the way, by providing input prompts, interactive help, and example flows. 
+## 介绍
 
-## Introduction
-
-This guide will walk you through how to use H2O's web UI, H2O Flow. To view a demo video of H2O Flow, click <a href="https://www.youtube.com/watch?feature=player_embedded&v=wzeuFfbW7WE" target="_blank">here</a>. 
+本指南将指导您如何使用AIR的web用户界面，要查看AIR Flow的演示视频，请点击<a href="https://www.youtube.com/watch?feature=player_embedded&v=wzeuFfbW7WE" target="_blank">这里</a>。 
 
 
 ---
 
 <a name="GetHelp"></a> 
-## Getting Help 
+## 获取帮助 
 ---
 
-First, let's go over the basics. Type `h` to view a list of helpful shortcuts. 
+首先，让我们了解一下基础知识。按键盘上`h`查看有用的快捷方式列表。
 
-The following help window displays: 
+将显示以下帮助窗口:
 
-![help menu](https://raw.githubusercontent.com/h2oai/h2o/master/docs/Flow-images/Shortcuts.png)
+![help menu](images/Flow_shortcuts.png)
 
-To close this window, click the **X** in the upper-right corner, or click the **Close** button in the lower-right corner. You can also click behind the window to close it. You can also access this list of shortcuts by clicking the **Help** menu and selecting **Keyboard Shortcuts**. 
+要关闭这个窗口，点击右上角**X**，或者点击右下角的**关闭**按钮。您也可以在窗口外侧点击来关闭它。您也可以通过点击**帮助菜单**然后选择**快捷键**来访问快捷键列表窗口。
 
-For additional help, click **Help** > **Assist Me** or click the **Assist Me!** button in the row of buttons below the menus. 
+需要额外的帮助,点击**帮助** > **建模助手** 或者点击在菜单下工具栏中的**建模助手**按钮。
 
 ![Assist Me](images/Flow_AssistMeButton.png) 
 
-You can also type `assist` in a blank cell and press **Ctrl+Enter**. A list of common tasks displays to help you find the correct command. 
+您也可以在空白单元格中输入`assist`，然后按 **Ctrl+Enter**。这将显示一个常见任务列表，以帮助您找到正确的命令。
 
  ![Assist Me links](images/Flow_assist.png)
  
-There are multiple resources to help you get started with Flow in the **Help** sidebar. 
+在 **帮助** 侧边栏中有多个资源可以帮助您开始使用Flow。
 
->**Note**: To hide the sidebar, click the **>>** button above it. ![Flow - Hide Sidebar](images/Flow_SidebarHide.png)
+>**注意**: 要隐藏侧边栏，点击上方的 **>>** 按钮。 ![Flow - 隐藏侧边栏](images/Flow_SidebarHide.png)
 >
->To display the sidebar if it is hidden, click the **<<** button. ![Flow - Hide Sidebar](images/Flow_SidebarDisplay.png)
+>隐藏的情况下要让侧边栏显示，点击 **<<** 按钮。 ![Flow - 显示侧边栏](images/Flow_SidebarDisplay.png)
 
-To access this documentation, select the **Flow Web UI...** link below the **General** heading in the Help sidebar. 
+要访问本文档，在帮助侧边栏的 **通用** 标题下选择 **Flow Web 用户界面...** 连接。
 
-You can also explore the pre-configured flows available in H2O Flow for a demonstration of how to create a flow. To view the example flows:
+您也可以在AIR Flow中探索可用的预先配置好的流程，以演示如何创建一个流程。要查看示例流程：
 
-- Click the **view example Flows** link below the **Quickstart Videos** button in the **Help** sidebar 
-  ![Flow - View Example Flows link](images/Flow_ViewExampleFlows.png)
+- 在 **帮助** 侧边栏的 **快速开始视频**按钮下面点击 **查看示例流程** 链接
+  ![Flow - 查看示例流程链接](images/Flow_ViewExampleFlows.png)
  
-   or 
+   或者 
 
-- Click the **Browse installed packs...** link in the **Packs** subsection of the **Help** sidebar. Click the **examples** folder and select the example flow from the list. 
+- 在 **帮助** 侧边栏的 **示例** 区域点击 **浏览已经安装的包...** 链接。点击 **examples** 文件夹然后从列表中选择示例流程。
 
-  ![Flow Packs](images/Flow_ExampleFlows.png)
+  ![流程包](images/Flow_ExampleFlows.png)
 
-If you have a flow currently open, a confirmation window appears asking if the current notebook should be replaced. To load the example flow, click the **Load Notebook** button. 
+如果当前打开了一个流程，则会出现一个确认窗口，询问是否应该替换当前流程笔记。要加载示例流程，点击 **加载流程笔记** 按钮。
 
-To view the REST API documentation, click the **Help** tab in the sidebar and then select the type of REST API documentation (**Routes** or **Schemas**). 
+要查看REST API文档，在侧边栏中点击 **帮助** 选项卡，然后选择REST API文档的类型（**Routes** 或者 **Schemas**）。 
 
- ![REST API documentation](images/Flow_REST_docs.png)
+ ![REST API 文档](images/Flow_REST_docs.png)
 
-Before getting started with H2O Flow, make sure you understand the different cell modes. Certain actions can only be performed when the cell is in a specific mode. 
+在开始使用AIR FLow之前，请确保了解不同的单元格模式。某些操作只能在单元格处于特定模式时执行。
 
 ---
 
 <a name="Cell"></a>
-## Understanding Cell Modes
+## 理解单元格模式
 
-There are two modes for cells: edit and command. 
+单元格有两种模式：编辑模式和命令模式。
 
 <a name="EditMode"></a>
-### Using Edit Mode
-In edit mode, the cell is yellow with a blinking bar to indicate where text can be entered and there is an orange flag to the left of the cell.
+### 使用编辑模式
+在编辑模式下，单元格是黄色的，带有一个闪烁的输入提示符，指示文本可以在何处输入，单元格的左侧有一个橙色小旗子。
 
 
-![Edit Mode](images/Flow_EditMode.png)
+![编辑模式](images/Flow_EditMode.png)
  
 <a name="CmdMode"></a>
-### Using Command Mode
- In command mode, the flag is yellow. The flag also indicates the cell's format: 
+### 使用命令模式
+ 在命令模式下，小旗子黄色的。该标志还指示单元格的格式：
 
 - **MD**: Markdown 
    
-   >**Note**: Markdown formatting is not applied until you run the cell by:
+   >**注意**：在运行单元格之前不会应用Markdown格式化：
    > 
-   >- clicking the **Run** button ![Flow - Run Button](images/Flow_RunButton.png)
-        > or
+   >- 点击 **运行** 按钮 ![Flow - 运行按钮](images/Flow_RunButton.png)
+        > 或者
       
-   >- pressing **Ctrl+Enter**
+   >- 按 **Ctrl+Enter**
 
  ![Flow - Markdown](images/Flow_markdown.png)
 
-- **CS**: Code (default)
+- **CS**: 代码形式（默认）
 
  ![Flow - Code](images/Flow_parse_code_ex.png)
 
-- **RAW**: Raw format (for code comments) 
+- **RAW**: 原始形式（用于代码注释） 
 
  ![Flow - Raw](images/Flow_raw.png)
 
-- **H[1-6]**: Heading level (where 1 is a first-level heading) 
+- **H[1-6]**: 标题级别（1是第一级标题）
 
  ![Flow - Heading Levels](images/Flow_headinglevels.png)
 
->**NOTE**: If there is an error in the cell, the flag is red. 
+>**注意**: 如果单元格中有错误，小旗子是红色的。
 
  ![Cell error](images/Flow_redflag.png)
  
- If the cell is executing commands, the flag is teal. The flag returns to yellow when the task is complete. 
+ 如果单元格正在执行命令，小旗子是青绿色的。当任务完成时，标志变回黄色。 
  
  ![Cell executing](images/Flow_cellmode_runningflag.png)
 
-### Changing Cell Formats
+### 改变单元格格式
 
-To change the cell's format (for example, from code to Markdown), make sure you are in command (not edit) mode and that the cell you want to change is selected. The easiest way to do this is to click on the flag to the left of the cell. Enter the keyboard shortcut for the format you want to use. The flag's text changes to display the current format. 
+要改变单元格格式（例如，从代码格式到Markdown格式）， 确认您在命令（不是编辑）模式下，并且您想要改变的单元格是选中状态。最简单的方法是单击单元格左侧的旗子，输入您想用的格式的键盘快捷键。旗子上的文本将更改为显示当前格式。 
 
-Cell Mode     | Keyboard Shortcut
+单元格格式     | 键盘快捷键
 ------------- | -----------------
 Code          | `y`
 Markdown      | `m`
@@ -132,142 +130,142 @@ Heading 5     | `5`
 Heading 6     | `6` 
 
 
-### Running Cells
+### 运行单元格
 
 
-The series of buttons at the top of the page below the menus run cells in a flow. 
+菜单下方页面顶部的一系列按钮在流中运行单元格。
  
- ![Flow - Run Buttons](images/Flow_RunButtons.png)
+ ![Flow - 运行按钮](images/Flow_RunButtons.png)
 
-- To run all cells in the flow, click the **Flow** menu, then click **Run All Cells**. 
-- To run the current cell and all subsequent cells, click the **Flow** menu, then click **Run All Cells Below**. 
-- To run an individual cell in a flow, confirm the cell is in [Edit Mode](#EditMode), then: 
+- 要运行流程中所有的单元格，点击 **流程笔记** 菜单，然后点击 **运行所有单元格**。 
+- 要运行当前单元格和所有后续单元格，点击 **流程笔记** 菜单，然后点击 **运行后续所有单元格**. 
+- 要在流程中运行一个独立的单元格，确认单元格是在[编辑模式](#EditMode)，然后： 
 
- - press **Ctrl+Enter**
+ - 按 **Ctrl+Enter**
 
-     or
+     或者
   
- - click the **Run** button ![Flow - Run Button](images/Flow_RunButton.png)
+ - 单击  **运行** 按钮 ![Flow - 运行按钮](images/Flow_RunButton.png)
 
 
 
-### Running Flows
-When you run the flow, a progress bar indicates the current status of the flow. You can cancel the currently running flow by clicking the **Stop** button in the progress bar. 
+### 运行流程
+运行流程时，进度条指示流程的当前状态。您可以通过单击进度栏中的 **结束** 按钮取消当前正在运行的流程。
 
   ![Flow Progress Bar](images/Flow_progressbar.png)
 
-When the flow is complete, a message displays in the upper right.
+当流程结束时，会在右上角显示一条消息。
 
   ![Flow - Completed Successfully](images/Flow_run_pass.png)
   ![Flow - Did Not Complete](images/Flow_run_fail.png) 
  
->**Note**: If there is an error in the flow, H2O Flow stops at the cell that contains the error. 
+>**注意**: 如果流程中有错误，AIR Flow将在包含错误的单元格处停止。 
 
 
-### Using Keyboard Shortcuts
+### 使用键盘快捷键
 
-Here are some important keyboard shortcuts to remember: 
+这里有一些重要的键盘快捷键需要记住：
 
-- Click a cell and press **Enter** to enter edit mode, which allows you to change the contents of a cell. 
-- To exit edit mode, press **Esc**. 
-- To execute the contents of a cell, press the **Ctrl** and **Enter** buttons at the same time.
+- 单击单元格并按 **回车** 键进入编辑模式，这允许您更改单元格的内容。
+- 要退出编辑模式，按 **Esc** 键。 
+- 要执行单元格内容，同时按 **Ctrl** 键和 **回车** 键。
 
-The following commands must be entered in [command mode](#CmdMode).  
+以下命令必须在[命令模式](#CmdMode)下输入。 
 
-- To add a new cell *above* the current cell, press **a**. 
-- To add a new cell *below* the current cell, press **b**. 
-- To delete the current cell, press the **d** key *twice*. (**dd**). 
+- 要在当前单元格 *之上* 新增一个新的单元格，按 **a**。
+- 要在当前单元格 *之下* 新增一个新的单元格，按 **b**。
+- 要删除当前单元格，*连按两次* **d** 键 (**dd**)。 
 
-You can view these shortcuts by clicking **Help** > **Keyboard Shortcuts** or by clicking the **Help** tab in the sidebar. 
+您可以通过单击 **帮助** > **键盘快捷键** 或者单击侧边栏的 **帮助选项卡** 来查看这些快捷键。
 
-### Using Variables in Cells
+### 在单元格中使用变量
 
-Variables can be used to store information such as download locations. To use a variable in Flow: 
+变量可用于存储诸如下载位置之类的信息。要在Flow中使用变量：
 
-1. Define the variable in a code cell (for example, `locA = "https://h2o-public-test-data.s3.amazonaws.com/bigdata/laptop/kdd2009/small-churn/kdd_train.csv"`). 
+1. 在代码单元格中定义变量（例如， `locA = "https://h2o-public-test-data.s3.amazonaws.com/bigdata/laptop/kdd2009/small-churn/kdd_train.csv"`）。 
   ![Flow variable definition](images/Flow_VariableDefinition.png)
-2. Run the cell. H2O validates the variable. 
+2. 运行单元格，AIR验证变量。
   ![Flow variable validation](images/Flow_VariableValidation.png)
-3. Use the variable in another code cell (for example, `importFiles [locA]`). 
+3. 在另一个代码单元格中使用该变量（例如，`importFiles [locA]`）。 
   ![Flow variable example](images/Flow_VariableExample.png)
-To further simplify your workflow, you can save the cells containing the variables and definitions as [clips](#Clips). 
+为了进一步简化工作流，可以将包含变量和定义的单元格保存为[收藏](#Clips)。
 
 
-### Using Flow Buttons
-There are also a series of buttons at the top of the page below the flow name that allow you to save the current flow, add a new cell, move cells up or down, run the current cell, and cut, copy, or paste the current cell. If you hover over the button, a description of the button's function displays. 
+### 使用Flow按钮
+在流程名称下方的页面顶部还有一系列按钮，允许您保存当前流程、新增新的单元格、上下移动单元格、运行当前单元格、剪切、复制或者粘贴当前单元格。如果将鼠标悬停在按钮上，将显示该按钮功能的描述。 
 
  ![Flow buttons](images/Flow_buttons.png)
  
-You can also use the menus at the top of the screen to edit the order of the cells, toggle specific format types (such as input or output), create models, or score models. You can also access troubleshooting information or obtain help with Flow.  
+您也可以使用屏幕顶部的菜单来编辑单元格顺序、切换特定格式类型（例如输入或者输出）、构建模型或者评价模型。您还可以访问故障诊断信息或获得有关Flow的帮助。  
  ![Flow menus](images/Flow_menus.png)
 
->**Note**: To disable the code input and use H2O Flow strictly as a GUI, click the **Cell** menu, then **Toggle Cell Input**. 
+>**注意**: 要禁用代码输入并严格将AIR Flow用作图形用户界面，单击 **单元格** 菜单，然后单击 **切换单元格可见性**。
 
-Now that you are familiar with the cell modes, let's import some data. 
+现在您已经熟悉了单元格模式，让我们导入一些数据吧。 
 
 ---
 
 <a name="ImportData"></a>
-# ... Importing Data
+# ... 导入数据
 
-If you don't have any data of your own to work with, you can find some example datasets at <a href="http://data.h2o.ai" target="_blank">http://data.h2o.ai</a>.
+如果没有自己的数据可以使用，可以在这里 <a href="http://data.h2o.ai" target="_blank">http://data.h2o.ai</a> 找到一些示例数据集。
 
 
-There are multiple ways to import data in H2O flow:
+在AIR FLow中导入数据有多种方法
 
-- Click the **Assist Me!** button in the row of buttons below the menus, then click the **importFiles** link. Enter the file path in the auto-completing **Search** entry field and press **Enter**. Select the file from the search results and confirm it by clicking the **Add All** link.
+- 点击在菜单下面的一排按钮中的 **建模助手** 按钮，然后点击 **导入文件** 链接。在自动补全的 **查找** 条目字段中输入文件路径，然后按 **回车** 键。从搜索结果中选择文件，并通过单击 **添加所有** 链接确认。
  ![Flow - Import Files Auto-Suggest](images/Flow_Import_AutoSuggest.png)
  
-- In a blank cell, select the CS format, then enter `importFiles ["path/filename.format"]` (where `path/filename.format` represents the complete file path to the file, including the full file name. The file path can be a local file path or a website address. 
+- 在空白单元格中，选择CS格式，然后输入 `importFiles ["path/filename.format"]` （其中`path/filename.format`表示文件的完整文件路径，包括完整的文件名。文件路径可以是本地文件路径或在线地址。） 
 
->**Note**: For S3 file locations, use the format `importFiles [ "s3n:/path/to/bucket/file/file.tab.gz" ]`
+>**注意**: 对于S3文件位置，使用这种格式`importFiles [ "s3n:/path/to/bucket/file/file.tab.gz" ]`
   
-- For an example of how to import a single file or a directory in R, refer to the following [example](https://github.com/h2oai/h2o-2/blob/master/R/tests/testdir_hdfs/runit_s3n_basic.R).  
+- 有关如何在R中导入单个文件或目录的示例，请参考下面的[示例](https://github.com/Shysoong/air-2/blob/master/R/tests/testdir_hdfs/runit_s3n_basic.R)。
 
-After selecting the file to import, the file path displays in the "Search Results" section. To import a single file, click the plus sign next to the file. To import all files in the search results, click the **Add all** link. The files selected for import display in the "Selected Files" section. 
+选择要导入的文件后，文件路径将显示在"查找结果"部分。要导入单个文件，请单击文件旁边的加号。要导入搜索结果中的所有文件，请单击 **添加所有** 链接。选中要导入的文件显示在"选中的文件"部分。
 ![Import Files](images/Flow_import.png)
 
->**Note**: If the file is compressed, it will only be read using a single thread. For best performance, we recommend uncompressing the file before importing, as this will allow use of the faster multithreaded distributed parallel reader during import. Please note that .zip files containing multiple files are not currently supported. 
+>**注意**: 如果文件是被压缩的，AIR将只使用一个线程读取。为了获得最佳性能，我们建议在导入之前解压文件，因为这将允许在导入期间使用更快的多线程分布式并行读取器。请注意，当前不支持包含多个文件的.zip文件。
 
 
 
-- To import the selected file(s), click the **Import** button. 
+- 要导入选择的文件，单击 **导入** 按钮。
 
-- To remove all files from the "Selected Files" list, click the **Clear All** link. 
+- 要从"选中的文件"列表中移除所有文件，单击 **移除所有** 链接。 
 
-- To remove a specific file, click the **X** next to the file path. 
+- 要移除某一个特定文件，单击文件路径边的 **X** 。 
 
-After you click the **Import** button, the raw code for the current job displays. A summary displays the results of the file import, including the number of imported files and their Network File System (nfs) locations. 
+在您点击 **导入** 按钮之后，当前作业的原始代码会打印出来。摘要显示文件导入的结果，包括导入的文件数量及其网络文件系统(nfs)位置。
 
  ![Import Files - Results](images/Flow_import_results.png)
 
-## Uploading Data
+## 上传数据
 
-To upload a local file, click the **Data** menu and select **Upload File...**. Click the **Choose File** button, select the file, click the **Choose** button, then click the **Upload** button. 
+要上传一个本地文件，单击 **数据** 菜单然后选择 **上传文件...**。单击 **选择文件** 按钮，选择文件，单击 **选择** 按钮，然后单击 **上传** 按钮。
   
   ![File Upload Pop-Up](images/Flow_UploadDataset.png)
   
-  When the file has uploaded successfully, a message displays in the upper right and the **Setup Parse** cell displays. 
+  当文件被成功上传后，窗口右上角会展示对应信息，并且 **设置解析** 单元格也会展示出来。
 
   
   ![File Upload Successful](images/Flow_FileUploadPass.png)
 
-Ok, now that your data is available in H2O Flow, let's move on to the next step: parsing. Click the **Parse these files** button to continue. 
+好了，现在您的数据在AIR Flow中已经可用，让我们进入下一步:解析。单击 **解析这些文件** 按钮以继续。
 
 ---
 
 <a name="ParseData"></a>
-## Parsing Data
+## 解析数据
 
-After you have imported your data, parse the data.
+在导入您的数据之后，应该要解析这些数据了。
 
  ![Flow - Parse options](images/Flow_parse_setup.png)
 
-The read-only **Sources** field displays the file path for the imported data selected for parsing. 
+只读的 **源** 字段显示了所选解析的导入数据的文件路径。
 
-The **ID** contains the auto-generated name for the parsed data (by default, the file name of the imported file with `.hex` as the file extension). Use the default name or enter a custom name in this field. 
+**ID** 包含了自动生成的解析后数据的名称（默认情况下，导入文件的文件名以`.hex`作为文件扩展名）。在此字段中使用默认名称或输入自定义名称。 
 
-Select the parser type (if necessary) from the drop-down **Parser** list. For most data parsing, H2O automatically recognizes the data type, so the default settings typically do not need to be changed. The following options are available: 
+从 **解析器** 下拉列表中选择解析器类型(如果需要)。对于大多数数据解析，AIR会自动识别数据类型，因此，默认设置通常不需要更改。以下解析器可供选择：
 
 - Auto
 - ARFF
@@ -275,8 +273,12 @@ Select the parser type (if necessary) from the drop-down **Parser** list. For mo
 - XLSX
 - CSV
 - SVMLight
+- ORC
+- AVRO
+- PARQUET
 
-   >**Note**: For SVMLight data, the column indices must be >= 1 and the columns must be in ascending order. 
+
+   >**注意**: 对于SVMLight数据，列索引必须为>= 1，列必须按升序排列。
 
 If a separator or delimiter is used, select it from the **Separator** list. 
 
@@ -327,11 +329,11 @@ Since we've submitted a couple of jobs (data import & parse) to H2O now, let's t
 --- 
  
 <a name="ViewJobs"></a>
-## Viewing Jobs
+## 查看任务
 
 Any command (such as `importFiles`) you enter in H2O is submitted as a job, which is associated with a key. The key identifies the job within H2O and is used as a reference.
 
-### Viewing All Jobs
+### 查看所有任务
 
 To view all jobs, click the **Admin** menu, then click **Jobs**, or enter `getJobs` in a cell in CS mode. 
 
@@ -348,7 +350,7 @@ The following information displays:
 
 To refresh this information, click the **Refresh** button. To view the details of the job, click the **View** button. 
 
-### Viewing Specific Jobs
+### 查看特定任务
 
 To view a specific job, click the link in the "Destination" column. 
 
@@ -370,7 +372,7 @@ Ok, now that you understand how to find jobs in H2O, let's submit a new one by b
 ---
 
 <a name="BuildModel"></a>
-# ... Building Models
+# ... 构建模型
 
 To build a model: 
 
@@ -667,7 +669,7 @@ The available options vary depending on the selected model. If an option is only
 ---
 
 <a name="ViewModel"></a>
-## Viewing Models
+## 查看模型
 
 Click the **Assist Me!** button, then click the **getModels** link, or enter `getModels` in the cell in CS mode and press **Ctrl+Enter**. A list of available models displays. 
 
@@ -689,7 +691,7 @@ To generate a Plain Old Java Object (POJO) that can use the model outside of H2O
 
 ---
 
-### Exporting and Importing Models
+### 导出和导入模型
 
 **To export a built model:**
 
@@ -717,7 +719,7 @@ To generate a Plain Old Java Object (POJO) that can use the model outside of H2O
 
 ---
 
-### Using Grid Search 
+### 使用网格搜索
 
 
 To include a parameter in a grid search in Flow, check the checkbox in the *Grid?* column to the right of the parameter name (highlighted in red in the image below). 
@@ -733,7 +735,7 @@ To include a parameter in a grid search in Flow, check the checkbox in the *Grid
 
 ---
 
-### Checkpointing Models
+### 检查点模型
 
 Some model types, such as DRF, GBM, and Deep Learning, support checkpointing. A checkpoint resumes model training so that you can iterate your model. The dataset must be the same. The following  model parameters must be the same when restarting a model from a checkpoint:
 
@@ -778,7 +780,7 @@ Can be modified | | |
 
 ---
 
-### Interpreting Model Results
+### 解释模型结果
 
 **Scoring history**: [GBM](#GBM), [DL](#DL) Represents the error rate of the model as it is built. Typically, the error rate will be higher at the beginning (the left side of the graph) then decrease as the model building completes and accuracy improves. Can include mean squared error (MSE) and deviance. 
 
@@ -822,7 +824,7 @@ To learn how to make predictions, continue to the next section.
 
 
 <a name="Predict"></a>
-# ... Making Predictions
+# ... 做出预测
 
 After creating your model, click the key link for the model, then click the **Predict** button. 
 Select the model to use in the prediction from the drop-down **Model:** menu and the data frame to use in the prediction from the drop-down **Frame:** menu, then click the **Predict** button. 
@@ -833,7 +835,7 @@ Select the model to use in the prediction from the drop-down **Model:** menu and
 ---
  
 <a name="ViewPredict"></a>
-## Viewing Predictions
+## 查看预测信息
 
 Click the **Assist Me!** button, then click the **getPredictions** link, or enter `getPredictions` in the cell in CS mode and press **Ctrl+Enter**. A list of the stored predictions displays. 
 To view a prediction, click the **View** button to the right of the model name. 
@@ -949,7 +951,7 @@ Select one of the above options from the drop-down **Color** menu to display the
 
 <a name="Flows"></a>
 
-# ... Using Flows
+# ... 使用流程
 
 You can use and modify flows in a variety of ways:
 
@@ -1064,7 +1066,7 @@ To load an exported flow, click the **Flow** menu and select **Open Flow...**. I
 ---
 
 <a name="Troubleshooting"></a>
-# ...Troubleshooting Flow
+# ...Flow故障排查
 
 To troubleshoot issues in Flow, use the **Admin** menu. The **Admin** menu allows you to check the status of the cluster, view a timeline of events, and view or download logs for issue analysis. 
 

@@ -1,11 +1,11 @@
-Importing a File
+导入文件
 ----------------
 
-Unlike the `upload <uploading-data.html>`__ function, which is a push from the client to the server, the import function is a parallelized reader and pulls information from the server from a location specified by the client. The path is a server-side path. This is a fast, scalable, highly optimized way to read data. H2O pulls the data from a data store and initiates the data transfer as a read operation.
+与 `上传 <uploading-data.html>`__ 函数不同，它是一个从客户机到服务器的推送。导入函数是一个并行的读取器，从客户机指定的位置从服务器获取信息，该路径是服务器端路径。这是一种快速、可伸缩、高度优化的数据读取方式。AIR从数据存储中提取数据，并作为读取操作启动数据传输。
 
-Refer to the `Supported File Formats <http://docs.h2o.ai/h2o/latest-stable/h2o-docs/getting-data-into-h2o.html#supported-file-formats>`__ topic to ensure that you are using a supported file type.
+参考 `支持的文件格式 <http://docs.h2o.ai/h2o/latest-stable/h2o-docs/getting-data-into-h2o.html#supported-file-formats>`__ 主题以确保使用受支持的文件类型。
 
-**Note**: When parsing a data file containing timestamps that do not include a timezone, the timestamps will be interpreted as UTC (GMT). You can override the parsing timezone using the following:
+**注意**： 当解析包含不包含时区的时间戳的数据文件时，时间戳将被解析为为UTC (GMT)时间。您可以使用以下命令覆盖解析时区：
 
   - R: ``h2o.setTimezone("America/Los Angeles")``
   - Python: ``h2o.cluster().timezone = "America/Los Angeles"``

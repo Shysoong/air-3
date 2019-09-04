@@ -1,12 +1,12 @@
 .. _Data_Munging:
 
 
-Data Manipulation
+数据操作
 =================
 
-This section provides examples of common tasks performed when preparing data for machine learning. These examples are run on a local cluster.
+本节提供在为机器学习准备数据时执行的常见任务的示例。这些示例在本地集群上运行。
 
-**Note**: The examples in this section include datasets that are pulled from GitHub and S3. 
+**注意**： 本节中的示例包括从GitHub和S3中提取的数据集。
 
 .. toctree::
    :maxdepth: 1

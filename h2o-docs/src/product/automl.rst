@@ -1,4 +1,4 @@
-AutoML: Automatic Machine Learning
+AutoML: 自动机器学习
 ==================================
 
 In recent years, the demand for machine learning experts has outpaced the supply, despite the surge of people entering the field.  To address this gap, there have been big strides in the development of user-friendly machine learning software that can be used by non-experts.  The first steps toward simplifying machine learning involved developing simple, unified interfaces to a variety of machine learning algorithms (e.g. H2O).
