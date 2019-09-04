@@ -114,6 +114,8 @@ NULL
     if (params$stopping_metric=="r2")
       stop("r2 cannot be used as an early stopping_metric yet.  Check this JIRA https://0xdata.atlassian.net/browse/PUBDEV-5381 for progress.")
   }
+  if (algo=="pca" && is.null(params$k)) # make sure to set k=1 for default for pca
+    params$k=1
   job <- .h2o.startModelJob(algo, params, h2oRestApiVersion)
   h2o.getFutureModel(job, verbose = verbose)
 }
@@ -480,6 +482,105 @@ predict.H2OModel <- function(object, newdata, ...) {
 h2o.predict <- function(object, newdata, ...){
   UseMethod("h2o.predict", object)
 }
+
+#' Use H2O Transformation model and apply the underlying transformation
+#'
+#' @param model A trained model representing the transformation strategy
+#' @param ... Transformation model-specific parameters
+#' @return Returns an H2OFrame object with data transformed.
+#' @export
+setGeneric("h2o.transform", function(model, ...) {
+  if(!is(model, "H2OModel")) {
+    stop(paste("Argument 'model' must be an H2O Model. Received:", class(model)))
+  }
+  standardGeneric("h2o.transform")
+})
+
+
+#' Applies target encoding to a given dataset
+#'
+#' @param model A trained model representing the transformation strategy
+#' @param data An H2OFrame with data to be transformed
+#' @param data_leakage_handling Handling of data leakage.
+#'  Available options are : ["None", "LeaveOneOut", "KFold"]. Defaults to "None".
+#' @param use_blending Use blending during the transformation. Respects model settings when not set.
+#' @param inflection_point Blending parameter. Only effective when blending is enabled.
+#'  By default, model settings are respected, if not overridden by this setting.
+#' @param smoothing Blending parameter. Only effective when blending is enabled.
+#'  By default, model settings are respected, if not overridden by this setting.
+#' @return Returns an H2OFrame object with data transformed.
+#' @export
+setMethod("h2o.transform", signature("H2OTargetEncoderModel"), function(model, data,
+                                                                        data_leakage_handling = NULL,
+                                                                        use_blending = NULL,
+                                                                        inflection_point = -1,
+                                                                        smoothing = -1) {
+  
+  params <- list()
+  params[["model"]] <- model@model_id
+  params[["frame"]] <- h2o.getId(data)
+  if(!is.null(data_leakage_handling)){
+    params[["data_leakage_handling"]] <- data_leakage_handling
+  }
+  if(!is.null(use_blending)){
+    params[["use_blending"]] <- use_blending
+  }
+  
+  
+  res <- .h2o.__remoteSend(
+    "TargetEncoderTransform",
+    method = "GET",
+    h2oRestApiVersion = 3,.params = params
+  )
+  
+  h2o.getFrame(res$name)
+  
+})
+
+#'
+#' Transform words (or sequences of words) to vectors using a word2vec model.
+#'
+#' @param model A word2vec model.
+#' @param words An H2OFrame made of a single column containing source words.
+#' @param aggregate_method Specifies how to aggregate sequences of words. If method is `NONE`
+#'    then no aggregation is performed and each input word is mapped to a single word-vector.
+#'    If method is 'AVERAGE' then input is treated as sequences of words delimited by NA.
+#'    Each word of a sequences is internally mapped to a vector and vectors belonging to
+#'    the same sentence are averaged and returned in the result.
+#' @examples
+#' \dontrun{
+#' h2o.init()
+#'
+#' # Build a simple word2vec model
+#' data <- as.character(as.h2o(c("a", "b", "a")))
+#' w2v_model <- h2o.word2vec(data, sent_sample_rate = 0, min_word_freq = 0, epochs = 1, vec_size = 2)
+#'
+#' # Transform words to vectors without aggregation
+#' sentences <- as.character(as.h2o(c("b", "c", "a", NA, "b")))
+#' h2o.transform(w2v_model, sentences) # -> 5 rows total, 2 rows NA ("c" is not in the vocabulary)
+#'
+#' # Transform words to vectors and return average vector for each sentence
+#' h2o.transform(w2v_model, sentences, aggregate_method = "AVERAGE") # -> 2 rows
+#' }
+#' @export
+setMethod("h2o.transform", signature("H2OWordEmbeddingModel"), function(model, words, aggregate_method = c("NONE", "AVERAGE")) {
+  
+  if (!is(model, "H2OModel")) stop(paste("The argument 'model' must be a word2vec model. Received:", class(model)))
+  if (missing(words)) stop("`words` must be specified")
+  if (!is.H2OFrame(words)) stop("`words` must be an H2OFrame")
+  if (ncol(words) != 1) stop("`words` frame must contain a single string column")
+  
+  if (length(aggregate_method) > 1)
+    aggregate_method <- aggregate_method[1]
+  
+  res <- .h2o.__remoteSend(method="GET", "Word2VecTransform", model = model@model_id,
+                           words_frame = h2o.getId(words), aggregate_method = aggregate_method)
+  key <- res$vectors_frame$name
+  h2o.getFrame(key)
+  
+})
+
+
 
 #'
 #' @rdname predict.H2OModel
@@ -1690,7 +1791,14 @@ h2o.varimp <- function(object) {
 
 #'
 #' Retrieve per-variable split information for a given Isolation Forest model.
-#' 
+#' Output will include:
+#' - count - The number of times a variable was used to make a split.
+#' - aggregated_split_ratios - The split ratio is defined as "abs(#left_observations - #right_observations) / #before_split".
+#'                             Even splits (#left_observations approx the same as #right_observations) contribute
+#'                             less to the total aggregated split ratio value for the given feature;
+#'                             highly imbalanced splits (eg. #left_observations >> #right_observations) contribute more.
+#' - aggregated_split_depths - The sum of all depths of a variable used to make a split. (If a variable is used
+#'                             on level N of a tree, then it contributes with N to the total aggregate.)
 #' @param object An Isolation Forest model represented by \linkS4class{H2OModel} object.
 #' @export
 h2o.varsplits <- function(object) {
