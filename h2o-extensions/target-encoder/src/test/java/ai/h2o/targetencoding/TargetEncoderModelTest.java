@@ -29,8 +29,8 @@ public class TargetEncoderModelTest extends TestUtil{
       parameters._data_leakage_handling = TargetEncoder.DataLeakageHandlingStrategy.None;
       parameters._blending_parameters = new BlendingParams(0.3,0.7);
       parameters._blending = true;
-      parameters._encoded_columns = new Frame.VecSpecifier[]{new Frame.VecSpecifier(trainingFrame._key, "Origin")};
       parameters._response_column = "IsDepDelayed";
+      parameters._ignored_columns = ignoredColumns(trainingFrame, "Origin", parameters._response_column);
       parameters._train = trainingFrame._key;
       parameters._seed = 0XFEED;
       
@@ -43,8 +43,8 @@ public class TargetEncoderModelTest extends TestUtil{
       Scope.track(transformedFrame);
       
       assertNotNull(transformedFrame);
-      assertEquals(trainingFrame.numCols() + parameters._encoded_columns.length, transformedFrame.numCols());
-      final int encodedColumnIndex = ArrayUtils.indexOf(transformedFrame.names(), parameters._encoded_columns[0]._column_name + "_te");
+      assertEquals(trainingFrame.numCols() + 1, transformedFrame.numCols());
+      final int encodedColumnIndex = ArrayUtils.indexOf(transformedFrame.names(), "Origin_te");
       assertNotEquals(-1, encodedColumnIndex);
       assertTrue(transformedFrame.vec(encodedColumnIndex).isNumeric());
     } finally {
@@ -65,8 +65,8 @@ public class TargetEncoderModelTest extends TestUtil{
       parameters._data_leakage_handling = TargetEncoder.DataLeakageHandlingStrategy.None;
       parameters._blending_parameters = null; // Explicitly set to null, default parameters should be used
       parameters._blending = true;
-      parameters._encoded_columns = new Frame.VecSpecifier[]{new Frame.VecSpecifier(trainingFrame._key, "Origin")};
       parameters._response_column = "IsDepDelayed";
+      parameters._ignored_columns = ignoredColumns(trainingFrame, "Origin", parameters._response_column);
       parameters._train = trainingFrame._key;
       parameters._seed = 0XFEED;
 
@@ -79,10 +79,36 @@ public class TargetEncoderModelTest extends TestUtil{
       Scope.track(transformedFrame);
 
       assertNotNull(transformedFrame);
-      assertEquals(trainingFrame.numCols() + parameters._encoded_columns.length, transformedFrame.numCols());
-      final int encodedColumnIndex = ArrayUtils.indexOf(transformedFrame.names(), parameters._encoded_columns[0]._column_name + "_te");
+      assertEquals(trainingFrame.numCols() + (trainingFrame.numCols() - parameters._ignored_columns.length - 1), transformedFrame.numCols());
+      final int encodedColumnIndex = ArrayUtils.indexOf(transformedFrame.names(), "Origin_te");
       assertNotEquals(-1, encodedColumnIndex);
       assertTrue(transformedFrame.vec(encodedColumnIndex).isNumeric());
+    } finally {
+      Scope.exit();
+    }
+  }
+
+  @Test
+  public void testTargetEncoderModel_dropNonCategoricalCols() {
+    try {
+      Scope.enter();
+      Frame trainingFrame = parse_test_file("./smalldata/testng/airlines_train.csv");
+      Scope.track(trainingFrame);
+
+      TargetEncoderModel.TargetEncoderParameters parameters = new TargetEncoderModel.TargetEncoderParameters();
+      parameters._data_leakage_handling = TargetEncoder.DataLeakageHandlingStrategy.None;
+      parameters._response_column = "IsDepDelayed";
+      parameters._ignored_columns = null;
+      parameters._train = trainingFrame._key;
+      parameters._seed = 0XFEED;
+
+
+      TargetEncoderBuilder job = new TargetEncoderBuilder(parameters);
+      final TargetEncoderModel targetEncoderModel = job.trainModel().get();
+      Scope.track_generic(targetEncoderModel);
+      // Check categorical colums for not being removed
+      assertArrayEquals(new String[]{"fYear", "fMonth", "fDayofMonth", "fDayOfWeek", "UniqueCarrier",
+              "Origin", "Dest", "IsDepDelayed"}, targetEncoderModel._output._names);
     } finally {
       Scope.exit();
     }

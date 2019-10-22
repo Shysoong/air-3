@@ -60,14 +60,22 @@ class Namespace:
         return namespace
 
     def __init__(self, **kwargs):
-        Namespace.add(self, **kwargs)
+        self.__dict__.update(**kwargs)
+
+    def __str__(self):
+        return str(self.__dict__)
+
+    def __repr__(self):
+        return repr(self.__dict__)
 
     def extend(self, **kwargs):
         """
         :param kwargs: attributes extending the current namespace
         :return: a new namespace containing same attributes as the original + the extended ones
         """
-        return Namespace.add(copy.copy(self), **kwargs)
+        clone = Namespace(**self.__dict__)
+        clone.__dict__.update(**kwargs)
+        return clone
 
 
 def ns(**kwargs):
@@ -3305,6 +3313,54 @@ def check_sorted_2_columns(frame1, sorted_column_indices, prob=0.5, ascending=[T
                                                                                              "row {2}: {3}".format(rowInd, frame1[rowInd,colInd],
                                                                                                                    rowInd+1, frame1[rowInd+1,colInd])
 
+def check_sorted_2_columns(frame1, sorted_column_indices, prob=0.5, ascending=[True, True]):
+    for colInd in sorted_column_indices:
+        for rowInd in range(0, frame1.nrow-1):
+            if (random.uniform(0.0,1.0) < prob):
+                if colInd == sorted_column_indices[0]:
+                    if not(math.isnan(frame1[rowInd, colInd])) and not(math.isnan(frame1[rowInd+1,colInd])):
+                        if ascending[colInd]:
+                            assert frame1[rowInd,colInd] <= frame1[rowInd+1,colInd], "Wrong sort order: value at row {0}: {1}, value at " \
+                                                                                     "row {2}: {3}".format(rowInd, frame1[rowInd,colInd],
+                                                                                                           rowInd+1, frame1[rowInd+1,colInd])
+                        else:
+                            assert frame1[rowInd,colInd] >= frame1[rowInd+1,colInd], "Wrong sort order: value at row {0}: {1}, value at " \
+                                                                                     "row {2}: {3}".format(rowInd, frame1[rowInd,colInd],
+                                                                                                           rowInd+1, frame1[rowInd+1,colInd])
+                else: # for second column
+                    if not(math.isnan(frame1[rowInd, sorted_column_indices[0]])) and not(math.isnan(frame1[rowInd+1,sorted_column_indices[0]])):
+                        if (frame1[rowInd,sorted_column_indices[0]]==frame1[rowInd+1, sorted_column_indices[0]]):  # meaningful to compare row entries then
+                            if not(math.isnan(frame1[rowInd, colInd])) and not(math.isnan(frame1[rowInd+1,colInd])):
+                                if ascending[colInd]:
+                                    assert frame1[rowInd,colInd] <= frame1[rowInd+1,colInd], "Wrong sort order: value at row {0}: {1}, value at " \
+                                                                                             "row {2}: {3}".format(rowInd, frame1[rowInd,colInd],
+                                                                                                                   rowInd+1, frame1[rowInd+1,colInd])
+                                else:
+                                    assert frame1[rowInd,colInd] >= frame1[rowInd+1,colInd], "Wrong sort order: value at row {0}: {1}, value at " \
+                                                                                             "row {2}: {3}".format(rowInd, frame1[rowInd,colInd],
+                                                                                                                   rowInd+1, frame1[rowInd+1,colInd])
+
+def check_sorted_1_column(frame1, sorted_column_index, prob=0.5, ascending=True):
+    totRow = frame1.nrow * prob
+    skipRow = int(frame1.nrow/totRow)
+    for rowInd in range(0, frame1.nrow-1, skipRow):
+        if not (math.isnan(frame1[rowInd, sorted_column_index])) and not (
+            math.isnan(frame1[rowInd + 1, sorted_column_index])):
+            if ascending:
+                assert frame1[rowInd, sorted_column_index] <= frame1[
+                    rowInd + 1, sorted_column_index], "Wrong sort order: value at row {0}: {1}, value at " \
+                                                      "row {2}: {3}".format(rowInd,
+                                                                            frame1[rowInd, sorted_column_index],
+                                                                            rowInd + 1,
+                                                                            frame1[rowInd + 1, sorted_column_index])
+            else:
+                assert frame1[rowInd, sorted_column_index] >= frame1[
+                    rowInd + 1, sorted_column_index], "Wrong sort order: value at row {0}: {1}, value at " \
+                                                      "row {2}: {3}".format(rowInd,
+                                                                            frame1[rowInd, sorted_column_index],
+                                                                            rowInd + 1,
+                                                                            frame1[rowInd + 1, sorted_column_index])
+
 def assert_correct_frame_operation(sourceFrame, h2oResultFrame, operString):
     """
     This method checks each element of a numeric H2OFrame and throw an assert error if its value does not
@@ -3563,15 +3619,19 @@ def compare_frames_local_svm(f1, f2, prob=0.5, tol=1e-6, returnResult=False):
 
 
 # frame compare with NAs in column
-def compare_frames_local_onecolumn_NA(f1, f2, prob=0.5, tol=1e-6, returnResult=False):
+def compare_frames_local_onecolumn_NA(f1, f2, prob=0.5, tol=1e-6, returnResult=False, oneLessRow=False):
     if (f1.types[f1.names[0]] == u'time'):   # we have to divide by 1000 before converting back and forth between ms and time format
         tol = 10
 
     temp1 = f1.as_data_frame(use_pandas=False)
     temp2 = f2.as_data_frame(use_pandas=False)
     assert (f1.nrow==f2.nrow) and (f1.ncol==f2.ncol), "The two frames are of different sizes."
+    if oneLessRow:
+        lastF2Row = f2.nrow
+    else:
+        lastF2Row = f2.nrow+1
     for colInd in range(f1.ncol):
-        for rowInd in range(1,f2.nrow):
+        for rowInd in range(1,lastF2Row):
             if (random.uniform(0,1) < prob):
                 if len(temp1[rowInd]) == 0 or len(temp2[rowInd]) == 0:
                     if returnResult:
@@ -3600,7 +3660,7 @@ def compare_frames_local_onecolumn_NA_enum(f1, f2, prob=0.5, tol=1e-6, returnRes
     temp2 = f2.as_data_frame(use_pandas=False)
     assert (f1.nrow==f2.nrow) and (f1.ncol==f2.ncol), "The two frames are of different sizes."
     for colInd in range(f1.ncol):
-        for rowInd in range(1,f2.nrow):
+        for rowInd in range(1,f2.nrow+1):
             if (random.uniform(0,1) < prob):
                 if len(temp1[rowInd]) == 0 or len(temp2[rowInd]) == 0:
                     if returnResult:
@@ -3627,7 +3687,7 @@ def compare_frames_local_onecolumn_NA_string(f1, f2, prob=0.5, returnResult=Fals
     temp2 = f2.as_data_frame(use_pandas=False)
     assert (f1.nrow==f2.nrow) and (f1.ncol==f2.ncol), "The two frames are of different sizes."
     for colInd in range(f1.ncol):
-        for rowInd in range(1,f2.nrow):
+        for rowInd in range(1,f2.nrow+1):
             if (random.uniform(0,1) < prob):
                 if len(temp1[rowInd]) == 0 or len(temp2[rowInd]) == 0:
                     if returnResult:

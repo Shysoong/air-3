@@ -22,8 +22,8 @@ def test_target_encoding_fit_method():
     trainingFrame[targetColumnName] = trainingFrame[targetColumnName].asfactor()
     trainingFrame[foldColumnName] = trainingFrame.kfold_column(n_folds=5, seed=1234)
     
-    te = H2OTargetEncoderEstimator(k = 0.7, f = 0.3, data_leakage_handling = "none")
-    te.train(training_frame = trainingFrame, encoded_columns = teColumns, target_column = targetColumnName)
+    te = H2OTargetEncoderEstimator(k = 0.7, f = 0.3, data_leakage_handling = "None")
+    te.train(training_frame=trainingFrame, x=teColumns, y=targetColumnName)
     print(te)
     transformed = te.transform(frame = trainingFrame)
     
@@ -37,12 +37,10 @@ def test_target_encoding_fit_method():
     
     # Test fold_column proper handling + kfold data leakage strategy defined
     te = H2OTargetEncoderEstimator(k=0.7, f=0.3)
-    te.train(training_frame=trainingFrame, fold_column="pclass", target_column=targetColumnName,
-             encoded_columns=teColumns)
+    te.train(training_frame=trainingFrame, fold_column="pclass", x=teColumns, y=targetColumnName)
     transformed = te.transform(trainingFrame, data_leakage_handling="kfold", seed = 1234)
 
-    te.train(training_frame=trainingFrame, fold_column="pclass", target_column=targetColumnName,
-             encoded_columns=teColumns)
+    te.train(training_frame=trainingFrame, fold_column="pclass", x=teColumns, y=targetColumnName)
     
     assert transformed is not None
     assert transformed.nrows == 1309
@@ -54,7 +52,15 @@ def test_target_encoding_fit_method():
 
     # Argument check
     te.train(training_frame=trainingFrame, fold_column="pclass", y=targetColumnName, x=teColumns)
-    
+
+    # Drop all non-categorical columns
+    te.train(x=None, y=targetColumnName, training_frame=trainingFrame, fold_column="pclass")
+    transformed = te.transform(trainingFrame, data_leakage_handling="kfold", seed=1234)
+    assert transformed.col_names == ['home.dest', 'pclass', 'embarked', 'cabin', 'sex', 'survived', 'name', 'age',
+                                     'sibsp', 'parch', 'ticket', 'fare', 'boat', 'body', 'kfold_column',
+                                     'sex_te', 'cabin_te', 'embarked_te', 'home.dest_te'] # 4 encoded columns
+
+
 testList = [
     test_target_encoding_fit_method
 ]

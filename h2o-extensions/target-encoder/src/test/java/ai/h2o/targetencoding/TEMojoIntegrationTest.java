@@ -1,5 +1,8 @@
 package ai.h2o.targetencoding;
 
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.generator.InRange;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import hex.genmodel.MojoModel;
 import hex.genmodel.algos.targetencoder.EncodingMap;
 import hex.genmodel.algos.targetencoder.EncodingMaps;
@@ -11,6 +14,7 @@ import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import water.DKV;
 import water.Scope;
 import water.TestUtil;
@@ -29,6 +33,7 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 import static ai.h2o.targetencoding.TargetEncoderFrameHelper.addKFoldColumn;
 
+@RunWith(JUnitQuickcheck.class)
 public class TEMojoIntegrationTest extends TestUtil {
 
   @BeforeClass
@@ -52,19 +57,14 @@ public class TEMojoIntegrationTest extends TestUtil {
       Frame fr = parse_test_file("./smalldata/gbm_test/titanic.csv");
 
       String responseColumnName = "survived";
-
       asFactor(fr, responseColumnName);
-
       Scope.track(fr);
 
-      Frame.VecSpecifier[] teColumns = {new Frame.VecSpecifier(fr._key, "home.dest"),
-              new Frame.VecSpecifier(fr._key, "embarked")};
-
       TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
-      targetEncoderParameters._encoded_columns = teColumns;
+      targetEncoderParameters._response_column = responseColumnName;
+      targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", "embarked", targetEncoderParameters._response_column);
       targetEncoderParameters._ignore_const_cols = false; // Why ignore_const_column ignores `name` column? bad naming
       targetEncoderParameters.setTrain(fr._key);
-      targetEncoderParameters._response_column = responseColumnName;
 
       TargetEncoderBuilder targetEncoderBuilder = new TargetEncoderBuilder(targetEncoderParameters);
 
@@ -78,11 +78,9 @@ public class TEMojoIntegrationTest extends TestUtil {
       }
 
       // Let's load model that we just have written and use it for prediction.
-      EasyPredictModelWrapper teModelWrapper = null;
 
       TargetEncoderMojoModel loadedMojoModel = (TargetEncoderMojoModel) MojoModel.load(mojoFile.getPath());
-
-      teModelWrapper = new EasyPredictModelWrapper(loadedMojoModel);
+      EasyPredictModelWrapper teModelWrapper = new EasyPredictModelWrapper(loadedMojoModel);
 
       // RowData that is not encoded yet
       RowData rowToPredictFor = new RowData();
@@ -159,10 +157,10 @@ public class TEMojoIntegrationTest extends TestUtil {
                 new Frame.VecSpecifier(fr._key, "embarked")};
 
         TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
-        targetEncoderParameters._encoded_columns = teColumns;
+        targetEncoderParameters._response_column = responseColumnName;
+        targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", "embarked", targetEncoderParameters._response_column);
         targetEncoderParameters._ignore_const_cols = false; // Why ignore_const_column ignores `name` column? bad naming
         targetEncoderParameters.setTrain(fr._key);
-        targetEncoderParameters._response_column = responseColumnName;
 
         TargetEncoderBuilder targetEncoderBuilder = new TargetEncoderBuilder(targetEncoderParameters);
 
@@ -252,11 +250,12 @@ public class TEMojoIntegrationTest extends TestUtil {
               new Frame.VecSpecifier(fr._key, "embarked")};
 
       TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
-      targetEncoderParameters._encoded_columns = teColumns;
-      targetEncoderParameters.setTrain(fr._key);
-      targetEncoderParameters._ignore_const_cols = false;
       targetEncoderParameters._fold_column = foldColumnName;
       targetEncoderParameters._response_column = responseColumnName;
+      targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", "embarked", targetEncoderParameters._fold_column,
+              targetEncoderParameters._response_column);
+      targetEncoderParameters.setTrain(fr._key);
+      targetEncoderParameters._ignore_const_cols = false;
 
       TargetEncoderBuilder job = new TargetEncoderBuilder(targetEncoderParameters);
 
@@ -334,10 +333,10 @@ public class TEMojoIntegrationTest extends TestUtil {
       TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
       targetEncoderParameters._blending = true;
       targetEncoderParameters._blending_parameters = TargetEncoder.DEFAULT_BLENDING_PARAMS;
-      targetEncoderParameters._encoded_columns = teColumns;
+      targetEncoderParameters._response_column = responseColumnName;
+      targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", "embarked", targetEncoderParameters._response_column);
       targetEncoderParameters._ignore_const_cols = false;
       targetEncoderParameters.setTrain(fr._key);
-      targetEncoderParameters._response_column = responseColumnName;
 
       TargetEncoderBuilder job = new TargetEncoderBuilder(targetEncoderParameters);
 
@@ -410,11 +409,10 @@ public class TEMojoIntegrationTest extends TestUtil {
 
   // We need to test only holdout None  case as we predict only for data which were not used for TEModel training 
   @Test
-  public void check_that_encodings_for_unexpected_values_are_the_same_in_TargetEncoderModel_and_TargetEncoderMojoModel_holdout_none() throws IOException, PredictException {
+  public void check_that_encodings_for_unexpected_values_are_the_same_in_TargetEncoderModel_and_TargetEncoderMojoModel_big_inflection_point() throws IOException, PredictException {
 
     String mojoFileName = "mojo_te.zip";
     File mojoFile = folder.newFile(mojoFileName);
-    ;
     TargetEncoderModel targetEncoderModel = null;
     Scope.enter();
     try {
@@ -425,19 +423,17 @@ public class TEMojoIntegrationTest extends TestUtil {
       asFactor(fr, responseColumnName);
       Scope.track(fr);
 
-      Frame.VecSpecifier[] teColumns = {new Frame.VecSpecifier(fr._key, "home.dest")};
-
       TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
-
-      targetEncoderParameters._encoded_columns = teColumns;
-
+      targetEncoderParameters._response_column = responseColumnName;
+      targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", targetEncoderParameters._response_column);
       // Enable blending
       targetEncoderParameters._blending = true;
-      targetEncoderParameters._blending_parameters = new BlendingParams(5, 1);
-
+      
+      // We want to test case when inflection point is higher than number of missing values in the training frame, i.e. blending would favor prior probability
+      int inflectionPoint = 600;
+      targetEncoderParameters._blending_parameters = new BlendingParams(inflectionPoint, 1);
       targetEncoderParameters._ignore_const_cols = false;
       targetEncoderParameters.setTrain(fr._key);
-      targetEncoderParameters._response_column = responseColumnName;
 
       TargetEncoderBuilder job = new TargetEncoderBuilder(targetEncoderParameters);
 
@@ -473,11 +469,12 @@ public class TEMojoIntegrationTest extends TestUtil {
               .build();
 
 
-      Frame encodingsFromTargetEncoderModel = targetEncoderModel.transform(withNullFrame, noneHoldoutStrategy, 0.0, false,null, 1234);
+      // Encoding should be coming from posterior probability of NAs in the training frame
+      Frame encodingsFromTargetEncoderModel = targetEncoderModel.transform(withNullFrame, noneHoldoutStrategy, 0.0, true,targetEncoderParameters._blending_parameters, 1234);
       Scope.track(encodingsFromTargetEncoderModel);
-      
+
       assertEquals(encodingsFromMojoModel[0], encodingsFromTargetEncoderModel.vec("home.dest_te").at(0), 1e-5);
-      
+
       // Unexpected level value - unseen categorical level
       Frame withUnseenLevelFrame = new TestFrameBuilder()
               .withName("testFrame2")
@@ -486,10 +483,172 @@ public class TEMojoIntegrationTest extends TestUtil {
               .withDataForCol(0, ar("xxx"))
               .build();
 
-      Frame encodingsFromTEModelForUnseenLevel = targetEncoderModel.transform(withUnseenLevelFrame, noneHoldoutStrategy, 0.0,false, null, 1234);
+      // In case we predict for unseen level, encodings should be coming from prior probability of the response
+      Frame encodingsFromTEModelForUnseenLevel = targetEncoderModel.transform(withUnseenLevelFrame, noneHoldoutStrategy, 0.0,true, targetEncoderParameters._blending_parameters, 1234);
+      Scope.track(encodingsFromTEModelForUnseenLevel);
+
+      // This prediction will essentially be a prior as inflection point is 600 vs only one value in the `withUnseenLevelFrame` frame
+      assertEquals(encodingsFromMojoModel[0], encodingsFromTEModelForUnseenLevel.vec("home.dest_te").at(0), 1e-5);
+
+    } finally {
+      targetEncoderModel.remove();
+      Scope.exit();
+    }
+  }
+
+  @Test
+  public void check_that_encodings_for_unexpected_values_are_the_same_in_TargetEncoderModel_and_TargetEncoderMojoModel_small_inflection_point() throws IOException, PredictException {
+
+    String mojoFileName = "mojo_te.zip";
+    File mojoFile = folder.newFile(mojoFileName);
+    TargetEncoderModel targetEncoderModel = null;
+    Scope.enter();
+    try {
+      Frame fr = parse_test_file("./smalldata/gbm_test/titanic.csv");
+
+      String responseColumnName = "survived";
+
+      asFactor(fr, responseColumnName);
+      Scope.track(fr);
+
+      TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
+      targetEncoderParameters._response_column = responseColumnName;
+      targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", targetEncoderParameters._response_column);
+      // Enable blending
+      targetEncoderParameters._blending = true;
+
+      // We want to test case when inflection point is lower than number of missing values in the training frame, i.e. blending would favor posterior probability
+      int inflectionPoint = 5;
+      targetEncoderParameters._blending_parameters = new BlendingParams(inflectionPoint, 1);
+      targetEncoderParameters._ignore_const_cols = false;
+      targetEncoderParameters.setTrain(fr._key);
+
+      TargetEncoderBuilder job = new TargetEncoderBuilder(targetEncoderParameters);
+
+      job.trainModel().get();
+
+      targetEncoderModel = job.getTargetEncoderModel();
+
+      try (FileOutputStream modelOutput = new FileOutputStream(mojoFile)) {
+        targetEncoderModel.getMojo().writeTo(modelOutput);
+        System.out.println("Model has been written down to a file as a mojo: " + mojoFileName);
+      }
+
+      // Let's load model that we just have written and use it for prediction.
+      EasyPredictModelWrapper teModelWrapper = null;
+
+      TargetEncoderMojoModel loadedMojoModel = (TargetEncoderMojoModel) MojoModel.load(mojoFile.getPath());
+
+      teModelWrapper = new EasyPredictModelWrapper(loadedMojoModel); // TODO why we store GenModel even though we pass MojoModel?
+
+      // RowData that is not encoded yet
+      RowData rowToPredictFor = new RowData();
+      rowToPredictFor.put("home.dest", Double.NaN);
+
+      double[] encodingsFromMojoModel = teModelWrapper.transformWithTargetEncoding(rowToPredictFor).transformations;
+      byte noneHoldoutStrategy = 2;
+
+      // Unexpected level value - `null`
+      Frame withNullFrame = new TestFrameBuilder()
+              .withName("testFrame")
+              .withColNames("home.dest")
+              .withVecTypes(Vec.T_CAT)
+              .withDataForCol(0, ar((String)null))
+              .build();
+
+
+      // Encoding should be coming from posterior probability of NAs in the training frame
+      Frame encodingsFromTargetEncoderModel = targetEncoderModel.transform(withNullFrame, noneHoldoutStrategy, 0.0, true,targetEncoderParameters._blending_parameters, 1234);
+      Scope.track(encodingsFromTargetEncoderModel);
+
+      assertEquals(encodingsFromMojoModel[0], encodingsFromTargetEncoderModel.vec("home.dest_te").at(0), 1e-5);
+
+      // Unexpected level value - unseen categorical level
+      Frame withUnseenLevelFrame = new TestFrameBuilder()
+              .withName("testFrame2")
+              .withColNames("home.dest")
+              .withVecTypes(Vec.T_CAT)
+              .withDataForCol(0, ar("xxx"))
+              .build();
+
+      Frame encodingsFromTEModelForUnseenLevel = targetEncoderModel.transform(withUnseenLevelFrame, noneHoldoutStrategy, 0.0,true, targetEncoderParameters._blending_parameters, 1234);
       Scope.track(encodingsFromTEModelForUnseenLevel);
 
       assertEquals(encodingsFromMojoModel[0], encodingsFromTEModelForUnseenLevel.vec("home.dest_te").at(0), 1e-5);
+
+    } finally {
+      targetEncoderModel.remove();
+      Scope.exit();
+    }
+  }
+
+  @Property(trials = 5)
+  public void check_that_encodings_with_blending_are_the_same_in_TargetEncoderModel_and_TargetEncoderMojoModel(@InRange(minInt = 1, maxInt = 1000)int randomInflectionPoint) throws IOException, PredictException {
+
+    String mojoFileName = "mojo_te.zip";
+    File mojoFile = folder.newFile(mojoFileName);
+    ;
+    TargetEncoderModel targetEncoderModel = null;
+    Scope.enter();
+    try {
+      Frame fr = parse_test_file("./smalldata/gbm_test/titanic.csv");
+
+      String responseColumnName = "survived";
+
+      asFactor(fr, responseColumnName);
+      Scope.track(fr);
+      
+      printOutFrameAsTable(fr);
+
+      TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
+      targetEncoderParameters._response_column = responseColumnName;
+      targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", targetEncoderParameters._response_column);
+      // Enable blending
+      targetEncoderParameters._blending = true;
+      targetEncoderParameters._blending_parameters = new BlendingParams(randomInflectionPoint, 1);
+      targetEncoderParameters._ignore_const_cols = false;
+      targetEncoderParameters.setTrain(fr._key);
+
+      TargetEncoderBuilder job = new TargetEncoderBuilder(targetEncoderParameters);
+
+      job.trainModel().get();
+
+      targetEncoderModel = job.getTargetEncoderModel();
+
+      try (FileOutputStream modelOutput = new FileOutputStream(mojoFile)) {
+        targetEncoderModel.getMojo().writeTo(modelOutput);
+        System.out.println("Model has been written down to a file as a mojo: " + mojoFileName);
+      }
+
+      // Let's load model that we just have written and use it for prediction.
+      EasyPredictModelWrapper teModelWrapper = null;
+
+      TargetEncoderMojoModel loadedMojoModel = (TargetEncoderMojoModel) MojoModel.load(mojoFile.getPath());
+
+      teModelWrapper = new EasyPredictModelWrapper(loadedMojoModel); // TODO why we store GenModel even though we pass MojoModel?
+
+      // RowData that is not encoded yet
+      RowData rowToPredictFor = new RowData();
+      rowToPredictFor.put("home.dest", "Southampton");
+
+      double[] encodingsFromMojoModel = teModelWrapper.transformWithTargetEncoding(rowToPredictFor).transformations;
+      byte noneHoldoutStrategy = 2;
+
+      // Unexpected level value - `null`
+      Frame withNullFrame = new TestFrameBuilder()
+              .withName("testFrame")
+              .withColNames("home.dest")
+              .withVecTypes(Vec.T_CAT)
+              .withDataForCol(0, ar("Southampton"))
+              .build();
+
+
+      Frame encodingsFromTargetEncoderModel = targetEncoderModel.transform(withNullFrame, noneHoldoutStrategy, 0.0, true,targetEncoderParameters._blending_parameters, 1234);
+      Scope.track(encodingsFromTargetEncoderModel);
+
+      double predictionFromTEModel = encodingsFromTargetEncoderModel.vec("home.dest_te").at(0);
+      double predictionFromMojo = encodingsFromMojoModel[0];
+      assertEquals(predictionFromMojo, predictionFromTEModel, 1e-5);
 
     } finally {
       targetEncoderModel.remove();
@@ -509,18 +668,15 @@ public class TEMojoIntegrationTest extends TestUtil {
       asFactor(fr, responseColumnName);
       Scope.track(fr);
 
-      Frame.VecSpecifier[] teColumns = {new Frame.VecSpecifier(fr._key, "home.dest"),
-              new Frame.VecSpecifier(fr._key, "embarked")};
-
       TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
 
-      targetEncoderParameters._encoded_columns = teColumns;
+      targetEncoderParameters._response_column = responseColumnName;
+      targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", "embarked", targetEncoderParameters._response_column);
       targetEncoderParameters._blending = true;
       targetEncoderParameters._blending_parameters = new BlendingParams(5, 1);
 
       targetEncoderParameters._ignore_const_cols = false;
       targetEncoderParameters.setTrain(fr._key);
-      targetEncoderParameters._response_column = responseColumnName;
 
       TargetEncoderBuilder targetEncoderBuilder = new TargetEncoderBuilder(targetEncoderParameters);
 
@@ -532,7 +688,6 @@ public class TEMojoIntegrationTest extends TestUtil {
 
       assertEquals(0, targetEncoderModel._output._target_encoding_map.get("embarked").byteSize());
       assertEquals(0, targetEncoderModel._output._target_encoding_map.get("home.dest").byteSize());
-      assertEquals(0, targetEncoderModel._output.column_name_to_idx.size());
     } finally {
       Scope.exit();
     }
@@ -561,10 +716,10 @@ public class TEMojoIntegrationTest extends TestUtil {
 
       TargetEncoderModel.TargetEncoderParameters targetEncoderParameters = new TargetEncoderModel.TargetEncoderParameters();
       targetEncoderParameters._blending = false;
-      targetEncoderParameters._encoded_columns = teColumns;
+      targetEncoderParameters._response_column = responseColumnName;
+      targetEncoderParameters._ignored_columns = ignoredColumns(fr, "home.dest", "embarked", responseColumnName);
       targetEncoderParameters._ignore_const_cols = false; // Why ignore_const_column ignores `name` column? bad naming
       targetEncoderParameters.setTrain(fr._key);
-      targetEncoderParameters._response_column = responseColumnName;
 
       TargetEncoderBuilder targetEncoderBuilder = new TargetEncoderBuilder(targetEncoderParameters);
 

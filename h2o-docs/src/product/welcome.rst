@@ -7,7 +7,7 @@ H2O's core code is written in Java. Inside H2O, a Distributed Key/Value store is
 
 H2O’s REST API allows access to all the capabilities of H2O from an external program or script via JSON over HTTP. The Rest API is used by H2O’s web interface (Flow UI), R binding (H2O-R), and Python binding (H2O-Python).
 
-The speed, quality, ease-of-use, and model-deployment for the various cutting edge Supervised and Unsupervised algorithms like Deep Learning, Tree Ensembles, and GLRM make H2O a highly sought after API for big data data science.
+The speed, quality, ease-of-use, and model-deployment for the various cutting edge Supervised and Unsupervised algorithms like Deep Learning, Tree Ensembles, and GLRM make H2O a highly sought after API for big data data science. 
 
 要求
 ------------
@@ -23,7 +23,7 @@ The speed, quality, ease-of-use, and model-deployment for the various cutting ed
 
 -  **语言**: Scala, R, and Python are not required to use H2O unless you want to use H2O in those environments, but Java is always required. Supported versions include:
 
-   -  Java 8 或更高版本
+   -  Java 8, 9, 10, 11, and 12
 
       - To build H2O or run H2O tests, the 64-bit JDK is required.
       - To run the H2O binary using either the command line, R, or Python packages, only 64-bit JRE is required.
@@ -428,9 +428,12 @@ This section describes how to use H2O on Hadoop.
 -  CDH 5.10
 -  CDH 5.13
 -  CDH 5.14
+-  CDH 5.15
+-  CDH 5.16
 -  CDH 6.0
 -  CDH 6.1
 -  CDH 6.2
+-  CDH 6.3
 -  HDP 2.2
 -  HDP 2.3
 -  HDP 2.4
@@ -442,6 +445,8 @@ This section describes how to use H2O on Hadoop.
 -  MapR 5.0
 -  MapR 5.1
 -  MapR 5.2
+-  MapR 6.0
+-  MapR 6.1
 -  IOP 4.2
 
 **要记住的要点**:

@@ -11,9 +11,13 @@ import water.rapids.ast.AstRoot;
 import water.rapids.ast.params.AstNumList;
 import water.rapids.ast.params.AstStr;
 import water.rapids.vals.ValFrame;
+import water.rapids.vals.ValNums;
+import water.rapids.vals.ValStr;
+import water.rapids.vals.ValStrs;
 import water.util.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -547,15 +551,14 @@ public class RapidsTest extends TestUtil {
     }
   }
 
-  @Test public void testChicago() {
+  @Test public void testChicago() throws IOException {
     String oldtz = Rapids.exec("(getTimeZone)").getStr();
     Session ses = new Session();
     try {
       parse_test_file(Key.make("weather.hex"),"smalldata/chicago/chicagoAllWeather.csv");
       parse_test_file(Key.make( "crimes.hex"),"smalldata/chicago/chicagoCrimes10k.csv.zip");
       String fname = "smalldata/chicago/chicagoCensus.csv";
-      File f = FileUtils.locateFile(fname);
-      assert f != null && f.exists():" file not found: " + fname;
+      File f = FileUtils.getFile(fname);
       NFSFileVec nfs = NFSFileVec.make(f);
       ParseSetup ps = ParseSetup.guessSetup(new Key[]{nfs._key}, false, 1);
       ps.getColumnTypes()[1] = Vec.T_CAT;
@@ -871,4 +874,25 @@ public class RapidsTest extends TestUtil {
       Scope.exit();
     }
   }
+
+  @Test
+  public void testExecNumList() {
+    Val r1 = Rapids.exec("[]");
+    assertTrue(r1.isEmpty());
+
+    Val r2 = Rapids.exec("[1, 32, 3.14]");
+    assertTrue(r2 instanceof ValNums);
+    assertArrayEquals(new double[]{1, 32, 3.14}, r2.getNums(), 0);
+  }
+
+  @Test
+  public void testExecStrList() {
+    Val r1 = Rapids.exec("[]");
+    assertTrue(r1.isEmpty());
+
+    Val r2 = Rapids.exec("['A', 'B', 'something']");
+    assertTrue(r2 instanceof ValStrs);
+    assertArrayEquals(new String[]{"A", "B", "something"}, r2.getStrs());
+  }
+
 }

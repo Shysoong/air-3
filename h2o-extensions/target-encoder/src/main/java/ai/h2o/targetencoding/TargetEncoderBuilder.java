@@ -4,11 +4,11 @@ import hex.ModelBuilder;
 import hex.ModelCategory;
 import water.Scope;
 import water.fvec.Frame;
+import water.fvec.Vec;
 import water.util.IcedHashMapGeneric;
 import water.util.Log;
 
-import java.util.Arrays;
-import java.util.Map;
+import java.util.*;
 
 public class TargetEncoderBuilder extends ModelBuilder<TargetEncoderModel, TargetEncoderModel.TargetEncoderParameters, TargetEncoderModel.TargetEncoderOutput> {
 
@@ -36,8 +36,9 @@ public class TargetEncoderBuilder extends ModelBuilder<TargetEncoderModel, Targe
   private class TargetEncoderDriver extends Driver {
     @Override
     public void computeImpl() {
-      final String[] encoded_columns = Frame.VecSpecifier.vecNames(_parms._encoded_columns);
-      TargetEncoder tec = new TargetEncoder(encoded_columns);
+      final int numColsRemoved = hasFoldCol() ? 2 : 1; // Response is always at the last index, fold column is on the index before.
+      final String[] encodedColumns = Arrays.copyOf(train().names(), train().names().length - numColsRemoved);
+      TargetEncoder tec = new TargetEncoder(encodedColumns);
 
       Scope.untrack(train().keys());
 
@@ -63,6 +64,16 @@ public class TargetEncoderBuilder extends ModelBuilder<TargetEncoderModel, Targe
       _parms._ignore_const_cols = false;
       Log.info("We don't want to ignore any columns during target encoding transformation therefore `_ignore_const_cols` parameter was set to `false`");
     }
+  }
+
+  @Override
+  protected void ignoreInvalidColumns(int npredictors, boolean expensive) {
+    new FilterCols(npredictors){
+      @Override
+      protected boolean filter(Vec v) {
+        return !v.isCategorical();
+      }
+    }.doIt(train(), "Removing non-categorical columns found in the list of encoded columns.", expensive);
   }
 
   /**

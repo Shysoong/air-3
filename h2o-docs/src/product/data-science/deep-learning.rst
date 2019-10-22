@@ -102,11 +102,11 @@ AIR深度学习模型有许多输入参数，其中许多只能通过专家模�
 
 -  **epsilon**:(Applicable only if **adaptive\_rate** is enabled) Specify the adaptive learning rate time smoothing factor to avoid dividing by zero.
 
--  **rate**: (Applicable only if **adaptive_rate** is disabled) Specify the learning rate. Higher values result in a less stable model, while lower values lead to slower convergence.
+-  `rate <algo-params/rate.html>`__: (Applicable only if **adaptive_rate** is disabled) Specify the learning rate. Higher values result in a less stable model, while lower values lead to slower convergence.
 
--  **rate_annealing**: (Applicable only if **adaptive_rate** is disabled) Specify the rate annealing value. The rate annealing is calculated as **rate**\ (1 + **rate_annealing** \* samples).
+-  `rate_annealing <algo-params/rate_annealing.html>`__: (Applicable only if **adaptive_rate** is disabled) Specify the rate annealing value. The rate annealing is calculated as rate / (1 + rate_annealing * samples).
 
--  **rate_decay**: (Applicable only if **adaptive_rate** is disabled) Specify the rate decay factor between layers. The rate decay is calculated as (N-th layer: **rate** \* alpha^(N-1)).
+-  `rate_decay <algo-params/rate_decay.html>`__: (Applicable only if **adaptive_rate** is disabled) Specify the rate decay factor between layers. The rate decay is calculated as (N-th layer: rate * rate_decay ^ (n - 1)).
 
 -  **momentum_start**: (Applicable only if **adaptive_rate** is disabled) Specify the initial momentum at the beginning of training; we suggest 0.5. 
 

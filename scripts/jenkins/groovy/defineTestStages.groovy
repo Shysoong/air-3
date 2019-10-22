@@ -41,18 +41,6 @@ def call(final pipelineContext) {
       stageName: 'Java 8 Smoke', target: 'test-junit-smoke-jenkins', javaVersion: 8, timeoutValue: 20,
       component: pipelineContext.getBuildConfig().COMPONENT_JAVA
     ],
-     [
-       stageName: 'Java 10 Smoke', target: 'test-junit-10-smoke-jenkins', javaVersion: 10, timeoutValue: 20,
-       component: pipelineContext.getBuildConfig().COMPONENT_JAVA
-     ],
-    [
-      stageName: 'Java 11 Smoke', target: 'test-junit-11-smoke-jenkins', javaVersion: 11, timeoutValue: 20,
-      component: pipelineContext.getBuildConfig().COMPONENT_JAVA
-    ],
-    [
-      stageName: 'Java 12 Smoke', target: 'test-junit-12-smoke-jenkins', javaVersion: 12, timeoutValue: 20,
-      component: pipelineContext.getBuildConfig().COMPONENT_JAVA
-    ]
   ]
 
   // Stages executed after each push to PR branch.
@@ -74,16 +62,6 @@ def call(final pipelineContext) {
       timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_PY,
       image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-jdk-8:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
     ],
-     [
-       stageName: 'Py2.7 Init Java 10', target: 'test-py-init', pythonVersion: '2.7', javaVersion: 10,
-       timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_PY,
-       image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-jdk-10:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
-     ],
-    [
-      stageName: 'Py2.7 Init Java 11', target: 'test-py-init', pythonVersion: '2.7', javaVersion: 11,
-      timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_PY,
-      image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-jdk-11:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
-    ],
     [
       stageName: 'Py3.5 Small', target: 'test-pyunit-small', pythonVersion: '3.5',
       timeoutValue: 90, component: pipelineContext.getBuildConfig().COMPONENT_PY
@@ -96,16 +74,6 @@ def call(final pipelineContext) {
       stageName: 'R3.4 Init Java 8', target: 'test-r-init', rVersion: '3.4.1', javaVersion: 8,
       timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_R,
       image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-r-3.4.1-jdk-8:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
-    ],
-     [
-       stageName: 'R3.4 Init Java 10', target: 'test-r-init', rVersion: '3.4.1', javaVersion: 10,
-       timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_R,
-       image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-r-3.4.1-jdk-10:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
-     ],
-    [
-      stageName: 'R3.4 Init Java 11', target: 'test-r-init', rVersion: '3.4.1', javaVersion: 11,
-      timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_R,
-      image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-r-3.4.1-jdk-11:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
     ],
     [
       stageName: 'R3.4 Small', target: 'test-r-small', rVersion: '3.4.1',
@@ -149,7 +117,7 @@ def call(final pipelineContext) {
     ],
     [
       stageName: 'Py3.6 Medium-large', target: 'test-pyunit-medium-large', pythonVersion: '3.5',
-      timeoutValue: 120, component: pipelineContext.getBuildConfig().COMPONENT_PY
+      timeoutValue: 150, component: pipelineContext.getBuildConfig().COMPONENT_PY
     ],
     [
       stageName: 'R3.4 Medium-large', target: 'test-r-medium-large', rVersion: '3.4.1',
@@ -178,18 +146,6 @@ def call(final pipelineContext) {
     [
       stageName: 'Java 8 XGBoost Multinode JUnit', target: 'test-junit-xgb-multi-jenkins', pythonVersion: '2.7', javaVersion: 8,
       timeoutValue: 120, component: pipelineContext.getBuildConfig().COMPONENT_JAVA, additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY]
-    ],
-    [
-      stageName: 'Java 10 JUnit', target: 'test-junit-10-jenkins', pythonVersion: '2.7', javaVersion: 10,
-      timeoutValue: 180, component: pipelineContext.getBuildConfig().COMPONENT_JAVA, additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY]
-    ],
-    [
-      stageName: 'Java 11 JUnit', target: 'test-junit-11-jenkins', pythonVersion: '2.7', javaVersion: 11,
-      timeoutValue: 180, component: pipelineContext.getBuildConfig().COMPONENT_JAVA, additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY]
-    ],
-    [
-      stageName: 'Java 12 JUnit', target: 'test-junit-12-jenkins', pythonVersion: '2.7', javaVersion: 12,
-      timeoutValue: 180, component: pipelineContext.getBuildConfig().COMPONENT_JAVA, additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY]
     ],
     [
       stageName: 'R3.4 Generate Docs', target: 'r-generate-docs-jenkins', archiveFiles: false,
@@ -235,6 +191,15 @@ def call(final pipelineContext) {
       nodeLabel: pipelineContext.getBuildConfig().getBenchmarkNodeLabel(),
     ],
     [
+      stageName: 'H2O XGB GPU Benchmark', executionScript: 'h2o-3/scripts/jenkins/groovy/benchmarkStage.groovy',
+      customDockerArgs: ['--runtime=nvidia', '--pid=host'],
+      timeoutValue: 120, target: 'benchmark-xgb-gpu', component: pipelineContext.getBuildConfig().COMPONENT_ANY,
+      dockerImageSuffix: "gpu",
+      additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_R],
+      customData: [algorithm: 'xgb'], makefilePath: pipelineContext.getBuildConfig().BENCHMARK_MAKEFILE_PATH,
+      nodeLabel: pipelineContext.getBuildConfig().getGPUBenchmarkNodeLabel()
+    ],
+    [
       stageName: 'Vanilla XGB Benchmark', executionScript: 'h2o-3/scripts/jenkins/groovy/benchmarkStage.groovy',
       timeoutValue: 120, target: 'benchmark-xgb-vanilla', component: pipelineContext.getBuildConfig().COMPONENT_ANY,
       additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY],
@@ -269,8 +234,52 @@ def call(final pipelineContext) {
   // Stages executed in addition to MASTER_STAGES, used for nightly builds.
   def NIGHTLY_STAGES = [
     [
+      stageName: 'Java 10 Smoke', target: 'test-junit-10-smoke-jenkins', javaVersion: 10, timeoutValue: 20,
+      component: pipelineContext.getBuildConfig().COMPONENT_JAVA
+    ],
+    [
+      stageName: 'Java 11 Smoke', target: 'test-junit-11-smoke-jenkins', javaVersion: 11, timeoutValue: 20,
+      component: pipelineContext.getBuildConfig().COMPONENT_JAVA
+    ],
+    [
+      stageName: 'Java 12 Smoke', target: 'test-junit-12-smoke-jenkins', javaVersion: 12, timeoutValue: 20,
+      component: pipelineContext.getBuildConfig().COMPONENT_JAVA
+    ],
+    [
       stageName: 'Java 13 Smoke', target: 'test-junit-13-smoke-jenkins', javaVersion: 13, timeoutValue: 20,
       component: pipelineContext.getBuildConfig().COMPONENT_JAVA
+    ],
+    [
+      stageName: 'Py2.7 Init Java 10', target: 'test-py-init', pythonVersion: '2.7', javaVersion: 10,
+      timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_PY,
+      image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-jdk-10:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
+    ],
+    [
+      stageName: 'Py2.7 Init Java 11', target: 'test-py-init', pythonVersion: '2.7', javaVersion: 11,
+      timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_PY,
+      image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-jdk-11:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
+    ],
+    [
+      stageName: 'R3.4 Init Java 10', target: 'test-r-init', rVersion: '3.4.1', javaVersion: 10,
+      timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_R,
+      image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-r-3.4.1-jdk-10:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
+    ],
+    [
+      stageName: 'R3.4 Init Java 11', target: 'test-r-init', rVersion: '3.4.1', javaVersion: 11,
+      timeoutValue: 10, hasJUnit: false, component: pipelineContext.getBuildConfig().COMPONENT_R,
+      image: "${pipelineContext.getBuildConfig().DOCKER_REGISTRY}/opsh2oai/h2o-3/dev-r-3.4.1-jdk-11:${pipelineContext.getBuildConfig().DEFAULT_IMAGE_VERSION_TAG}"
+    ],
+    [
+      stageName: 'Java 10 JUnit', target: 'test-junit-10-jenkins', pythonVersion: '2.7', javaVersion: 10,
+      timeoutValue: 180, component: pipelineContext.getBuildConfig().COMPONENT_JAVA, additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY]
+    ],
+    [
+      stageName: 'Java 11 JUnit', target: 'test-junit-11-jenkins', pythonVersion: '2.7', javaVersion: 11,
+      timeoutValue: 180, component: pipelineContext.getBuildConfig().COMPONENT_JAVA, additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY]
+    ],
+    [
+      stageName: 'Java 12 JUnit', target: 'test-junit-12-jenkins', pythonVersion: '2.7', javaVersion: 12,
+      timeoutValue: 180, component: pipelineContext.getBuildConfig().COMPONENT_JAVA, additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY]
     ],
     [
       stageName: 'Py2.7 Single Node', target: 'test-pyunit-single-node', pythonVersion: '2.7',
@@ -371,7 +380,7 @@ def call(final pipelineContext) {
         kerberosPrincipal: 'HTTP/localhost@H2O.AI',
         kerberosConfigPath: 'scripts/jenkins/config/kerberos.conf',
         kerberosPropertiesPath: 'scripts/jenkins/config/kerberos.properties',
-      ], pythonVersion: '2.7', nodeLabel: 'docker && micro',
+      ], pythonVersion: '2.7',
       customDockerArgs: [ '--privileged' ],
       executionScript: 'h2o-3/scripts/jenkins/groovy/hadoopStage.groovy'
     ]
@@ -385,8 +394,7 @@ def call(final pipelineContext) {
     onHadoopStage.customData.mode = 'ON_HADOOP'
     onHadoopStage.image = pipelineContext.getBuildConfig().getSmokeHadoopImage(onHadoopStage.customData.distribution, onHadoopStage.customData.version, false)
 
-    HADOOP_STAGES += standaloneStage
-    HADOOP_STAGES += onHadoopStage
+    HADOOP_STAGES += [ standaloneStage, onHadoopStage ]
   }
 
   def KERBEROS_STAGES = []
@@ -431,7 +439,7 @@ def call(final pipelineContext) {
                     kerberosPrincipal: 'HTTP/localhost@H2O.AI',
                     kerberosConfigPath: 'scripts/jenkins/config/kerberos.conf',
                     kerberosPropertiesPath: 'scripts/jenkins/config/kerberos.properties',
-            ], pythonVersion: '2.7', nodeLabel: 'docker && micro',
+            ], pythonVersion: '2.7',
             customDockerArgs: [ '--privileged' ],
             executionScript: 'h2o-3/scripts/jenkins/groovy/hadoopStage.groovy'
     ]
@@ -445,8 +453,12 @@ def call(final pipelineContext) {
     onHadoopStage.customData.mode = 'ON_HADOOP'
     onHadoopStage.image = pipelineContext.getBuildConfig().getSmokeHadoopImage(onHadoopStage.customData.distribution, onHadoopStage.customData.version, true)
 
-    KERBEROS_STAGES += standaloneStage
-    KERBEROS_STAGES += onHadoopStage
+    def onHadoopWithSpnegoStage = evaluate(stageTemplate.inspect())
+    onHadoopWithSpnegoStage.stageName = "${distribution.name.toUpperCase()} ${distribution.version} - HADOOP WITH SPNEGO"
+    onHadoopWithSpnegoStage.customData.mode = 'ON_HADOOP_WITH_SPNEGO'
+    onHadoopWithSpnegoStage.image = pipelineContext.getBuildConfig().getSmokeHadoopImage(onHadoopStage.customData.distribution, onHadoopStage.customData.version, true)
+
+    KERBEROS_STAGES += [ standaloneStage, onHadoopStage, onHadoopWithSpnegoStage ]
   }
 
   def XGB_STAGES = []
@@ -457,11 +469,11 @@ def call(final pipelineContext) {
         stageName: "XGB on ${xgbEnv.name}", target: "test-xgb-smoke-${xgbEnv.targetName}-jenkins",
         timeoutValue: 15, component: pipelineContext.getBuildConfig().COMPONENT_ANY,
         additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_JAVA], pythonVersion: '3.5',
-        image: pipelineContext.getBuildConfig().getXGBImageForEnvironment(osName, xgbEnv),
-        nodeLabel: pipelineContext.getBuildConfig().getXGBNodeLabelForEnvironment(xgbEnv)
+        image: pipelineContext.getBuildConfig().getXGBImageForEnvironment(osName, xgbEnv.targetName),
+        nodeLabel: xgbEnv.nodeLabel
       ]
       if (xgbEnv.targetName == pipelineContext.getBuildConfig().XGB_TARGET_GPU) {
-        stageDefinition['executionScript'] = 'h2o-3/scripts/jenkins/groovy/xgbGPUStage.groovy'
+        stageDefinition['customDockerArgs'] = ['--runtime=nvidia', '--pid=host']
       }
       XGB_STAGES += stageDefinition
     }
@@ -571,6 +583,7 @@ private void executeInParallel(final jobs, final pipelineContext) {
           activatePythonEnv = c['activatePythonEnv']
 	      customDockerArgs = c['customDockerArgs']
           imageSpecifier = c['imageSpecifier']
+          dockerImageSuffix = c['dockerImageSuffix']
         }
       }
     ]

@@ -7,13 +7,13 @@ sourceCompatibility = 1.7
 targetCompatibility = 1.7
 
 ext {
-    xgboost4jVersion = "0.82.21"
+    xgboost4jVersion = "0.90.5"
 }
 
 dependencies {
     compile project(":h2o-genmodel")
 
-    compile('ai.h2o:xgboost-predictor:0.3.8') {
+    compile('ai.h2o:xgboost-predictor:0.3.9') {
         exclude group: 'net.jafama', 'module': 'jafama'
     }
 
@@ -29,7 +29,6 @@ dependencies {
     compile "ai.h2o:xgboost4j-linux-gpuv4:${xgboost4jVersion}"
     compile "ai.h2o:xgboost4j-linux-minimal:${xgboost4jVersion}"
     compile "ai.h2o:xgboost4j-osx-minimal:${xgboost4jVersion}"
-    compile "ai.h2o:xgboost4j-linux-ompv3:${xgboost4jVersion}"
     compileOnly 'com.esotericsoftware.kryo:kryo:2.21'
 
     testCompile 'com.esotericsoftware.kryo:kryo:2.21'

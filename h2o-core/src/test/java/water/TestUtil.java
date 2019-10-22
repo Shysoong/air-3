@@ -367,7 +367,7 @@ public class TestUtil extends Iced {
   }
 
   private static boolean runWithoutLocalFiles() {
-    return Boolean.getBoolean("H2O_JUNIT_ALLOW_NO_SMALLDATA");
+    return Boolean.valueOf(System.getenv("H2O_JUNIT_ALLOW_NO_SMALLDATA"));
   }
   
   private static void downloadTestFileFromS3(String fname) throws IOException {
@@ -1153,6 +1153,12 @@ public class TestUtil extends Iced {
     }
 
     return true;
+  }
+
+  public static final String[] ignoredColumns(final Frame frame, final String... usedColumns) {
+    Set<String> ignored = new HashSet(Arrays.asList(frame.names()));
+    ignored.removeAll(Arrays.asList(usedColumns));
+    return ignored.toArray(new String[ignored.size()]);
   }
 
   public static boolean compareFrames(final Frame f1, final Frame f2) throws IllegalStateException {

@@ -1,7 +1,7 @@
 均值编码
 ---------------
 
-均值编码是用目标变量的均值替换分类值的过程。在本例中，我们将尝试使用清理后的贷款俱乐部数据预测 ``bad_loan``： https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv.
+均值编码是用目标变量的均值替换分类值的过程。任何非分类列都会被目标编码器模型自动删除。在本例中，我们将尝试使用清理后的贷款俱乐部数据预测 ``bad_loan``： https://raw.githubusercontent.com/h2oai/app-consumer-loan/master/data/loan.csv.
 
 其中一个预测因子是 ``addr_state``，包含50个惟一值的分类列。在 ``addr_state`` 上执行均值编码，将计算每一个州的 ``bad_loan`` 平均值（由于 ``bad_loan`` 是二项的，这将转化为 ``bad_loan = 1`` 占记录的比例）
 
@@ -463,3 +463,4 @@ Seed
 -  `Target Encoding in H2O-3 Demo <https://github.com/h2oai/h2o-3/blob/master/h2o-r/demos/rdemo.target_encode.R>`__
 -  `Automatic Feature Engineering Webinar <https://www.youtube.com/watch?v=VMTKcT1iHww>`__
 -   Daniele Micci-Barreca. 2001. A preprocessing scheme for high-cardinality categorical attributes in classification and prediction problems. SIGKDD Explor. Newsl. 3, 1 (July 2001), 27-32.
+-  `Zumel, Nina B. and John Mount. "vtreat: a data.frame Processor for Predictive Modeling." (2016). <https://arxiv.org/abs/1611.09477>`__

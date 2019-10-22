@@ -75,7 +75,10 @@
   url = .h2o.calcBaseURL(conn, h2oRestApiVersion = h2oRestApiVersion, urlSuffix = urlSuffix)
 
   opts = curlOptions()
-  if (!is.na(conn@username)) {
+  if (conn@use_spnego) {
+    negotiateAuth = 4
+    opts = curlOptions(httpauth = negotiateAuth, userpwd = ":", .opts = opts)
+  } else if (!is.na(conn@username)) {
     userpwd = sprintf("%s:%s", conn@username, conn@password)
     basicAuth = 1L
     opts = curlOptions(userpwd = userpwd, httpauth = basicAuth, .opts = opts)
@@ -83,10 +86,14 @@
   if (conn@https) {
     if (conn@insecure) {
       opts = curlOptions(ssl.verifypeer = 0L, ssl.verifyhost=0L, .opts = opts)
+    } else if (! is.na(conn@cacert)) {
+      opts = curlOptions(cainfo = conn@cacert, .opts = opts)
     }
   }
   if (!is.na(conn@proxy)) {
     opts = curlOptions(proxy = conn@proxy, .opts = opts)
+  } else if (conn@ip == "localhost" || conn@ip == "127.0.0.1") {
+    opts = curlOptions(noproxy="127.0.0.1,localhost", .opts = opts)
   }
 
   queryString = ""
