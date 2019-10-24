@@ -1058,9 +1058,9 @@ To load an exported flow, click the **Flow** menu and select **Open Flow...**. I
 
  ![Open Flow](images/Flow_Open.png)
 
->**Notes**: 
+>**注意**: 
 
->- Only exported flows using the default .flow filetype are supported. Other filetypes will not open. 
+>- 只有使用默认的.flow文件类型的导出的流程笔记才被支持，其他文件类型不会被打开。
 - If the current notebook has the same name as the selected file, a pop-up confirmation appears to confirm that the current notebook should be overwritten. 
 
 ---
@@ -1068,126 +1068,126 @@ To load an exported flow, click the **Flow** menu and select **Open Flow...**. I
 <a name="Troubleshooting"></a>
 # ...Flow故障排查
 
-To troubleshoot issues in Flow, use the **Admin** menu. The **Admin** menu allows you to check the status of the cluster, view a timeline of events, and view or download logs for issue analysis. 
+要排除Flow中的故障，可以使用**管理**菜单。**管理** 菜单允许您检查集群的状态，查看事件的时间轴,查看或下载用来分析问题的日志。 
 
->**NOTE**: To view the current H2O Flow version, click the **Help** menu, then click **About**. 
+>**注意**: 要查看当前AIR Flow的版本，单击**帮助**菜单，然后单击**关于**。 
 
-## Viewing Cluster Status
+## 查看集群状态
 
-Click the **Admin** menu, then select **Cluster Status**. A summary of the status of the cluster (also known as a cloud) displays, which includes the same information: 
+单击**管理**菜单，然后选择**集群状态**。将显示集群(也称为云)状态的摘要，其中包含如下的信息： 
 
-- Cluster health
-- Whether all nodes can communicate (consensus)
-- Whether new nodes can join (locked/unlocked)
+- 集群健康状况
+- 所有节点是否可以通信(一致)
+- 新节点是否可以连接(锁定/未锁定)
   
-  >**Note**: After you submit a job to H2O, the cluster does not accept new nodes. 
-- H2O version
-- Number of used and available nodes
-- When the cluster was created
+  >**注意**: 向AIR提交作业之后，集群不接受新节点。
+- AIR版本
+- 使用的和可用的节点数量
+- 集群的创建时间
 
  ![Cluster Status](images/Flow_CloudStatus.png)
 
 
-The following information displays for each node:   
+每个节点显示以下信息:  
 
-- IP address (name)
-- Time of last ping
-- Number of cores
-- Load
-- Amount of data (used/total)
-- Percentage of cached data
-- GC (free/total/max)
-- Amount of disk space in GB (free/max)
-- Percentage of free disk space 
+- IP地址(名称)
+- 最近一次ping的时间
+- 核心数
+- 负载
+- 数据量(使用的/总计)
+- 缓存数据的百分率
+- 垃圾回收(空闲/总计/最大)
+- GB为单位的磁盘空间大小(空闲/最大)
+- 空闲磁盘空间百分率 
 
-To view more information, click the **Show Advanced** button. 
-
----
-
-## Viewing CPU Status (Water Meter)
-
-To view the current CPU usage, click the **Admin** menu, then click **Water Meter (CPU Meter)**. A new window opens, displaying the current CPU use statistics. 
+要浏览更多信息，单击**显示高级属性**按钮。 
 
 ---
 
-## Viewing Logs
-To view the logs for troubleshooting, click the **Admin** menu, then click **Inspect Log**. 
+## 查看CPU状态(气量计)
+
+要查看当前CPU用量，单击**管理**菜单，然后单击**气量计(CPU状态)**。这将打开一个新窗口，显示当前的CPU使用统计信息。
+
+---
+
+## 查看日志
+要查看故障排除日志，单击**管理**菜单，然后单击**查看日志**。 
 
  ![Inspect Log](images/Flow_viewLog.png)
 
-To view the logs for a specific node, select it from the drop-down **Select Node** menu. 
+要查看特定节点的日志，从**选择服务节点**下拉菜单中选取该节点。 
 
 ---
 
 <a name="DL_Logs"></a>
-## Downloading Logs
+## 下载日志
 
-To download the logs for further analysis, click the **Admin** menu, then click **Download Log**. A new window opens and the logs download to your default download folder. You can close the new window after downloading the logs. Send the logs to [h2ostream](mailto:h2ostream@googlegroups.com) or [file a JIRA ticket](#ReportIssue) for issue resolution. 
+要下载日志供深入分析，单击**管理**菜单，然后单击**下载日志**。这会打开一个新窗口，日志会下载到您默认的下载文件夹。日志下载结束后您可以关闭该新窗口。疑难问题可以将日志发送到[airstream](mailto:tony@skyease.io)或者[在JIRA中提交问题](#ReportIssue)。
 
 ---
 
-## Viewing Stack Trace Information
+## 查看堆栈信息
 
-To view the stack trace information, click the **Admin** menu, then click **Stack Trace**. 
+要查看堆栈信息，单击**管理**菜单，然后单击**堆栈信息**。
 
  ![Stack Trace](images/Flow_stacktrace.png)
 
-To view the stack trace information for a specific node, select it from the drop-down **Select Node** menu. 
+要查看某一特定节点的堆栈信息，从**选择节点**下拉菜单中选取该节点。
 
 ---
 
-## Viewing Network Test Results
+## 查看网络测试结果
 
-To view network test results, click the **Admin** menu, then click **Network Test**. 
+要查看网络测试结果，单击**管理**菜单，然后点击**网络测试**。 
 
   ![Network Test Results](images/Flow_NetworkTest.png)
 
 ---
 
-## Accessing the Profiler
+## 访问分析器
 
-The Profiler looks across the cluster to see where the same stack trace occurs, and can be helpful for identifying activity on the current CPU. 
-To view the profiler, click the **Admin** menu, then click **Profiler**. 
+分析器检查整个集群，以查看相同的堆栈错误发生在何处，并且可以帮助识别当前CPU上的活动。
+要查看分析器，单击**管理**菜单，然后单击**分析器**。 
 
  ![Profiler](images/Flow_profiler.png)
 
-To view the profiler information for a specific node, select it from the drop-down **Select Node** menu. 
+要查看某一特定节点的分析器信息，从**选择节点**下拉菜单中选取该节点。
 
 ---
 
 
-## Viewing the Timeline
+## 查看时间轴
 
-To view a timeline of events in Flow, click the **Admin** menu, then click **Timeline**. The following information displays for each event: 
+要查看Flow中事件的时间线，单击**管理**菜单，然后单击**时间轴**。每个事件显示以下信息： 
 
-- Time of occurrence (HH:MM:SS:MS)
-- Number of nanoseconds for duration
-- Originator of event ("who")
-- I/O type
-- Event type
-- Number of bytes sent & received
+- 事件发生的时间 (HH:MM:SS:MS)
+- 持续时间的纳秒数
+- 事件的发起者 ("who")
+- I/O 类型
+- 事件类型
+- 发送和接受的字节数
 
  ![Timeline](images/Flow_timeline.png)
 
-To obtain the most recent information, click the **Refresh** button.  
+要获取最新的信息，单击**刷新**按钮。  
 
 ---
 
 <a name="ReportIssue"></a>
-## Reporting Issues
+## 报告问题
 
-If you experience an error with Flow, you can submit a JIRA ticket to notify our team. 
+如果您在使用Flow时遇到错误，你可以通过在JIRA中提交问题来通知我们的团队。
 
-1. First, click the **Admin** menu, then click **Download Logs**. This will download a file contains information that will help our developers identify the cause of the issue.  
-2. Click the **Help** menu, then click **Report an issue**. This will open our JIRA page where you can file your ticket.  
-3. Click the **Create** button at the top of the JIRA page. 
-4. Attach the log file from the first step, write a description of the error you experienced, then click the **Create** button at the bottom of the page. Our team will work to resolve the issue and you can track the progress of your ticket in JIRA. 
+1. 首先，单击**管理**菜单，然后单击**下载日志**。这会下载一个包含了可以帮助我们开发者定位问题的信息的文件。  
+2. 单击**帮助**菜单，然后单击**报告问题**。这将打开我们的JIRA页面，您可以在这里提交您的问题。  
+3. 单击位于JIRA页面顶部的**创建**按钮。
+4. 在第一步的时候把日志文件附上去，写下关于您正碰到错误的描述，然后单击位于页面底部的**创建**按钮。我们的团队将努力解决这个问题，您可以在JIRA中跟踪该问题的进度。 
 
 ---
 
-## Requesting Help
+## 请求帮助
 
-If you have a Google account, you can submit a request for assistance with H2O on our Google Groups page, [H2Ostream](https://groups.google.com/forum/#!forum/h2ostream). 
+如果您有谷歌账号，you can submit a request for assistance with H2O on our Google Groups page, [H2Ostream](https://groups.google.com/forum/#!forum/h2ostream). 
 
 To access H2Ostream from Flow:
 
@@ -1204,9 +1204,9 @@ Or, you can post your question on [Stack Overflow](https://stackoverflow.com/que
 
 ---
 
-## Shutting Down H2O
+## 关闭AIR
 
-To shut down H2O, click the **Admin** menu, then click **Shut Down**. A *Shut down complete* message displays in the upper right when the cluster has been shut down. 
+要关闭AIR，单击**管理**菜单，然后单击**关闭服务器**。当集群已经被关闭后在窗口右上角会显示一条*关闭完成*的消息。 
 
 ---
 
