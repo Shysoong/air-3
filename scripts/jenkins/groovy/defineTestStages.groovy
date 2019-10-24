@@ -208,7 +208,7 @@ def call(final pipelineContext) {
     ],
     [
       stageName: 'DMLC XGB Benchmark', executionScript: 'h2o-3/scripts/jenkins/groovy/benchmarkStage.groovy',
-      timeoutValue: 120, target: 'build-and-benchmark-latest-dmlc-r-xgboost', component: pipelineContext.getBuildConfig().COMPONENT_ANY,
+      timeoutValue: 120, target: 'benchmark-dmlc-r-xgboost', component: pipelineContext.getBuildConfig().COMPONENT_ANY,
       additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_R],
       customData: [algorithm: 'xgb-dmlc'], makefilePath: pipelineContext.getBuildConfig().BENCHMARK_MAKEFILE_PATH,
       nodeLabel: pipelineContext.getBuildConfig().getBenchmarkNodeLabel(),
@@ -364,7 +364,7 @@ def call(final pipelineContext) {
     }
 
     def stageTemplate = [
-      target: target, timeoutValue: 45,
+      target: target, timeoutValue: 60,
       component: pipelineContext.getBuildConfig().COMPONENT_ANY,
       additionalTestPackages: [
               pipelineContext.getBuildConfig().COMPONENT_HADOOP,
@@ -375,11 +375,7 @@ def call(final pipelineContext) {
         distribution: distribution.name,
         version: distribution.version,
         commandFactory: 'h2o-3/scripts/jenkins/groovy/hadoopCommands.groovy',
-        ldapConfigPath: ldapConfigPath,
-        kerberosUserName: 'jenkins@H2O.AI',
-        kerberosPrincipal: 'HTTP/localhost@H2O.AI',
-        kerberosConfigPath: 'scripts/jenkins/config/kerberos.conf',
-        kerberosPropertiesPath: 'scripts/jenkins/config/kerberos.properties',
+        ldapConfigPath: ldapConfigPath
       ], pythonVersion: '2.7',
       customDockerArgs: [ '--privileged' ],
       executionScript: 'h2o-3/scripts/jenkins/groovy/hadoopStage.groovy'
@@ -424,7 +420,7 @@ def call(final pipelineContext) {
     }
 
     def stageTemplate = [
-            target: target, timeoutValue: 45,
+            target: target, timeoutValue: 60,
             component: pipelineContext.getBuildConfig().COMPONENT_ANY,
             additionalTestPackages: [
                     pipelineContext.getBuildConfig().COMPONENT_HADOOP,
