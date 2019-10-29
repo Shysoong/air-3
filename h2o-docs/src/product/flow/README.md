@@ -280,170 +280,170 @@ Heading 6     | `6`
 
    >**注意**: 对于SVMLight数据，列索引必须为>= 1，列必须按升序排列。
 
-If a separator or delimiter is used, select it from the **Separator** list. 
+如果使用了分隔符，从**分隔符**列表中选取它。
 
-Select a column header option, if applicable: 
+如果适用，选择一个列头选项：
 
-- **Auto**: Automatically detect header types.
-- **First row contains column names**: Specify heading as column names.
-- **First row contains data**: Specify heading as data. This option is selected by default.
+- **自动**： 自动检测列头类型。
+- **首行包含列名**：指定列头为列名。
+- **首行包含数据**：指定列头为数据。此选项为默认选中。
 
-Select any necessary additional options: 
+选择任何必要的附加选项：
 
-- **Enable single quotes as a field quotation character**: Treat single quote marks (also known as apostrophes) in the data as a character, rather than an enum. This option is not selected by default. 
-- **Delete on done**: Check this checkbox to delete the imported data after parsing. This option is selected by default. 
+- **启用单引号作为字段引号字符**： 将数据中的单引号（也称为撇号）视为字符，而不是枚举.该选项没有被默认选中。
+- **完成后删除**：选取复选框以在解析后删除导入的数据。该选项被默认选中。 
 
-A preview of the data displays in the "Edit Column Names and Types" section. 
+在"编辑列名和类型"部分会展示一部分预览数据。
 
 
-To change or add a column name, edit or enter the text in the column's entry field. In the screenshot below, the entry field for column 16 is highlighted in red.  
+要改变或者新增列名，编辑或在列的输入字段中输入文本。在下面的屏幕截图中，第16列的输入字段以红色高亮显示。  
   
  ![Flow - Column Name Entry Field](images/Flow_ColNameEntry.png)
 
-To change the column type, select the drop-down list to the right of the column name entry field and select the data type. The options are: 
+要改变列类型，选择列名输入字段右侧的下拉列表并选择数据类型。选项有：
   
-  - Unknown
-  - Numeric
-  - Enum
-  - Time
+  - 未知
+  - 数值
+  - 枚举
+  - 时间
   - UUID
-  - String
-  - Invalid
+  - 字符串
+  - 无效
 
-You can search for a column by entering it in the *Search by column name...* entry field above the first column name entry field. As you type, H2O displays the columns that match the specified search terms.
+您可以通过位于第一列的列名输入字段上方的*通过列名查找...*输入字段中输入列名来查找。键入时，AIR将显示与指定搜索项匹配的列。
 
-**Note**: Only custom column names are searchable. Default column names cannot be searched. 
+**注意**： 只有自定义列名是可搜索的。无法搜索默认列名。
 
-To navigate the data preview, click the **<- Previous page** or **-> Next page** buttons.  
+若要浏览数据预览，请单击 **<- 前一页**或者 **-> 后一页** 按钮。
 
   ![Flow - Pagination buttons](images/Flow_PageButtons.png)
 
-After making your selections, click the **Parse** button. 
+做出选择后，单击**解析**按钮。
 
-After you click the **Parse** button, the code for the current job displays. 
+单击**解析**按钮后，将显示当前作业的代码。
 
  ![Flow - Parse code](images/Flow_parse_code_ex.png)
  
-Since we've submitted a couple of jobs (data import & parse) to H2O now, let's take a moment to learn more about jobs in H2O.  
+由于我们已经向AIR提交了数个作业（数据导入和解析），现在让我们花点时间来了解更多关于AIR中的作业。
  
 --- 
  
 <a name="ViewJobs"></a>
 ## 查看任务
 
-Any command (such as `importFiles`) you enter in H2O is submitted as a job, which is associated with a key. The key identifies the job within H2O and is used as a reference.
+任何您在AIR中输入的命令（诸如 `importFiles`）都是作为任务提交的，它们都与某个特定键关联。该键标识AIR中的任务，并用作引用。
 
 ### 查看所有任务
 
-To view all jobs, click the **Admin** menu, then click **Jobs**, or enter `getJobs` in a cell in CS mode. 
+要查看所有的任务，单击**管理**菜单，然后单击**任务作业**，或者在CS（命令行）模式下在单元格中输入`getJobs`。
 
  ![View Jobs](images/Flow_getJobs.png)
 
-The following information displays: 
+显示以下信息:
 
-- Type (for example, `Frame` or `Model`)
-- Link to the object 
-- Description of the job type (for example, `Parse` or `GBM`)
-- Start time
-- End time
-- Run time
+- 类型（例如，`Frame` 或者 `Model`）
+- 对象的链接
+- 任务类型的描述（例如， `Parse` 或者 `GBM`）
+- 开始时间
+- 结束时间
+- 运行时间
 
-To refresh this information, click the **Refresh** button. To view the details of the job, click the **View** button. 
+要刷新这些信息，单击**刷新**按钮。要查看任务的细节，单击**查看**按钮。
 
 ### 查看特定任务
 
-To view a specific job, click the link in the "Destination" column. 
+要查看一个特定的任务，单击"最终产物"列中的链接。
 
 ![View Job - Model](images/Flow_ViewJob_Model.png)
 
-The following information displays: 
+显示以下信息: 
 
-- Type (for example, `Frame`)
-- Link to object (key)
-- Description (for example, `Parse`)
-- Status
-- Run time
-- Progress
+- 类型（例如，`Frame`）
+- 对象的链接（键）
+- 描述（例如，`Parse`）
+- 状态
+- 运行时间
+- 进度
 
->**NOTE**: For a better understanding of how jobs work, make sure to review the [Viewing Frames](#ViewFrames) section as well. 
+>**注意**：为了更好地理解任务是如何工作的，请确保同时查看[Viewing Frames](#ViewFrames)部分。 
  
-Ok, now that you understand how to find jobs in H2O, let's submit a new one by building a model. 
+好了，现在您已经理解了如何在AIR中查找任务了，让我们通过构建一个模型来提交一个新任务吧。
 
 ---
 
 <a name="BuildModel"></a>
 # ... 构建模型
 
-To build a model: 
+要构建一个模型： 
 
-- Click the **Assist Me!** button in the row of buttons below the menus and select **buildModel**
+- 在菜单下面的一排按钮中单击**建模助手**，并且选取**构建模型**
 
-  or 
+  或者 
 
-- Click the **Assist Me!** button, select **getFrames**, then click the **Build Model...** button below the parsed .hex data set
+- 单击**建模助手**按钮，选择**获取数据帧**，然后在解析过的.hex数据集下面单击**构建模型...**
 
-  or 
+  或者 
 
-- Click the **View** button after parsing data, then click the **Build Model** button
+- 解析数据后单击**查看**按钮，然后单击**构建模型**按钮
 
-  or 
+  或者 
 
-- Click the drop-down **Model** menu and select the model type from the list
+- 单击**模型**下拉菜单，然后从列表中选取模型类型
 
 
-The **Build Model...** button can be accessed from any page containing the .hex key for the parsed data (for example, `getJobs` > `getFrame`). The following image depicts the K-Means model type. Available options vary depending on model type. 
+**构建模型...** 按钮可以从包含已解析数据的.hex键的任何页面进行访问（例如，`getJobs` > `getFrame`）。下图描述了K-Means模型类型。可用的选项因模型类型而异。
 
 
  ![Model Builder](images/Flow_ModelBuilder.png)
 
  
-In the **Build a Model** cell, select an algorithm from the drop-down menu: 
+在**构建模型**单元格，从下拉菜单中选择一个算法：
 
 <a name="Kmeans"></a>
-- **K-means**: Create a K-Means model.
+- **K-means**: 创建一个K-Means模型。
 
 <a name="GLM"></a>
-- **Generalized Linear Model**: Create a Generalized Linear model.
+- **Generalized Linear Model**: 创建一个广义线性模型。
 
 <a name="DRF"></a>
-- **Distributed RF**: Create a distributed Random Forest model.  
+- **Distributed RF**: 创建一个分布式随机森林模型。
 
 <a name="NB"></a>
-- **Naïve Bayes**: Create a Naïve Bayes model. 
+- **Naïve Bayes**: 创建一个朴素贝叶斯模型。
 
 <a name="PCA"></a> 
-- **Principal Component Analysis**: Create a Principal Components Analysis model for modeling without regularization or performing dimensionality reduction. 
+- **Principal Component Analysis**: 创建一个主成分分析模型用于不需要进行正则化或降维的建模。 
 
 <a name="GBM"></a>
-- **Gradient Boosting Machine**: Create a Gradient Boosted model
+- **Gradient Boosting Machine**: 创建一个梯度推进模型。
 
 <a name="DL"></a>
-- **Deep Learning**: Create a Deep Learning model.
+- **Deep Learning**: 创建一个深度学习模型。
 
 
-The available options vary depending on the selected model. If an option is only available for a specific model type, the model type is listed. If no model type is specified, the option is applicable to all model types. 
+可用的选项根据所选的模型而有所不同。如果一个选项只对特定的模型类型可用，则列出模型类型。如果没有指定模型类型，则该选项适用于所有模型类型。
 
-- **model_id**: (Optional) Enter a custom name for the model to use as a reference. By default, H2O automatically generates an ID containing the model type (for example, `gbm-6f6bdc8b-ccbc-474a-b590-4579eea44596`). 
+- **model_id**: (可选) 输入要用作引用的模型的自定义名称。默认情况下，AIR自动生成一个包含模型类型的ID(例如，`gbm-6f6bdc8b-ccbc-474a-b590-4579eea44596`)。 
 
-- **training_frame**: (Required) Select the dataset used to build the model. 
+- **training_frame**: (必须) 选择用于构建模型的数据集。 
 
-- **validation_frame**: (Optional) Select the dataset used to evaluate the accuracy of the model. 
+- **validation_frame**: (可选) 选择用于评估模型准确性的数据集。 
 
-- **nfolds**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF)) Specify the number of folds for cross-validation. 
+- **nfolds**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF)) 指定交叉验证的折叠数。 
 
-- **response_column**: (Required for [GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [Naïve Bayes](#NB)) Select the column to use as the independent variable.
+- **response_column**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [Naïve Bayes](#NB) 需要) 选择要用作独立变量的列。
 
-- **ignored_columns**: (Optional) Click the checkbox next to a column name to add it to the list of columns excluded from the model. To add all columns, click the **All** button. To remove a column from the list of ignored columns, click the X next to the column name. To remove all columns from the list of ignored columns, click the **None** button. To search for a specific column, type the column name in the **Search** field above the column list. To only show columns with a specific percentage of missing values, specify the percentage in the **Only show columns with more than 0% missing values** field. To change the selections for the hidden columns, use the **Select Visible** or **Deselect Visible** buttons. 
+- **ignored_columns**: (可选)单击列名旁边的复选框，将其添加到模型排除的列列表中。要添加所有列，单击**全选**按钮。要从忽略列的列表中删除列，请单击列名旁边的X。从被忽略列的列表中删除所有列，单击**全不选**按钮。搜索特定的列，在列列表上方的**查找**字段中输入列名。只显示具有特定丢失值百分比的列，在**只展示缺失超过0%数据的列**字段中指定百分比。更改隐藏列的选择，使用**选择可见**或者**反选可见**按钮。 
 
-- **ignore\_const\_cols**: (Optional) Check this checkbox to ignore constant training columns, since no information can be gained from them. This option is selected by default. 
+- **ignore\_const\_cols**: (可选) 选中此复选框以忽略常数训练列，因为无法从中获得任何信息。该选项默认被选中。
 
-- **transform**: ([PCA](#PCA)) Select the transformation method for the training data: None, Standardize, Normalize, Demean, or Descale.  
+- **transform**: ([PCA](#PCA)) 选择训练数据的转换方法：无、标准化、规范化、Demean或Descale。 
 
-- **pca_method**: ([PCA](#PCA)) Select the algorithm to use for computing the principal components: 
-	- *GramSVD*: Uses a distributed computation of the Gram matrix, followed by a local SVD using the JAMA package
-	- *Power*: Computes the SVD using the power iteration method
-	- *Randomized*: Uses randomized subspace iteration method 
-	- *GLRM*: Fits a generalized low-rank model with L2 loss function and no regularization and solves for the SVD using local matrix algebra
+- **pca_method**: ([PCA](#PCA)) 选择计算主成分的算法： 
+	- *GramSVD*: 使用Gram矩阵的分布式计算，然后使用JAMA包进行局部SVD
+	- *Power*: 利用幂迭代法计算奇异值分解（SVD）
+	- *Randomized*: 采用随机子空间迭代法
+	- *GLRM*: 拟合了具有L2损失函数且无正则化的广义低秩模型，并利用局部矩阵代数求解奇异值分解
 
 - **family**: ([GLM](#GLM)) Select the model type (Gaussian, Binomial, Multinomial, Poisson, Gamma, or Tweedie).
 
@@ -671,49 +671,49 @@ The available options vary depending on the selected model. If an option is only
 <a name="ViewModel"></a>
 ## 查看模型
 
-Click the **Assist Me!** button, then click the **getModels** link, or enter `getModels` in the cell in CS mode and press **Ctrl+Enter**. A list of available models displays. 
+单击**建模助手**按钮，然后单击**获取模型**链接，或者在CS模式下在单元格中输入`getModels`然后按下**Ctrl+Enter**。这将显示可用模型的列表。
 
  ![Flow Models](images/Flow_getModels.png)
 
-To view all current models, you can also click the **Model** menu and click **List All Models**. 
+要查看当前所有的模型，您也可以单击**模型**菜单，然后单击**列出所有模型**。
 
-To inspect a model, check its checkbox then click the **Inspect** button, or click the **Inspect** button to the right of the model name. 
+要检查一个模型，选择它的复选框然后单击**检查**按钮，或者单击位于模型名称右边的**检查**按钮。
 
  ![Flow Model](images/Flow_GetModel.png)
  
- A summary of the model's parameters displays. To display more details, click the **Show All Parameters** button. 
+ 这将显示模型参数的摘要。要显示更多的细节，单击**显示所有参数**按钮。
  
-To delete a model, click the **Delete** button. 
+要删除一个模型，单击**删除**按钮。 
 
-To generate a Plain Old Java Object (POJO) that can use the model outside of H2O, click the **Download POJO** button. 
+要生成一个可在AIR环境外部使用的传统的JAVA对象（POJO）模型，单击**下载POJO** 按钮。 
 
->**Note**: A POJO can be run in standalone mode or it can be integrated into a platform, such as [Hadoop's Storm](https://github.com/h2oai/h2o-training/blob/master/tutorials/streaming/storm/README.md). To make the POJO work in your Java application, you will also need the `h2o-genmodel.jar` file (available in `h2o-3/h2o-genmodel/build/libs/h2o-genmodel.jar`).
+>**注意**: 一个POJO可以在独立模式下运行或者也可以集成到平台中运行，例如 [Hadoop's Storm](https://github.com/h2oai/h2o-training/blob/master/tutorials/streaming/storm/README.md)。要使POJO在您的Java应用中工作，您也需要 `h2o-genmodel.jar` 文件 (可在 `h2o-3/h2o-genmodel/build/libs/h2o-genmodel.jar` 中找到)。
 
 ---
 
 ### 导出和导入模型
 
-**To export a built model:**
+**要导出一个构建好的模型：**
 
-1. Click the **Model** menu at the top of the screen. 
-2. Select *Export Model...*
-3. In the `exportModel` cell that appears, select the model from the drop-down *Model:* list.
-4. Enter a location for the exported model in the *Path:* entry field. 
-	>**Note**: If you specify a location that doesn't exist, it will be created. For example, if you only enter `test` in the *Path:* entry field, the model will be exported to `h2o-3/test`. 
-5. To overwrite any files with the same name, check the *Overwrite:* checkbox. 
-6. Click the **Export** button. A confirmation message displays when the model has been successfully exported. 
+1. 在屏幕上方单击**模型**菜单。
+2. 选择*导出模型...*
+3. 在出现的`exportModel`单元格中，从*模型：*下列了列表中选择模型。
+4. 在*路径：*输入框中为要导出的模型输入路径。 
+	>**注意**: 如果您指定了一个不存在的位置，它会先被创建。举例来说，如果您在*路径：* 输入框中只输入`test`，模型会被导出到`h2o-3/test`。 
+5. 覆盖具有相同名称的任何文件，勾选*覆盖:* 复选框。
+6. 单击 **导出** 按钮。当模型成功导出时，将显示一条确认消息。
 
   ![Export Model](images/ExportModel.png)
 
 
-**To import a built model:** 
+**要导入一个构建好的模型：** 
 
-1. Click the **Model** menu at the top of the screen. 
-2. Select *Import Model...*
-3. Enter the location of the model in the *Path:* entry field. 
-	>**Note**: The file path must be complete (e.g., `Users/h2o-user/h2o-3/exported_models`). Do not rename models while importing. 
-4. To overwrite any files with the same name, check the *Overwrite:* checkbox. 
-5. Click the **Import** button. A confirmation message displays when the model has been successfully imported. To view the imported model, click the **View Model** button. 
+1. 在屏幕上方单击**模型**菜单。
+2. 选择*导入模型...*
+3. 在*路径：*输入框中输入模型的位置。
+	>**注意**: 文件路径必须完整(e.g., `Users/h2o-user/h2o-3/exported_models`)。导入时不要重命名模型。
+4. 覆盖具有相同名称的任何文件，勾选*覆盖:* 复选框。
+5. 单击**导入**按钮。当模型成功导入时，将显示一条确认消息。要查看导入的模型，单击**查看模型** 按钮。
 
   ![Import Model](images/ImportModel.png)
 
@@ -722,25 +722,25 @@ To generate a Plain Old Java Object (POJO) that can use the model outside of H2O
 ### 使用网格搜索
 
 
-To include a parameter in a grid search in Flow, check the checkbox in the *Grid?* column to the right of the parameter name (highlighted in red in the image below). 
+要在Flow中将一个参数包含进网格搜索，勾选参数名称右边的*Grid?*列上的复选框（下图以红色高亮显示）。 
 
   ![Grid Search Column](images/Flow_GridSearch.png)
 
 
-- If the parameter selected for grid search is Boolean (T/F or Y/N), both values are included when the *Grid?* checkbox is selected. 
-- If the parameter selected for grid search is a list of values, the values display as checkboxes when the *Grid?* checkbox is selected. More than one option can be selected. 
-- If the parameter selected for grid search is a numerical value, use a semicolon (;) to separate each additional value. 
-- To view a list of all grid searches, select the **Model** menu, then click **List All Grid Search Results**, or click the **Assist Me** button and select **getGrids**. 
+- 如果选择启用网格搜索的参数是布尔型的（T/F或者Y/N），当*Grid?* 复选框被勾选时两个值都包含在内。 
+- 如果选择启用网格搜索的参数是值的列表，当*Grid?* 复选框被勾选时这些值会以复选框的形式展现出来。可以选择多个选项。 
+- 如果选择启用网格搜索的参数是数值型的，使用分号(;)来分隔每个附加值。
+- 要查看所有的网格搜索的结果列表，单击**模型**菜单，然后单击**列出网格搜索结果**，或者单击**建模助手**按钮然后选择**获取网格搜索结果**。 
 
 
 ---
 
 ### 检查点模型
 
-Some model types, such as DRF, GBM, and Deep Learning, support checkpointing. A checkpoint resumes model training so that you can iterate your model. The dataset must be the same. The following  model parameters must be the same when restarting a model from a checkpoint:
+一些模型类型，诸如DRF、GBM和深度学习支持检查点机制。检查点恢复模型训练，以便您可以迭代您的模型，数据集必须相同。当从检查点重启模型的时候下列模型参数必须相同：
 
 
-Must be the same as in checkpoint model         |            |      | 
+必须与检查点模型相同         |            |      | 
 --------------------|------------------|-----------------------|
  `drop_na20_cols` | `response_column` | `activation` |
  `use_all_factor_levels` | `adaptive_rate` | `autoencoder` |
@@ -752,9 +752,9 @@ Must be the same as in checkpoint model         |            |      |
 `distribution` | `tweedie_power` | |
 
 
-The following parameters can be modified when restarting a model from a checkpoint: 
+从检查点重新启动模型时，可以修改以下参数： 
 
-Can be modified | | | 
+可被修改的 | | | 
 ----------------|-|-|
 `seed` | `checkpoint`| `epochs` | 
 `score_interval`| `train_samples_per_iteration`| `target_ratio_comm_to_comp`
@@ -771,11 +771,11 @@ Can be modified | | |
 `elastic_averaging_moving_rate`| `elastic_averaging_regularization`| `mini_batch_size`
 
 
-1. After building your model, copy the `model_id`. To view the `model_id`, click the **Model** menu then click **List All Models**. 
-2. Select the model type from the drop-down **Model** menu. 
-	>**Note**: The model type must be the same as the checkpointed model. 
-3. Paste the copied `model_id` in the *checkpoint* entry field. 
-4. Click the **Build Model** button. The model will resume training. 
+1. 构建完您的模型后，拷贝`model_id`。要查看`model_id`，单击**模型**菜单，然后单击**列出所有模型**。 
+2. 从**模型**下拉菜单中选择模型类型。
+	>**注意**: 模型类型必须和检查点模型一致。
+3. 在*checkpoint*输入框粘贴拷贝的 `model_id`。
+4. 单击**构建模型**按钮，模型将恢复训练。
 
 
 ---
