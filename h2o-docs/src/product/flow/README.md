@@ -782,19 +782,19 @@ Heading 6     | `6`
 
 ### 解释模型结果
 
-**Scoring history**: [GBM](#GBM), [DL](#DL) Represents the error rate of the model as it is built. Typically, the error rate will be higher at the beginning (the left side of the graph) then decrease as the model building completes and accuracy improves. Can include mean squared error (MSE) and deviance. 
+**得分历史**: [GBM](#GBM), [DL](#DL) 表示模型构建时的错误率。通常，错误率在开始时(图的左侧)会更高，然后随着模型构建的完成和准确性的提高而降低。包括均方误差(MSE)和偏差。
 
   ![Scoring History example](images/Flow_ScoringHistory.png)
 
-**Variable importances**: [GBM](#GBM), [DL](#DL) Represents the statistical significance of each variable in the data in terms of its affect on the model. Variables are listed in order of most to least importance. The percentage values represent the percentage of importance across all variables, scaled to 100%. The method of computing each variable's importance depends on the algorithm.  To view the scaled importance value of a variable, use your mouse to hover over the bar representing the variable. 
+**变量重要性**: [GBM](#GBM), [DL](#DL) 表示数据中各变量对模型影响的统计显著性。变量按重要性从高到低排列。百分比值表示所有变量的重要性百分比，比例为100%。计算每个变量重要性的方法取决于算法。若要查看变量缩放后的重要性值，请使用鼠标将其悬停在表示该变量的条上。
 
   ![Variable Importances example](images/Flow_VariableImportances.png)
 
-**Confusion Matrix**: [DL](#DL) Table depicting performance of algorithm in terms of false positives, false negatives, true positives, and true negatives. The actual results display in the columns and the predictions display in the rows; correct predictions are highlighted in yellow. In the example below, `0` was predicted correctly 902 times, while `8` was predicted correctly 822 times and `0` was predicted as `4` once.
+**混淆矩阵**: [DL](#DL) 表中描述了算法性能的假阳性，假阴性，真阳性，真阴性。实际结果显示在列中，预测显示在行中。正确的预测用黄色突出显示。在下面的例子中，`0`被正确预测了902次, 而`8`被正确预测了822次，并且`0`被预测为`4`一次。
 
   ![Confusion Matrix example](images/Flow_ConfusionMatrix.png)
 
-**ROC Curve**: [DL](#DL), [GLM](#GLM), [DRF](#DRF) Graph representing the ratio of true positives to false positives. To view a specific threshold, select a value from the drop-down **Threshold** list. To view any of the following details, select it from the drop-down **Criterion** list: 
+**ROC曲线**: [DL](#DL), [GLM](#GLM), [DRF](#DRF) 表示真阳性与假阳性比率的图表。要查看特定的阈值，从**Threshold**下拉列表中选择一个值。要查看以下任何细节，从**Criterion**下拉列表中选择对应的值：
 
 - Max f1
 - Max f2
@@ -804,21 +804,21 @@ Heading 6     | `6`
 - Max absolute MCC (the threshold that maximizes the absolute Matthew's Correlation Coefficient)
 - Max min per class accuracy
 
-The lower-left side of the graph represents less tolerance for false positives while the upper-right represents more tolerance for false positives. Ideally, a highly accurate ROC resembles the following example. 
+图的左下角表示对假阳性的容忍度较低，而右上角表示对假阳性的容忍度较高。理想情况下，一个高度精确的ROC类似于下面的例子。 
 
  ![ROC Curve example](images/Flow_ROC.png)
 
-**Hit Ratio**: [GBM](#GBM), [DRF](#DRF), [NaiveBayes](#NB), [DL](#DL), [GLM](#GLM) (Multinomial Classification only) Table representing the number of times that the prediction was correct out of the total number of predictions. 
+**命中率**: [GBM](#GBM), [DRF](#DRF), [NaiveBayes](#NB), [DL](#DL), [GLM](#GLM) (只多项分类适用) 表中表示预测正确的次数占预测总数的比例。
 
  ![Hit Ratio Table](images/HitRatioTable.png)
 
 
-**Standardized Coefficient Magnitudes** [GLM](#GLM)  Bar chart representing the relationship of a specific feature to the response variable. Coefficients can be positive (orange) or negative (blue). A positive coefficient indicates a positive relationship  between the feature and the response, where an increase in the feature corresponds with an increase in the response, while a negative coefficient represents a negative relationship between the feature and the response where an increase in the feature corresponds with a decrease in the response (or vice versa). 
+**标准化系数大小** [GLM](#GLM)  表示特定特性与响应变量之间关系的柱状图。系数可以是正（橙色）或者负（蓝色）。正系数表示特征与响应之间的正相关关系，意味着特性值的增加对应于响应变量的增加，而负系数表示特征值与响应变量之间的负相关关系，特征值的增加对应响应变量的减少(反之亦然)。
 
   ![Standardized Coefficient Magnitudes](images/SCM.png)
 
 
-To learn how to make predictions, continue to the next section. 
+要学习如何进行预测，请继续学习下一部分。
 
 ---
 
@@ -826,8 +826,8 @@ To learn how to make predictions, continue to the next section.
 <a name="Predict"></a>
 # ... 做出预测
 
-After creating your model, click the key link for the model, then click the **Predict** button. 
-Select the model to use in the prediction from the drop-down **Model:** menu and the data frame to use in the prediction from the drop-down **Frame:** menu, then click the **Predict** button. 
+创建好您的模型后，单击该模型的键的链接，然后单击**预测**按钮。
+从**模型:** 下拉菜单中选择要用于预测的模型，然后从**数据帧:** 下拉菜单中选择要用于预测的数据帧，然后单击**预测** 按钮。 
 
  ![Making Predictions](images/Flow_makePredict.png)
 
@@ -837,12 +837,12 @@ Select the model to use in the prediction from the drop-down **Model:** menu and
 <a name="ViewPredict"></a>
 ## 查看预测信息
 
-Click the **Assist Me!** button, then click the **getPredictions** link, or enter `getPredictions` in the cell in CS mode and press **Ctrl+Enter**. A list of the stored predictions displays. 
-To view a prediction, click the **View** button to the right of the model name. 
+单击**建模助手**按钮，然后单击**获取预测**链接，或者在CS模式下在单元格中输入`getPredictions`并且按下**Ctrl+Enter**，这将显示平台中存储的预测列表。
+要查看一个预测，单击模型名称右边的**查看**按钮。 
 
  ![Viewing Predictions](images/Flow_getPredict.png)
 
-You can also view predictions by clicking the drop-down **Score** menu and selecting **List All Predictions**.
+您也可以通过单击**评价**下拉菜单然后选择**列出所有预测信息**来查看预测信息。
 
 
  
@@ -850,84 +850,84 @@ You can also view predictions by clicking the drop-down **Score** menu and selec
 ---
 
 <a name="ViewFrame"></a>
-## Viewing Frames
+## 查看数据帧
 
-To view a specific frame, click the "Key" link for the specified frame, or enter `getFrameSummary "FrameName"` in a cell in CS mode (where `FrameName` is the name of a frame, such as `allyears2k.hex`).
+要查看一个特定的帧，单击特定帧的"键"，或者在CS模式下在单元格中输入`getFrameSummary "FrameName"`（`FrameName` 是数据帧的名字，诸如`allyears2k.hex`）。
 
  ![Viewing specified frame](images/Flow_getFrame.png) 
 
 
-From the `getFrameSummary` cell, you can: 
+在`getFrameSummary`单元格中，您可以：
 
-- view a truncated list of the rows in the data frame by clicking the **View Data** button
-- split the dataset by clicking the **Split...** button
-- view the columns, data, and factors in more detail or plot a graph by clicking the **Inspect** button
-- create a model by clicking the **Build Model** button
-- make a prediction based on the data by clicking the **Predict** button
-- download the data as a .csv file by clicking the **Download** button
-- view the characteristics or domain of a specific column by clicking the **Summary** link
+- 通过单击**浏览数据**按钮来查看截取后的数据帧的行列表
+- 通过点击**拆分数据...** 来拆分数据集
+- 通过单击**检查**按钮来查看列、数据和其他因素的详细信息或者绘图
+- 通过单击**构建模型**按钮来创建模型
+- 通过单击**预测**按钮来根据数据生成预测
+- 通过单击**下载**按钮来下载.csv文件形式的数据
+- 通过单击**摘要**链接查看特定列的特征或域
 
-When you view a frame, you can "drill-down" to the necessary level of detail (such as a specific column or row) using the **Inspect** button or by clicking the links. The following screenshot displays the results of clicking the **Inspect** button for a frame.
+当您查看一个数据帧的时候，您可以使用**检查**按钮或者通过单击对应链接"下钻"到必要的详情层级（例如特定的列或行）。下面的截图显示了单击**检查**按钮查看数据帧的结果。
 
 ![Inspecting Frames](images/Flow_inspectFrame.png)
 
-This screenshot displays the results of clicking the **columns** link. 
+下面的截图展示了单击**columns**链接的结果。 
 
 ![Inspecting Columns](images/Flow_inspectCol.png)
 
 
-To view all frames, click the **Assist Me!** button, then click the **getFrames** link, or enter `getFrames` in the cell in CS mode and press **Ctrl+Enter**. You can also view all current frames by clicking the drop-down **Data** menu and selecting **List All Frames**. 
+要查看所有的数据帧，单击**建模助手**按钮，然后单击**获取数据帧**链接，或者在CS模式下在单元格中输入`getFrames`并且按下**Ctrl+Enter**。您也可以通过单击**数据菜单**然后选择**列出所有数据帧**来查看平台中当前所有的数据帧。
 
-A list of the current frames in H2O displays that includes the following information for each frame: 
-
-
-- Link to the frame (the "key")
-- Number of rows and columns
-- Size 
+AIR中显示的当前数据帧的列表，其中包括每个帧的以下信息：
 
 
-For parsed data, the following information displays: 
+- 到数据帧的链接（即"键"）
+- 行数和列数
+- 大小 
 
-- Link to the .hex file
-- The **Build Model**, **Predict**, and **Inspect** buttons
+
+对于解析后的数据，显示以下信息:
+
+- 到.hex文件的链接
+- **构建模型**、**预测**和**检查**按钮
 
  ![Parsed Frames](images/Flow_getFrames.png)
 
-To make a prediction, check the checkboxes for the frames you want to use to make the prediction, then click the **Predict on Selected Frames** button. 
+要生成一个预测，勾选您想用来生成预测的数据帧的复选框，然后单击**在所选数据帧上预测**按钮。 
 
 ---
 
-### Splitting Frames
+### 拆分数据帧
 
-Datasets can be split within Flow for use in model training and testing. 
+数据集可以在Flow中分割，用于模型训练和测试。
 
  ![splitFrame cell](images/Flow_splitFrame.png)
 
-1. To split a frame, click the **Assist Me** button, then click **splitFrame**.
+1. 要拆分数据帧，单击**建模助手**按钮，然后单击**拆分数据帧**。
   
-  >**Note**: You can also click the drop-down **Data** menu and select **Split Frame...**.
-2. From the drop-down **Frame:** list, select the frame to split. 
-3. In the second **Ratio** entry field, specify the fractional value to determine the split. The first **Ratio** field is automatically calculated based on the values entered in the second **Ratio** field. 
+  >**注意**: 您也可以单击**数据**下拉菜单然后选择**拆分数据帧...**。
+2. 从下拉**数据帧:** 列表中选择要拆分的数据帧。
+3. 在第二个**比例**输入字段处指定确定分割用的分数值。第一个**比例**字段根据第二个**比例**字段中输入的值自动计算。
    
-  >**Note**: Only fractional values between 0 and 1 are supported (for example, enter `.5` to split the frame in half). The total sum of the ratio values must equal one. H2O automatically adjusts the ratio values to equal one; if unsupported values are entered, an error displays.  
-4. In the **Key** entry field, specify a name for the new frame. 
-5. (Optional) To add another split, click the **Add a split** link. To remove a split, click the `X` to the right of the **Key** entry field. 
-6. Click the **Create** button.  
+  >**注意**: 只支持0和1之间的小数值（例如，输入`.5`来分割数据帧为两半）。比例值的和必须等于一。AIR会自动调整比例值使和等于一，如果输入了不支持的值，会显示一个错误。
+4. 在**键**字段处，给新的帧指定一个名字。
+5. （可选）要再一次拆分，单击**再拆分一次** 链接。要移除一次拆分，单击**键**字段右侧的`X`。 
+6. 单击**创建拆分**按钮。
 
 ---
-### Creating Frames
+### 创建数据帧
 
-To create a frame with a large amount of random data (for example, to use for testing), click the drop-down **Admin** menu, then select **Create Synthetic Frame**. Customize the frame as needed, then click the **Create** button to create the frame. 
+创建一个包含大量随机数据的帧（例如，用于测试），单击**管理**下拉菜单，然后选择**创建合成数据帧**。按需定制数据帧，然后单击**创建**按钮来创建数据帧。
 
   ![Flow - Creating Frames](images/Flow_CreateFrame.png)
 
 ---
 
-### Plotting Frames
+### 绘制数据帧
 
-To create a plot from a frame, click the **Inspect** button, then click the **Plot** button. 
+要从数据帧创建一个绘图，单击**检查**按钮，然后单击**绘图**按钮。
 
-Select the type of plot (point, path, or rect) from the drop-down **Type** menu, then select the x-axis and y-axis from the following options: 
+从**类型**下拉菜单选择绘图的类型(point, path, or rect)，然后选择从以下选项中选择x轴和y轴： 
 
 - label 
 - type
@@ -941,127 +941,127 @@ Select the type of plot (point, path, or rect) from the drop-down **Type** menu,
 - sigma
 - cardinality
 
-Select one of the above options from the drop-down **Color** menu to display the specified data in color, then click the **Plot** button to plot the data. 
+从**颜色**下拉菜单中选择上方所列选项中的一个，以颜色显示指定的数据，然后单击**绘图**按钮来绘制数据。
 
  ![Flow - Plotting Frames](images/Flow_plot.png)
 
->**Note**: Because H2O stores enums internally as numeric then maps the integers to an array of strings, any `min`, `max`, or `mean` values for categorical columns are not meaningful and should be ignored. Displays for categorical data will be modified in a future version of H2O. 
+>**注意**: 因为AIR在内部以数字形式存储枚举，然后将整数映射到字符串数组，所以任意分类变量列的`min`、`max`或`mean`值是没有意义的，应该被忽略。分类数据的显示将在AIR的未来版本中进行改进。
 
 ---
 
 <a name="Flows"></a>
 
-# ... 使用流程
+# ... 使用Flow
 
-You can use and modify flows in a variety of ways:
+您可以以多种方式使用和修改flow：
 
-- Clips allow you to save single cells 
-- Outlines display summaries of your workflow
-- Flows can be saved, duplicated, loaded, or downloaded
+- 收藏夹允许您保存单个单元格
+- 大纲显示工作流的概要信息
+- Flows可以被保存、复制、加载或者下载
 
 ---
 
 
 <a name="Clips"></a>
 
-## Using Clips
+## 使用收藏夹
 
-Clips enable you to save cells containing your workflow for later reuse. To save a cell as a clip, click the paperclip icon to the right of the cell (highlighted in the red box in the following screenshot). 
+收藏夹可以使您保存以后复用的包含您工作流为单元格。要保存一个单元格为内容剪辑，单击单元格右边的回形针图标（在下面的截图中，以红色框突出显示）。 
  ![Paperclip icon](images/Flow_clips_paperclip.png)
 
-To use a clip in a workflow, click the "Clips" tab in the sidebar on the right. 
+要在工作流中使用内容剪辑，单击右边侧边栏上的"收藏"选项卡。 
 
  ![Clips tab](images/Flow_clips.png)
 
-All saved clips, including the default system clips (such as `assist`, `importFiles`, and `predict`), are listed. Clips you have created are listed under the "My Clips" heading. To select a clip to insert, click the circular button to the left of the clip name. To delete a clip, click the trashcan icon to right of the clip name. 
+所有保存的内容剪辑，包括默认的系统剪辑（例如 `assist`、`importFiles`和`predict`）被列出。您创建的剪辑在"我的收藏夹"标题下被列出。要选择一个剪辑来插入，单击剪辑名称左边的圆形按钮。要删除一个剪辑，单击剪辑名称右边的垃圾桶图标。
 
->**NOTE**: The default clips listed under "System" cannot be deleted. 
+>**注意**: 在"系统内置"标题下列出的默认的剪辑不能被删除。
 
-Deleted clips are stored in the trash. To permanently delete all clips in the trash, click the **Empty Trash** button. 
+已删除的剪辑存储在垃圾箱中。要永久删除回收站中的所有剪辑，单击**清空回收站**按钮。
 
->**NOTE**: Saved data, including flows and clips, are persistent as long as the same IP address is used for the cluster. If a new IP is used, previously saved flows and clips are not available. 
+>**注意**: 只要集群使用相同的IP地址，保存的数据(包括流程笔记和剪辑)就是持久的。如果使用新的IP，则先前保存的流程笔记和剪辑将不可用。
 
 ---
 
 <a name="Outline"></a>
-## Viewing Outlines
+## 查看大纲
 
-The **Outline** tab in the sidebar displays a brief summary of the cells currently used in your flow; essentially, a command history. 
+侧边栏中的**大纲选项卡**显示流程笔记中当前使用的单元格的简要摘要，本质上是一个命令历史。
 
-- To jump to a specific cell, click the cell description. 
-- To delete a cell, select it and press the X key on your keyboard. 
+- 要跳转到特定的单元格，单击单元格描述。
+- 要删除一个单元格，选中它，并且按下键盘上的X键。
 
  ![View Outline](images/Flow_outline.png)
 
 ---
 
 <a name="SaveFlow"></a>
-## Saving Flows
+## 保存流程笔记
 
-You can save your flow for later reuse. To save your flow as a notebook, click the "Save" button (the first button in the row of buttons below the flow name), or click the drop-down "Flow" menu and select "Save Flow." 
-To enter a custom name for the flow, click the default flow name ("Untitled Flow") and type the desired flow name. A pencil icon indicates where to enter the desired name. 
+您可以保存流程笔记以供以后重用。要将您的工作流保存成流程笔记，单击"保存"按钮（流程名称下面按钮栏的第三个按钮）或者单击"流程笔记"下拉菜单然后选择"保存笔记" 。
+要为流程输入一个定制化的名字，单击默认的流程名("Untitled Flow")，然后键入所需的流程名称。铅笔图标指示在何处输入所需的名称。 
 
  ![Renaming Flows](images/Flow_rename.png)
 
-To confirm the name, click the checkmark to the right of the name field. 
+要确认名称，单击名称字段右边的复选标记。
  
  ![Confirm Name](images/Flow_rename2.png)
 
-To reuse a saved flow, click the "Flows" tab in the sidebar, then click the flow name. To delete a saved flow, click the trashcan icon to the right of the flow name. 
+要复用一个保存过的流程笔记，单击侧边栏上的"流程"选项卡，然后单击流程名称。要删除一个保存的流程笔记，单击流程名称右边的垃圾桶图标。
 
  ![Flows](images/Flow_flows.png)
 
-### Finding Saved Flows on your Disk
+### 查找磁盘上保存的流程笔记
  
-By default, flows are saved to the `h2oflows` directory underneath your home directory.  The directory where flows are saved is printed to stdout:
+默认情况下，流程笔记被保存到您用户目录下的`h2oflows`目录下。保存流程笔记的目录会被打印到标准输出：
  
 ```
 03-20 14:54:20.945 172.16.2.39:54323     95667  main      INFO: Flow dir: '/Users/<UserName>/h2oflows'
 ```
 
-To back up saved flows, copy this directory to your preferred backup location.  
+要备份保存的流程笔记，拷贝该目录到您首选的备份位置。
 
-To specify a different location for saved flows, use the command-line argument `-flow_dir` when launching H2O:
+要指定一个保存流程笔记的不同的位置，在启动AIR的时候使用命令行参数`-flow_dir`：
 
-`java -jar h2o.jar -flow_dir /<New>/<Location>/<For>/<Saved>/<Flows>`  
+`java -jar air.jar -flow_dir /<New>/<Location>/<For>/<Saved>/<Flows>`  
 
-where `/<New>/<Location>/<For>/<Saved>/<Flows>` represents the specified location.  If the directory does not exist, it will be created the first time you save a flow.
+这里的 `/<New>/<Location>/<For>/<Saved>/<Flows>` 代表指定的位置。如果目录不存在，AIR会在你第一个保存流程笔记的时候创建它。
 
-### Saving Flows on a Hadoop cluster
+### 在Hadoop集群上保存流程笔记
 
-If you are running H2O Flow on a Hadoop cluster, H2O will try to find the HDFS home directory to use as the default directory for flows. If the HDFS home directory is not found, flows cannot be saved unless a directory is specified while launching using `-flow_dir`:
+如果您是在Hadoop集群上运行AIR Flow，AIR会将尝试找到HDFS主目录作为流程笔记的默认目录。如果HDFS主目录没有被找到，流程笔记不会被保存，除非当启动的时候使用了`-flow_dir`指定了目录：
 
 `hadoop jar h2odriver.jar -nodes 1 -mapperXmx 6g -output hdfsOutputDirName -flow_dir hdfs:///<Saved>/<Flows>/<Location>`  
 
-The location specified in `flow_dir` may be either an hdfs or regular filesystem directory.  If the directory does not exist, it will be created the first time you save a flow.
+在`flow_dir`中指定的位置可以是hdfs目录，也可以是常规文件系统目录。如果目录不存在，AIR会在你第一个保存流程笔记的时候创建它。
 
-### Copying Flows
+### 拷贝流程笔记
 
-To create a copy of the current flow, select the **Flow** menu, then click **Make a Copy**. The name of the current flow changes to `Copy of <FlowName>` (where `<FlowName>` is the name of the flow). You can save the duplicated flow using this name by clicking **Flow** > **Save Flow**, or [rename it](#SaveFlow) before saving. 
+要创建一个当前流程的拷贝，选择**流程笔记**菜单，然后单击**生成拷贝**。当前流程的名字会变成`Copy of <FlowName>` （这里的 `<FlowName>`是流程的名称）。您可以单击**流程笔记** > **保存笔记** 来保存这重复的流程笔记，或者在保存前[重命名](#SaveFlow)。 
 
 
-### Downloading Flows
+### 下载流程笔记
 
-After saving a flow as a notebook, click the **Flow** menu, then select **Download this Flow**. A new window opens and the saved flow is downloaded to the default downloads folder on your computer. The file is exported as `<filename>.flow`, where `<filename>` is the name specified when the flow was saved. 
+当保存一个流程为流程笔记后，单击**流程笔记**菜单，然后选择**下载本流程笔记**。这将打开一个新窗口，并将保存的流程笔记下载到计算机上的默认下载文件夹。文件会以`<filename>.flow`的形式导出，这里的 `<filename>`是当流程被保存的时候指定的名称。
 
-**Caution**: You must have an active internet connection to download flows. 
+**注意**: 必须有一个可用的因特网才能下载流程笔记。
 
-### Loading Flows
+### 加载流程笔记
 
-To load a saved flow, click the **Flows** tab in the sidebar at the right. In the pop-up confirmation window that appears, select **Load Notebook**, or click **Cancel** to return to the current flow. 
+要加载一个保存过的流程笔记，单击右边侧边栏中的**流程笔记**选项卡。在弹出的确认窗口中选择**加载流程笔记**，或者单击**取消**来返回到当前流程。
 
  ![Confirm Replace Flow](images/Flow_confirmreplace.png)
 
-After clicking **Load Notebook**, the saved flow is loaded. 
+当单击**加载流程笔记后**后，保存过的流程就被加载了。
 
-To load an exported flow, click the **Flow** menu and select **Open Flow...**. In the pop-up window that appears, click the **Choose File** button and select the exported flow, then click the **Open** button. 
+要加载一个被导出的流程笔记，单击**流程笔记**菜单，然后选择**打开笔记...**。在弹出窗口上，单击**Choose File**按钮然后选择导出的流程笔记，然后单击**打开**按钮。
 
  ![Open Flow](images/Flow_Open.png)
 
 >**注意**: 
 
 >- 只有使用默认的.flow文件类型的导出的流程笔记才被支持，其他文件类型不会被打开。
-- If the current notebook has the same name as the selected file, a pop-up confirmation appears to confirm that the current notebook should be overwritten. 
+- 如果当前流程笔记和被选中导入的文件有相同的名称，一个弹出的确认窗口会显示出来让您确认当前流程笔记是否被覆盖。 
 
 ---
 
