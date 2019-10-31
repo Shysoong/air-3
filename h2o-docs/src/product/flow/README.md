@@ -438,100 +438,99 @@ Heading 6     | `6`
 - **ignore\_const\_cols**: (可选) 选中此复选框以忽略常数训练列，因为无法从中获得任何信息。该选项默认被选中。
 
 - **transform**: ([PCA](#PCA)) 选择训练数据的转换方法：无、标准化、规范化、Demean或Descale。 
-
 - **pca_method**: ([PCA](#PCA)) 选择计算主成分的算法： 
 	- *GramSVD*: 使用Gram矩阵的分布式计算，然后使用JAMA包进行局部SVD
 	- *Power*: 利用幂迭代法计算奇异值分解（SVD）
 	- *Randomized*: 采用随机子空间迭代法
 	- *GLRM*: 拟合了具有L2损失函数且无正则化的广义低秩模型，并利用局部矩阵代数求解奇异值分解
 
-- **family**: ([GLM](#GLM)) Select the model type (Gaussian, Binomial, Multinomial, Poisson, Gamma, or Tweedie).
+- **family**: ([GLM](#GLM)) 选择模型（指数族分布）类型(Gaussian, Binomial, Multinomial, Poisson, Gamma, or Tweedie)。
 
-- **solver**: ([GLM](#GLM)) Select the solver to use (AUTO, IRLSM, L\_BFGS, COORDINATE\_DESCENT\_NAIVE, or COORDINATE\_DESCENT). IRLSM is fast on on problems with a small number of predictors and for lambda-search with L1 penalty, while [L_BFGS](http://cran.r-project.org/web/packages/lbfgs/vignettes/Vignette.pdf) scales better for datasets with many columns. COORDINATE\_DESCENT is IRLSM with the covariance updates version of cyclical coordinate descent in the innermost loop. COORDINATE\_DESCENT\_NAIVE is IRLSM with the naive updates version of cyclical coordinate descent in the innermost loop. COORDINATE\_DESCENT\_NAIVE and COORDINATE\_DESCENT are currently experimental. 
+- **solver**: ([GLM](#GLM)) 选择要使用的求解器(AUTO, IRLSM, L\_BFGS, COORDINATE\_DESCENT\_NAIVE 或 COORDINATE\_DESCENT). IRLSM可以快速地处理具有少量预测因子的问题，以及L1惩罚的lambda-search， 而 [L_BFGS](http://cran.r-project.org/web/packages/lbfgs/vignettes/Vignette.pdf) 对于具有许多列的数据集，具有更好的伸缩性。 COORDINATE\_DESCENT is IRLSM with the covariance updates version of cyclical coordinate descent in the innermost loop. COORDINATE\_DESCENT\_NAIVE is IRLSM with the naive updates version of cyclical coordinate descent in the innermost loop. COORDINATE\_DESCENT\_NAIVE 和 COORDINATE\_DESCENT 目前还在实验阶段。 
 
-- **link**: ([GLM](#GLM)) Select a link function (Identity, Family_Default, Logit, Log, Inverse, or Tweedie).
+- **link**: ([GLM](#GLM)) 选择link function (Identity, Family_Default, Logit, Log, Inverse, or Tweedie)。
 
-- **alpha**: ([GLM](#GLM)) Specify the regularization distribution between L2 and L2.  
+- **alpha**: ([GLM](#GLM)) 指定L2和L2之间的正则化分布。  
 
-- **lambda**: ([GLM](#GLM)) Specify the regularization strength.  
+- **lambda**: ([GLM](#GLM)) 指定正则化强度。
 
-- **lambda_search**: ([GLM](#GLM)) Check this checkbox to enable lambda search, starting with lambda max. The given lambda is then interpreted as lambda min. 
+- **lambda_search**: ([GLM](#GLM)) 勾选复选框以激活lambda search，以最大的lambda值开始，给定的lambda随后递减为最小的lambda值。 
 
-- **non-negative**: ([GLM](#GLM)) To force coefficients to be non-negative, check this checkbox. 
+- **non-negative**: ([GLM](#GLM)) 要强制系数为非负，勾选这个复选框。
 
-- **standardize**: ([K-Means](#Kmeans), [GLM](#GLM)) To standardize the numeric columns to have mean of zero and unit variance, check this checkbox. Standardization is highly recommended; if you do not use standardization, the results can include components that are dominated by variables that appear to have larger variances relative to other attributes as a matter of scale, rather than true contribution. This option is selected by default. 
+- **standardize**: ([K-Means](#Kmeans), [GLM](#GLM)) 若要将数值列标准化为零均值和单位方差，请选中此复选框。强烈推荐启用标准化，如果不使用标准化，结果会包含那些被相对于其他属性，在规模上似乎有更大方差的变量主导的组件，而不是真实贡献。该选项默认被选中。 
 
-- **beta_constraints**: ([GLM](#GLM)) To use beta constraints, select a dataset from the drop-down menu. The selected frame is used to constraint the coefficient vector to provide upper and lower bounds. 
+- **beta_constraints**: ([GLM](#GLM)) 要使用beta约束，从下拉菜单中选择一个数据集。选定的数据帧用于约束系数向量，提供上下界。
 
-- **ntrees**: ([GBM](#GBM), [DRF](#DRF)) Specify the number of trees.  
+- **ntrees**: ([GBM](#GBM), [DRF](#DRF)) 指定树的数量。  
 
-- **max\_depth**: ([GBM](#GBM), [DRF](#DRF)) Specify the maximum tree depth.  
+- **max\_depth**: ([GBM](#GBM), [DRF](#DRF)) 指定树的最大深度。
 
-- **min\_rows**: ([GBM](#GBM), [DRF](#DRF)) Specify the minimum number of observations for a leaf ("nodesize" in R). 
+- **min\_rows**: ([GBM](#GBM), [DRF](#DRF)) 指定一个叶子节点的最小观察值 (R中为"nodesize")。 
 
-- **nbins**: ([GBM](#GBM), [DRF](#DRF)) (Numerical [real/int] only) Specify the minimum number of bins for the histogram to build, then split at the best point.   
+- **nbins**: ([GBM](#GBM), [DRF](#DRF)) （只适用于数值型 [real/int]）指定用于构建直方图的最小bins数量，然后在最合适的地方分割。
 
-- **nbins_cats**: ([GBM](#GBM), [DRF](#DRF)) (Categorical [factors/enums] only) Specify the maximum number of bins for the histogram to build, then split at the best point. Higher values can lead to more overfitting.  The levels are ordered alphabetically; if there are more levels than bins, adjacent levels share bins. This value has a more significant impact on model fitness than **nbins**. Larger values may increase runtime, especially for deep trees and large clusters, so tuning may be required to find the optimal value for your configuration. 
+- **nbins_cats**: ([GBM](#GBM), [DRF](#DRF)) （只适用于分类数据类型 [factors/enums]） 指定用于构建直方图的最大bins数量，然后在最合适的地方分割。数值越高越会导致过拟合。The levels are ordered alphabetically; if there are more levels than bins, adjacent levels share bins.该值对模型拟合度的影响比**nbins**更显著。较大的值可能会增加运行时，特别是对于深度树和大型集群，因此可能需要进行调优，以找到配置的最佳值。
 
-- **learn_rate**: ([GBM](#GBM)) Specify the learning rate. The range is 0.0 to 1.0. 
+- **learn_rate**: ([GBM](#GBM)) 指定学习率。范围是 0.0 到 1.0。 
 
-- **distribution**: ([GBM](#GBM), [DL](#DL)) Select the distribution type from the drop-down list. The options are auto, bernoulli, multinomial, gaussian, poisson, gamma, or tweedie.
+- **distribution**: ([GBM](#GBM), [DL](#DL)) 从下拉列表中选择分布类型。选项有 auto, bernoulli, multinomial, gaussian, poisson, gamma或tweedie。
 
-- **sample_rate**: ([GBM](#GBM), [DRF](#DRF)) Specify the row sampling rate (x-axis). The range is 0.0 to 1.0. Higher values may improve training accuracy. Test accuracy improves when either columns or rows are sampled. For details, refer to "Stochastic Gradient Boosting" ([Friedman, 1999](https://statweb.stanford.edu/~jhf/ftp/stobst.pdf)). 
+- **sample_rate**: ([GBM](#GBM), [DRF](#DRF)) 指定行采样率(x-axis)。范围是0.0到1.0。较高的数值可以提高训练的准确性。当采样列或行时，测试集上精度会提高。更多细节，请参考 "Stochastic Gradient Boosting" ([Friedman, 1999](https://statweb.stanford.edu/~jhf/ftp/stobst.pdf)). 
 
-- **col\_sample_rate**: ([GBM](#GBM), [DRF](#DRF)) Specify the column sampling rate (y-axis). The range is 0.0 to 1.0. Higher values may improve training accuracy. Test accuracy improves when either columns or rows are sampled. For details, refer to "Stochastic Gradient Boosting" ([Friedman, 1999](https://statweb.stanford.edu/~jhf/ftp/stobst.pdf)). 
+- **col\_sample_rate**: ([GBM](#GBM), [DRF](#DRF)) 指定列采样率(y-axis)。范围是0.0到1.0。较高的数值可以提高训练的准确性。当采样列或行时，测试集上精度会提高。更多细节，请参考 "Stochastic Gradient Boosting" ([Friedman, 1999](https://statweb.stanford.edu/~jhf/ftp/stobst.pdf)). 
 
-- **mtries**: ([DRF](#DRF)) Specify the columns to randomly select at each level. If the default value of `-1` is used, the number of variables is the square root of the number of columns for classification and p/3 for regression (where p is the number of predictors).   
+- **mtries**: ([DRF](#DRF)) 指定要在每个级别随机选择的列。如果使用默认值`-1`， 变量数的确定，定于分类问题为列数的平方跟，对于回归问题为 p/3 （这里的p是特征数量）。   
    
-- **binomial\_double\_trees**: ([DRF](#DRF)) (Binary classification only) Build twice as many trees (one per class). Enabling this option can lead to higher accuracy, while disabling can result in faster model building. This option is disabled by default. 
+- **binomial\_double\_trees**: ([DRF](#DRF)) （只适用于二分类问题） 构建两倍数量的内部树(每个类一个)。 启用此选项可以让结果精度更高，而禁用此选项则可以使模型构建更快。默认情况下此选项被禁用。
 
-- **score\_each\_iteration**: ([K-Means](#Kmeans), [DRF](#DRF), [Naïve Bayes](#NB), [PCA](#PCA), [GBM](#GBM), [GLM](#GLM)) To score during each iteration of the model training, check this checkbox. 
+- **score\_each\_iteration**: ([K-Means](#Kmeans), [DRF](#DRF), [Naïve Bayes](#NB), [PCA](#PCA), [GBM](#GBM), [GLM](#GLM)) 要在模型训练的每次迭代中计分，请选中此复选框。
 
-- **k***: ([K-Means](#Kmeans), [PCA](#PCA)) For K-Means, specify the number of clusters. For PCA, specify the rank of matrix approximation.  
+- **k***: ([K-Means](#Kmeans), [PCA](#PCA)) 对于K-Means，指定聚类的数量。对于PCA，指定矩阵近似的秩。 
 
-- **user_points**: ([K-Means](#Kmeans)) For K-Means, specify the number of initial cluster centers.  
+- **user_points**: ([K-Means](#Kmeans)) 对于K-Means，指定初始化聚类中心的个数。 
 
-- **max_iterations**: ([K-Means](#Kmeans), [PCA](#PCA), [GLM](#GLM)) Specify the number of training iterations. 
+- **max_iterations**: ([K-Means](#Kmeans), [PCA](#PCA), [GLM](#GLM)) 指定训练迭代的数量。
 
-- **init**: ([K-Means](#Kmeans)) Select the initialization mode. The options are Furthest, PlusPlus, Random, or User. 
+- **init**: ([K-Means](#Kmeans)) 选择初始化模式，选项有Furthest、PlusPlus、Random或User。 
 
-  >**Note**: If PlusPlus is selected, the initial Y matrix is chosen by the final cluster centers from the K-Means PlusPlus algorithm. 
+  >**注意**: 如果选择了PlusPlus，则初始Y矩阵将由K-Means PlusPlus算法的最终集群中心选择。
 
-- **tweedie_variance_power**: ([GLM](#GLM)) (Only applicable if *Tweedie* is selected for **Family**) Specify the Tweedie variance power. 
+- **tweedie_variance_power**: ([GLM](#GLM))（仅适用于当**Family**选择了*Tweedie*时）指定Tweedie方差的幂。 
 
-- **tweedie_link_power**: ([GLM](#GLM)) (Only applicable if *Tweedie* is selected for **Family**) Specify the Tweedie link power. 
+- **tweedie_link_power**: ([GLM](#GLM))（仅适用于当**Family**选择了*Tweedie*时）指定Tweediet link函数的幂。
 
-- **activation**: ([DL](#DL)) Select the activation function (Tanh, TanhWithDropout, Rectifier, RectifierWithDropout, Maxout, MaxoutWithDropout). The default option is Rectifier. 
+- **activation**: ([DL](#DL)) 选择激活函数(Tanh, TanhWithDropout, Rectifier, RectifierWithDropout, Maxout, MaxoutWithDropout)。默认选项是Rectifier。
 
-- **hidden**: ([DL](#DL)) Specify the hidden layer sizes (e.g., 100,100). For Grid Search, use comma-separated values: (10,10),(20,20,20). The default value is [200,200]. The specified value(s) must be positive. 
+- **hidden**: ([DL](#DL)) 指定隐藏层的大小（例如：100,100）。对于网格搜索，使用都好分割的值：(10,10),(20,20,20)。默认值是[200,200]。指定值必须为正。
 
-- **epochs**: ([DL](#DL)) Specify the number of times to iterate (stream) the dataset. The value can be a fraction.  
+- **epochs**: ([DL](#DL)) 指定迭代(流)数据集的次数，值可以是分数。 
 
-- **variable_importances**: ([DL](#DL)) Check this checkbox to compute variable importance. This option is not selected by default. 
+- **variable_importances**: ([DL](#DL)) 勾选复选框以计算变量重要性，该选项默认没有被选中。 
 
-- **laplace**: ([Naïve Bayes](#NB)) Specify the Laplace smoothing parameter. 
+- **laplace**: ([Naïve Bayes](#NB)) 指定拉普拉斯平滑参数。 
 
-- **min\_sdev**: ([Naïve Bayes](#NB)) Specify the minimum standard deviation to use for observations without enough data.  
+- **min\_sdev**: ([Naïve Bayes](#NB)) 指定用于没有足够数据的观测量的最小标准差。 
 
-- **eps\_sdev**: ([Naïve Bayes](#NB)) Specify the threshold for standard deviation. If this threshold is not met, the **min\_sdev** value is used.  
+- **eps\_sdev**: ([Naïve Bayes](#NB)) 指定标准差的阈值。如果不满足这个阈值，使用 **min\_sdev** 的值。  
 
-- **min\_prob**: ([Naïve Bayes](#NB)) Specify the minimum probability to use for observations without enough data.  
+- **min\_prob**: ([Naïve Bayes](#NB)) 指定用于没有足够数据的观测量的最小概率。
 
 - **eps\_prob**: ([Naïve Bayes](#NB)) Specify the threshold for standard deviation. If this threshold is not met, the **min\_sdev** value is used. 
 
-- **compute_metrics**: ([Naïve Bayes](#NB), [PCA](#PCA)) To compute metrics on training data, check this checkbox. The Naïve Bayes classifier assumes independence between predictor variables conditional on the response, and a Gaussian distribution of numeric predictors with mean and standard deviation computed from the training dataset. When building a Naïve Bayes classifier, every row in the training dataset that contains at least one NA will be skipped completely. If the test dataset has missing values, then those predictors are omitted in the probability calculation during prediction. 
+- **compute_metrics**: ([Naïve Bayes](#NB), [PCA](#PCA)) 若要计算训练数据的指标，请勾选此复选框。朴素贝叶斯分类器假设在特定预测变量条件下各特征变量之间的相互独立，以及从训练数据集计算的平均值和标准差的数值预测器服从高斯分布。在构建朴素贝叶斯分类器时，训练数据集中包含至少一个NA的每一行都将被完全跳过。如果测试数据集有缺失值，那么在预测期间的概率计算中将省略这些预测因子。
 
-**Advanced Options**
+**高级选项**
 
 - **fold_assignment**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [K-Means](#Kmeans)) (Applicable only if a value for **nfolds** is specified and **fold_column** is not selected) Select the cross-validation fold assignment scheme. The available options are Random or [Modulo](https://en.wikipedia.org/wiki/Modulo_operation). 
 
 - **fold_column**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [K-Means](#Kmeans)) Select the column that contains the cross-validation fold index assignment per observation. 
 
-- **offset_column**: ([GLM](#GLM), [DRF](#DRF), [GBM](#GBM))  Select a column to use as the offset. 
-	>*Note*: Offsets are per-row "bias values" that are used during model training. For Gaussian distributions, they can be seen as simple corrections to the response (y) column. Instead of learning to predict the response (y-row), the model learns to predict the (row) offset of the response column. For other distributions, the offset corrections are applied in the linearized space before applying the inverse link function to get the actual response values. For more information, refer to the following [link](http://www.idg.pl/mirrors/CRAN/web/packages/gbm/vignettes/gbm.pdf). 
+- **offset_column**: ([GLM](#GLM), [DRF](#DRF), [GBM](#GBM))  选择要用作偏移量的列。
+	>*注意*: 偏移量是在模型训练中使用的每行“偏差值”。对于高斯分布，它们可以看作是对response (y)列的简单更正。Instead of learning to predict the response (y-row), the model learns to predict the (row) offset of the response column. For other distributions, the offset corrections are applied in the linearized space before applying the inverse link function to get the actual response values. For more information, refer to the following [link](http://www.idg.pl/mirrors/CRAN/web/packages/gbm/vignettes/gbm.pdf). 
 
 - **weights_column**: ([GLM](#GLM), [DL](#DL), [DRF](#DRF), [GBM](#GBM)) Select a column to use for the observation weights. The specified `weights_column` must be included in the specified `training_frame`. *Python only*: To use a weights column when passing an H2OFrame to `x` instead of a list of column names, the specified `training_frame` must contain the specified `weights_column`. 
-	>*Note*: Weights are per-row observation weights and do not increase the size of the data frame. This is typically the number of times a row is repeated, but non-integer values are supported as well. During training, rows with higher weights matter more, due to the larger loss function pre-factor.  
+	>*注意*: Weights are per-row observation weights and do not increase the size of the data frame. This is typically the number of times a row is repeated, but non-integer values are supported as well. During training, rows with higher weights matter more, due to the larger loss function pre-factor.  
 
 - **loss**: ([DL](#DL)) Select the loss function. For DL, the options are Automatic, Quadratic, CrossEntropy, Huber, or Absolute and the default value is Automatic. Absolute, Quadratic, and Huber are applicable for regression or classification, while CrossEntropy is only applicable for classification. Huber can improve for regression problems with outliers.
 
