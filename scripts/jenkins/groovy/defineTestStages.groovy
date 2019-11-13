@@ -367,7 +367,6 @@ def call(final pipelineContext) {
       target: target, timeoutValue: 60,
       component: pipelineContext.getBuildConfig().COMPONENT_ANY,
       additionalTestPackages: [
-              pipelineContext.getBuildConfig().COMPONENT_HADOOP,
               pipelineContext.getBuildConfig().COMPONENT_PY,
               pipelineContext.getBuildConfig().COMPONENT_R
       ],
@@ -375,7 +374,8 @@ def call(final pipelineContext) {
         distribution: distribution.name,
         version: distribution.version,
         commandFactory: 'h2o-3/scripts/jenkins/groovy/hadoopCommands.groovy',
-        ldapConfigPath: ldapConfigPath
+        ldapConfigPath: ldapConfigPath,
+        ldapConfigPathStandalone: 'scripts/jenkins/config/ldap-jetty-8.txt'
       ], pythonVersion: '2.7',
       customDockerArgs: [ '--privileged' ],
       executionScript: 'h2o-3/scripts/jenkins/groovy/hadoopStage.groovy'
@@ -423,7 +423,6 @@ def call(final pipelineContext) {
             target: target, timeoutValue: 60,
             component: pipelineContext.getBuildConfig().COMPONENT_ANY,
             additionalTestPackages: [
-                    pipelineContext.getBuildConfig().COMPONENT_HADOOP,
                     pipelineContext.getBuildConfig().COMPONENT_PY,
                     pipelineContext.getBuildConfig().COMPONENT_R
             ],

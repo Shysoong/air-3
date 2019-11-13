@@ -2,9 +2,73 @@
 
 ## H2O
 
-### Yau (3.26.0.8) - 10/17/2019
+### Yau (3.26.0.10) - 11/7/2019
 
-Download at: <a href='http://h2o-release.s3.amazonaws.com/h2o/rel-yau/8/index.html'>http://h2o-release.s3.amazonaws.com/h2o/rel-yau/8/index.html</a>
+Download at: <a href='http://h2o-release.s3.amazonaws.com/h2o/rel-yau/10/index.html'>http://h2o-release.s3.amazonaws.com/h2o/rel-yau/10/index.html</a>
+
+<h4>Bug</h4>
+
+<ul>
+<li>[<a href='https://0xdata.atlassian.net/browse/HEXDEV-743'>HEXDEV-743</a>] - Fixed an issue that caused H2O to ignore security configurations when running on Hadoop 3.x.
+</li>
+</ul>
+
+<h4>New Feature</h4>
+
+<ul>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-7026'>PUBDEV-7026</a>] - Added a `disable_flow` option that can be specified when starting H2O to disable access to H2O Flow.
+</li>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-7040'>PUBDEV-7040</a>] - Version details are now exposed in cloud information.
+</li>
+</ul>
+
+<h4>Improvement</h4>
+
+<ul>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-6831'>PUBDEV-6831</a>] - Removed duplicate definition for sample_rate in DRF, as this is already defined in shared tree model parameters.
+</li>
+</ul>
+
+<h4>Docs</h4>
+
+<ul>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-7038'>PUBDEV-7038</a>] - Fixed documentation for Logloss scorer.
+</li>
+</ul>
+
+### Yau (3.26.0.9) - 10/29/2019
+
+<h4>Bug</h4>
+
+<ul>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-6829'>PUBDEV-6829</a>] - Fixed an issue that caused sort on a multinode cluster (for example, 2 nodes) to be much slower than a single node cluster. 
+</li>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-6934'>PUBDEV-6934</a>] - Fixed an issue that caused class conflicts between the released jars for h2o-genmodel-ext-xgboost and other Java packages. 
+</li>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-6954'>PUBDEV-6954</a>] - Export checkpoint no longer fails to export all models created during a grid search.
+</li>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-7010'>PUBDEV-7010</a>] - In the Python client, H2OFrame.drop no longer modifies parameters.
+</li>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-7011'>PUBDEV-7011</a>] - Fixed an issue in the Python Client that caused model.actual_params to sometimes return a <property> object instead of a dict.
+</li>
+</ul>
+
+<h4>Task</h4>
+
+<ul>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-6977'>PUBDEV-6977</a>] - Fixed an issue that caused XGBoost to exhaust all memory on a node (-xmx+(1.2*-xmx)) on wide datasets.
+</li>
+</ul>
+
+<h4>Improvement</h4>
+
+<ul>
+<li>[<a href='https://0xdata.atlassian.net/browse/PUBDEV-6847'>PUBDEV-6847</a>] - Created a Technical Note (TN) describing how to use MOJO Import when importing models from a different H2O version. This TN is available here: <a href="https://0xdata.atlassian.net/browse/TN-14">https://0xdata.atlassian.net/browse/TN-14</a>. 
+</li>
+</ul>
+
+
+### Yau (3.26.0.8) - 10/17/2019
 
 <h4>Bug</h4>
 
