@@ -1,4 +1,4 @@
-# ... Flow网页用户界面 
+# Flow网页用户界面 ...
 
 >**注意**: 这个主题已经不再维护，关于最新文档的信息，请参阅 [使用Flow - AIR的Web用户界面](https://github.com/Shysoong/air-3/blob/master/h2o-docs/src/product/flow.rst) 主题。
 
@@ -199,7 +199,7 @@ Heading 6     | `6`
 您也可以使用屏幕顶部的菜单来编辑单元格顺序、切换特定格式类型（例如输入或者输出）、构建模型或者评价模型。您还可以访问故障诊断信息或获得有关Flow的帮助。  
  ![Flow menus](images/Flow_menus.png)
 
->**注意**: 要禁用代码输入并严格将AIR Flow用作图形用户界面，单击 **单元格** 菜单，然后单击 **切换单元格可见性**。
+>**注意**: 要禁用代码输入并严格将AIR Flow用作图形用户界面，单击 *tweedie_power*单元格** 菜单，然后单击 **切换单元格可见性**。
 
 现在您已经熟悉了单元格模式，让我们导入一些数据吧。 
 
@@ -516,152 +516,152 @@ Heading 6     | `6`
 
 - **min\_prob**: ([Naïve Bayes](#NB)) 指定用于没有足够数据的观测量的最小概率。
 
-- **eps\_prob**: ([Naïve Bayes](#NB)) Specify the threshold for standard deviation. If this threshold is not met, the **min\_sdev** value is used. 
+- **eps\_prob**: ([Naïve Bayes](#NB)) Specify the threshold for standard deviation. If this threshold is not met, the **min\_sdev** value is used. 此处有笔误？
 
 - **compute_metrics**: ([Naïve Bayes](#NB), [PCA](#PCA)) 若要计算训练数据的指标，请勾选此复选框。朴素贝叶斯分类器假设在特定预测变量条件下各特征变量之间的相互独立，以及从训练数据集计算的平均值和标准差的数值预测器服从高斯分布。在构建朴素贝叶斯分类器时，训练数据集中包含至少一个NA的每一行都将被完全跳过。如果测试数据集有缺失值，那么在预测期间的概率计算中将省略这些预测因子。
 
 **高级选项**
 
-- **fold_assignment**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [K-Means](#Kmeans)) (Applicable only if a value for **nfolds** is specified and **fold_column** is not selected) Select the cross-validation fold assignment scheme. The available options are Random or [Modulo](https://en.wikipedia.org/wiki/Modulo_operation). 
+- **fold_assignment**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [K-Means](#Kmeans)) (仅当**nfolds**指定了值，且**fold_column**没有被选中时适用)选择交叉验证折叠分配方案。可用选项有随机或[取模](https://en.wikipedia.org/wiki/Modulo_operation). 
 
-- **fold_column**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [K-Means](#Kmeans)) Select the column that contains the cross-validation fold index assignment per observation. 
+- **fold_column**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [K-Means](#Kmeans)) 选择包含了交叉验证折叠索引分配的列（每个观测值）。
 
 - **offset_column**: ([GLM](#GLM), [DRF](#DRF), [GBM](#GBM))  选择要用作偏移量的列。
-	>*注意*: 偏移量是在模型训练中使用的每行“偏差值”。对于高斯分布，它们可以看作是对response (y)列的简单更正。Instead of learning to predict the response (y-row), the model learns to predict the (row) offset of the response column. For other distributions, the offset corrections are applied in the linearized space before applying the inverse link function to get the actual response values. For more information, refer to the following [link](http://www.idg.pl/mirrors/CRAN/web/packages/gbm/vignettes/gbm.pdf). 
+	>*注意*: 偏移量是在模型训练中使用的每行“偏差值”。对于高斯分布，它们可以看作是对response (y)列的简单更正。模型不是学习预测响应(y行)，而是学习预测响应列的(行)偏移量。对于其他分布，在应用反向链接函数得到实际响应值之前，先在线性空间中应用偏移校正。更多信息，请参阅[link](http://www.idg.pl/mirrors/CRAN/web/packages/gbm/vignettes/gbm.pdf)。 
 
-- **weights_column**: ([GLM](#GLM), [DL](#DL), [DRF](#DRF), [GBM](#GBM)) Select a column to use for the observation weights. The specified `weights_column` must be included in the specified `training_frame`. *Python only*: To use a weights column when passing an H2OFrame to `x` instead of a list of column names, the specified `training_frame` must contain the specified `weights_column`. 
-	>*注意*: Weights are per-row observation weights and do not increase the size of the data frame. This is typically the number of times a row is repeated, but non-integer values are supported as well. During training, rows with higher weights matter more, due to the larger loss function pre-factor.  
+- **weights_column**: ([GLM](#GLM), [DL](#DL), [DRF](#DRF), [GBM](#GBM)) 选择一个用于观察权重的列。指定的`weights_column`必须被包含在指定的`training_frame`中。*Python独占*: 当传递AIRFrame到`x`而不是传递列名列表时，要使用权重列，指定的`training_frame`必须包含指定的`weights_column`。 
+	>*注意*: 权值是每行观察变量的权值，不会增加数据帧的大小。这通常是一行重复的次数，但是也支持非整数值。在训练中，由于较大的损失函数前因子，具有较高权重的行更重要。 
 
-- **loss**: ([DL](#DL)) Select the loss function. For DL, the options are Automatic, Quadratic, CrossEntropy, Huber, or Absolute and the default value is Automatic. Absolute, Quadratic, and Huber are applicable for regression or classification, while CrossEntropy is only applicable for classification. Huber can improve for regression problems with outliers.
+- **loss**: ([DL](#DL)) 选择损失函数。对于深度学习而言，选项有Automatic、Quadratic、CrossEntropy、Huber或Absolute，并且默认值是Automatic。Absolute、Quadratic和Huber在回归和分类时适用，但CrossEntropy不适用于分类问题。Huber可以改进有离群值的回归问题。
 
-- **checkpoint**: ([DL](#DL), [DRF](#DRF), [GBM](#GBM)) Enter a model key associated with a previously-trained model. Use this option to build a new model as a continuation of a previously-generated model.
+- **checkpoint**: ([DL](#DL), [DRF](#DRF), [GBM](#GBM)) 输入与以前训练过的模型相关联的模型的键。使用此选项来构建新模型，作为以前生成的模型的延续。
 
-- **use\_all\_factor\_levels**: ([DL](#DL), [PCA](#PCA)) Check this checkbox to use all factor levels in the possible set of predictors; if you enable this option, sufficient regularization is required. By default, the first factor level is skipped. For Deep Learning models, this option is useful for determining variable importances and is automatically enabled if the autoencoder is selected. 
+- **use\_all\_factor\_levels**: ([DL](#DL), [PCA](#PCA)) 勾选此选项框以在可能的预测因子集合中使用所有的因子水平。如果您启用此选项，需要充分的正则化。默认情况下，跳过第一个因素级别。对于深度学习模型，此选项对于确定变量重要性非常有用，如果选择了autoencoder，则会自动启用此选项。
 
-- **train\_samples\_per\_iteration**: ([DL](#DL)) Specify the number of global training samples per MapReduce iteration. To specify one epoch, enter 0. To specify all available data (e.g., replicated training data), enter -1. To use the automatic values, enter -2. 
+- **train\_samples\_per\_iteration**: ([DL](#DL)) 指定每个MapReduce迭代的全局训练样本的数量。要指定one epoch，输入0。要指定所有可用数据（例如，复制的训练数据），输入-1。要使用自动的值，输入-2。
 
-- **adaptive_rate**: ([DL](#DL)) Check this checkbox to enable the adaptive learning rate (ADADELTA). This option is selected by default. If this option is enabled, the following parameters are ignored: `rate`, `rate_decay`, `rate_annealing`, `momentum_start`, `momentum_ramp`, `momentum_stable`, and `nesterov_accelerated_gradient`. 
+- **adaptive_rate**: ([DL](#DL)) 选中此复选框以启用自适应学习率（ADADELTA）。此选项是默认选中。如果此选项启用，以下参数会被忽略：`rate`、`rate_decay`、`rate_annealing`、`momentum_start`、`momentum_ramp`、`momentum_stable`和 `nesterov_accelerated_gradient`。
 
-- **input\_dropout\_ratio**: ([DL](#DL)) Specify the input layer dropout ratio to improve generalization. Suggested values are 0.1 or 0.2. The range is >= 0 to <1. 
+- **input\_dropout\_ratio**: ([DL](#DL)) 指定输入层的丢失率，以提高泛化能力。建议值是0.1 或 0.2，范围是>= 0 或者 <1。 
 
-- **l1**: ([DL](#DL)) Specify the L1 regularization to add stability and improve generalization; sets the value of many weights to 0. 
+- **l1**: ([DL](#DL)) 指定L1正则化，增加稳定性，提高泛化能力，将许多权值设置为0。 
 
-- **l2**: ([DL](#DL)) Specify the L2 regularization to add stability and improve generalization; sets the value of many weights to smaller values. 
+- **l2**: ([DL](#DL)) 指定L2正则化以增加稳定性和改进泛化;将许多权值设置为较小的值。
 
-- **balance_classes**: ([GBM](#GBM), [DL](#DL)) Oversample the minority classes to balance the class distribution. This option is not selected by default and can increase the data frame size. This option is only applicable for classification. Majority classes can be undersampled to satisfy the **Max\_after\_balance\_size** parameter.
+- **balance_classes**: ([GBM](#GBM), [DL](#DL)) 过采样少数类别以平衡类别分布。默认情况下不选择此选项，它会增加数据帧的大小。此选项仅适用于分类问题。多数类别可以欠采样来满足**Max\_after\_balance\_size**参数。
 
-  >**Note**: `balance_classes` balances over just the target, not over all classes in the training frame. 
+  >**注意**: `balance_classes` 只平衡目标变量，而不是在训练集上的所有类。
 
-- **max\_confusion\_matrix\_size**: ([DRF](#DRF), [DL](#DL), [Naïve Bayes](#NB), [GBM](#GBM), [GLM](#GLM)) Specify the maximum size (in number of classes) for confusion matrices to be printed in the Logs. 
+- **max\_confusion\_matrix\_size**: ([DRF](#DRF), [DL](#DL), [Naïve Bayes](#NB), [GBM](#GBM), [GLM](#GLM)) 指定要打印到日志中的混淆矩阵的最大大小(以类的数量为单位)。
 
-- **max\_hit\_ratio\_k**: ([DRF](#DRF), [DL](#DL), [Naïve Bayes](#NB), [GBM](#GBM), [GLM](#GLM)) Specify the maximum number (top K) of predictions to use for hit ratio computation. Applicable to multinomial only. To disable, enter 0. 
+- **max\_hit\_ratio\_k**: ([DRF](#DRF), [DL](#DL), [Naïve Bayes](#NB), [GBM](#GBM), [GLM](#GLM)) 指定用于计算命中率的最大预测数（top K）。只适用于多分类问题，要禁用，输入0。 
 
-- **r2_stopping**: ([GBM](#GBM), [DRF](#DRF)) r2_stopping is no longer supported and will be ignored if set - please use stopping_rounds, stopping_metric and stopping_tolerance instead.
+- **r2_stopping**: ([GBM](#GBM), [DRF](#DRF)) r2_stopping不再被支持，如果设置将被忽略 - 请使用stopping_rounds、stopping_metric和stopping_tolerance来替代。
 
-- **build\_tree\_one\_node**: ([DRF](#DRF), [GBM](#GBM)) To run on a single node, check this checkbox. This is suitable for small datasets as there is no network overhead but fewer CPUs are used. The default setting is disabled. 
+- **build\_tree\_one\_node**: ([DRF](#DRF), [GBM](#GBM)) 若要在单个节点上运行，请选中此复选框。这适用于小型数据集，因为没有网络开销，但是使用的cpu资源更少。默认设置被禁用。
 
-- **rate**: ([DL](#DL)) Specify the learning rate. Higher rates result in less stable models and lower rates result in slower convergence. Not applicable if **adaptive_rate** is enabled. 
+- **rate**: ([DL](#DL)) 指定学习率。更高的学习率导致更不稳定的模型，更低的学习率导致更慢的收敛。如果**adaptive_rate**启用了，该选项就不适用。
 
-- **rate_annealing**: ([DL](#DL)) Specify the learning rate annealing. The formula is rate/(1+rate\_annealing value \* samples). Not applicable if **adaptive\_rate** is enabled.
+- **rate_annealing**: ([DL](#DL)) 指定学习速率退火。其计算公式为 rate/(1+rate\_annealing value \* samples)。如果**adaptive_rate**启用了，该选项就不适用。
 
-- **momentum_start**: ([DL](#DL)) Specify the initial momentum at the beginning of training. A suggested value is 0.5. Not applicable if **adaptive_rate** is enabled.
+- **momentum_start**: ([DL](#DL)) 训练开始时指定初始化动量。建议的值是0.5。如果**adaptive_rate**启用了，该选项就不适用。
 
-- **momentum_ramp**: ([DL](#DL)) Specify the number of training samples for increasing the momentum. Not applicable if **adaptive_rate** is enabled.
+- **momentum_ramp**: ([DL](#DL)) 指定增加动量的训练样本的数量。如果**adaptive_rate**启用了，该选项就不适用。
 
-- **momentum_stable**: ([DL](#DL)) Specify the final momentum value reached after the **momentum_ramp** training samples. Not applicable if **adaptive_rate** is enabled. 
+- **momentum_stable**: ([DL](#DL)) 指定在**momentum_ramp**训练样本后最终达到的动量值。如果**adaptive_rate**启用了，该选项就不适用。
 
-- **nesterov\_accelerated\_gradient**: ([DL](#DL)) Check this checkbox to use the Nesterov accelerated gradient. This option is recommended and selected by default. Not applicable is **adaptive_rate** is enabled. 
+- **nesterov\_accelerated\_gradient**: ([DL](#DL)) Check this checkbox to use the Nesterov accelerated gradient. 默认情况下推荐并选中此选项。Not applicable is **adaptive_rate** is enabled. 此处有笔误？
 
-- **hidden\_dropout\_ratios**: ([DL](#DL)) Specify the hidden layer dropout ratios to improve generalization. Specify one value per hidden layer, each value between 0 and 1 (exclusive). There is no default value. This option is applicable only if *TanhwithDropout*, *RectifierwithDropout*, or *MaxoutWithDropout* is selected from the **Activation** drop-down list. 
+- **hidden\_dropout\_ratios**: ([DL](#DL)) 指定隐藏层的丢失率，以提高泛化能力。为每个隐藏层指定一个值，每个值在0和1(排除)之间。该选项没有默认值。只有在*TanhwithDropout*、*RectifierwithDropout*或*MaxoutWithDropout*从**Activation**下拉列表选中时才适用。 
 
-- **tweedie_power**: ([DL](#DL), [GBM](#GBM)) (Only applicable if *Tweedie* is selected for **Family**) Specify the Tweedie power. The range is from 1 to 2. For a normal distribution, enter `0`. For Poisson distribution, enter `1`. For a gamma distribution, enter `2`. For a compound Poisson-gamma distribution, enter a value greater than 1 but less than 2. For more information, refer to [Tweedie distribution](https://en.wikipedia.org/wiki/Tweedie_distribution). 
+- **tweedie_power**: ([DL](#DL), [GBM](#GBM)) （只有当为**Family**选择了*Tweedie*时适用）指定Tweedie power。范围是1到2。对于正态分布，输入`0`。对于泊松分布，输入`1`。对于伽马分布，输入`2`。对于复合波里森-伽马分布，输入一个大于1但小于2的值。更多信息，请参考[Tweedie distribution](https://en.wikipedia.org/wiki/Tweedie_distribution). 
 
-- **score_interval**: ([DL](#DL)) Specify the shortest time interval (in seconds) to wait between model scoring.  
+- **score_interval**: ([DL](#DL)) 指定模型评分之间等待的最短时间间隔(以秒为单位)。 
 
-- **score\_training\_samples**: ([DL](#DL)) Specify the number of training set samples for scoring. To use all training samples, enter 0.  
+- **score\_training\_samples**: ([DL](#DL)) 指定用于评分的训练集样本的数量。要使用所有的训练样本，输入0。 
 
-- **score\_validation\_samples**: ([DL](#DL)) (Requires selection from the **validation_frame** drop-down list) This option is applicable to classification only. Specify the number of validation set samples for scoring. To use all validation set samples, enter 0.  
+- **score\_validation\_samples**: ([DL](#DL))（需要从**validation_frame**下拉菜单中选择）此选项仅适用于分类。指定用于评分的验证集样本的数量。要适用所有的验证集样本，输入0。
 
-- **score\_duty\_cycle**: ([DL](#DL)) Specify the maximum duty cycle fraction for scoring. A lower value results in more training and a higher value results in more scoring. The value must be greater than 0 and less than 1. 
+- **score\_duty\_cycle**: ([DL](#DL)) 指定计分最大占空比。较低的值导致更多的训练，较高的值导致更多的计分。该值必须大于0且小于1。
 
-- **autoencoder**: ([DL](#DL)) Check this checkbox to enable the Deep Learning autoencoder. This option is not selected by default. 
-   >**Note**: This option requires a loss function other than CrossEntropy. If this option is enabled, **use\_all\_factor\_levels** must be enabled. 
+- **autoencoder**: ([DL](#DL)) 勾选此复选框以启用深度学习autoencoder。该选项默认没有被选中。 
+   >**注意**: 该选项需要一个非CrossEntropy的损失函数。如果该选项启用，**use\_all\_factor\_levels** 必须被启用。 
 
-**Expert Options**
+**专家选项**
 
-- **keep\_cross\_validation\_predictions**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [K-Means](#Kmeans)) To keep the cross-validation predictions, check this checkbox. 
+- **keep\_cross\_validation\_predictions**: ([GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF), [K-Means](#Kmeans)) 若要保留交叉验证预测，请选中此复选框。
 
-- **class\_sampling\_factors**: ([DRF](#DRF), [GBM](#GBM), [DL](#DL)) Specify the per-class (in lexicographical order) over/under-sampling ratios. By default, these ratios are automatically computed during training to obtain the class balance. This option is only applicable for classification problems and when **balance_classes** is enabled. 
+- **class\_sampling\_factors**: ([DRF](#DRF), [GBM](#GBM), [DL](#DL)) 指定每个类(按字典顺序)的过/欠采样率。默认情况下，这些比率在训练期间自动计算，以获得类平衡。此选项只在分类问题并且当**balance_classes**启用时适用。
 
-- **overwrite\_with\_best\_model**: ([DL](#DL)) Check this checkbox to overwrite the final model with the best model found during training. This option is selected by default. 
+- **overwrite\_with\_best\_model**: ([DL](#DL)) 选中此复选框，以使用在训练期间找到的最佳模型覆盖最终模型。该选项默认选中。
 
-- **target\_ratio\_comm\_to\_comp**: ([DL](#DL)) Specify the target ratio of communication overhead to computation. This option is only enabled for multi-node operation and if **train\_samples\_per\_iteration** equals -2 (auto-tuning).  
+- **target\_ratio\_comm\_to\_comp**: ([DL](#DL)) 指定通信开销与计算的目标比率。此选项仅在多节点操作并且**train\_samples\_per\_iteration**等于-2（自动调优）时启用。  
 
-- **rho**: ([DL](#DL)) Specify the adaptive learning rate time decay factor. This option is only applicable if **adaptive_rate** is enabled. 
+- **rho**: ([DL](#DL)) 指定自适应学习速率时间衰减因子。该选项只在**adaptive_rate**启用时适用。
 
-- **epsilon**: ([DL](#DL)) Specify the adaptive learning rate time smoothing factor to avoid dividing by zero. This option is only applicable if **adaptive_rate** is enabled. 
+- **epsilon**: ([DL](#DL)) 指定自适应学习速率时间平滑因子以避免除以零。该选项只在**adaptive_rate**启用时适用。
 
-- **max_w2**: ([DL](#DL)) Specify the constraint for the squared sum of the incoming weights per unit (e.g., for Rectifier). 
+- **max_w2**: ([DL](#DL)) 指定每个单元输入权重的平方和的约束(例如，Rectifier)。
 
-- **initial\_weight\_distribution**: ([DL](#DL)) Select the initial weight distribution (Uniform Adaptive, Uniform, or Normal). If Uniform Adaptive is used, the **initial\_weight\_scale** parameter is not applicable. 
+- **initial\_weight\_distribution**: ([DL](#DL)) 选择初始化权重分布（Uniform Adaptive、 Uniform或Normal）。如果使用 Uniform Adaptive，**initial\_weight\_scale** 参数不适用。 
  
-- **initial\_weight\_scale**: ([DL](#DL)) Specify the initial weight scale of the distribution function for Uniform or Normal distributions. For Uniform, the values are drawn uniformly from initial weight scale. For Normal, the values are drawn from a Normal distribution with the standard deviation of the initial weight scale. If Uniform Adaptive is selected as the **initial\_weight\_distribution**, the **initial\_weight\_scale** parameter is not applicable.
+- **initial\_weight\_scale**: ([DL](#DL)) 为均匀分布或正态分布指定分布函数的初始权值。对于均匀分布，从初始权值中均匀地提取值。对于正态分布，这些值来自正态分布和初始权重的标准差。如果选择Uniform Adaptive作为**initial\_weight\_distribution**的值，**initial\_weight\_scale**参数就不适用。
 
-- **classification_stop**: ([DL](#DL)) (Applicable to discrete/categorical datasets only) Specify the stopping criterion for classification error fractions on training data. To disable this option, enter -1.  
+- **classification_stop**: ([DL](#DL)) （只适用于离散/分类数据集）指定训练数据分类错误分数的停止标准。要禁用此选项，输入-1。 
 
-- **max\_hit\_ratio\_k**: ([DL](#DL), [GLM](#GLM)) (Classification only) Specify the maximum number (top K) of predictions to use for hit ratio computation (for multinomial only). To disable this option, enter 0.  
+- **max\_hit\_ratio\_k**: ([DL](#DL), [GLM](#GLM))（仅分类问题）指定用于命中率计算的最大预测数（top K）(仅用于多分类)。要禁用此选项，输入0。  
 
-- **regression_stop**: ([DL](#DL)) (Applicable to real value/continuous datasets only) Specify the stopping criterion for regression error (MSE) on the training data. To disable this option, enter -1.  
+- **regression_stop**: ([DL](#DL)) （只适用于实数值/连续性数据集）指定训练数据回归误差(MSE)的停止标准。要禁用此选项，输入-1。 
 
-- **diagnostics**: ([DL](#DL)) Check this checkbox to compute the variable importances for input features (using the Gedeon method). For large networks, selecting this option can reduce speed. This option is selected by default. 
+- **diagnostics**: ([DL](#DL)) 选中此复选框以计算输入特性的变量重要性（使用Gedeon方法）。对于大型网络，选择此选项会降低速度。此选项默认被选中。
 
-- **fast_mode**: ([DL](#DL)) Check this checkbox to enable fast mode, a minor approximation in back-propagation. This option is selected by default. 
+- **fast_mode**: ([DL](#DL)) 选中此复选框以启用快速模式，这是反向传播中的一个小近似值。此选项是默认选中的。
 
-- **force\_load\_balance**: ([DL](#DL)) Check this checkbox to force extra load balancing to increase training speed for small datasets and use all cores. This option is selected by default. 
+- **force\_load\_balance**: ([DL](#DL)) 选中此复选框可强制进行额外的负载平衡以提高小数据集的训练速度，并使用所有核心。此选项默认被选中。
 
-- **single\_node\_mode**: ([DL](#DL)) Check this checkbox to force H2O to run on a single node for fine-tuning of model parameters. This option is not selected by default. 
+- **single\_node\_mode**: ([DL](#DL)) 选中此复选框以强制AIR在单个节点上运行，以便对模型参数进行微调。此选项默认未被选中。
 
-- **replicate\_training\_data**: ([DL](#DL)) Check this checkbox to replicate the entire training dataset on every node for faster training on small datasets. This option is not selected by default. This option is only applicable for clouds with more than one node. 
+- **replicate\_training\_data**: ([DL](#DL)) 选中此复选框可在每个节点上复制整个训练数据集，以便在小数据集上进行更快的训练。此选项默认未被选中。此选项只在拥有多于一个节点的云环境下适用。
 
-- **shuffle\_training\_data**: ([DL](#DL)) Check this checkbox to shuffle the training data. This option is recommended if the training data is replicated and the value of **train\_samples\_per\_iteration** is close to the number of nodes times the number of rows. This option is not selected by default. 
+- **shuffle\_training\_data**: ([DL](#DL)) 选中此复选框以打乱训练数据。如果训练数据重复并且**train\_samples\_per\_iteration**的值和节点数乘以数据行数的积接近，则建议启用此选项。此选项默认未被选中。
 
-- **missing\_values\_handling**: ([DL](#DL), [GLM](#GLM) Select how to handle missing values (Skip or MeanImputation). 
+- **missing\_values\_handling**: ([DL](#DL), [GLM](#GLM) 选择如何处理丢失的值（跳过或者均值插补）。
 
-- **quiet_mode**: ([DL](#DL)) Check this checkbox to display less output in the standard output. This option is not selected by default.
+- **quiet_mode**: ([DL](#DL)) 选中此复选框以在标准输出中显示较少的输出。默认情况下不选择此选项。
 
-- **sparse**: ([DL](#DL)) Check this checkbox to enable sparse data handling, which is more efficient for data with many zero values. 
+- **sparse**: ([DL](#DL)) 选中此复选框以启用稀疏数据处理，这对于具有许多零值的数据更有效。
 
-- **col_major**: ([DL](#DL)) Check this checkbox to use a column major weight matrix for the input layer. This option can speed up forward propagation but may reduce the speed of backpropagation. This option is not selected by default.  
+- **col_major**: ([DL](#DL)) 选中此复选框以使用输入层的列主权重矩阵。此选项可以加速正向传播，但可能会降低反向传播的速度。此选项默认未被选中。
   
-  >**Note**: This parameter has been deprecated. 
+  >**注意**: 此参数已被弃用。
 
-- **average_activation**: ([DL](#DL)) Specify the average activation for the sparse autoencoder. If **Rectifier** is selected as the **Activation** type, this value must be positive. For Tanh, the value must be in (-1,1). 
+- **average_activation**: ([DL](#DL)) 为稀疏autoencoder指定平均激活函数。如果**Rectifier**被选为**Activation**的类型，该值必须为正。对于Tanh，值必须在(-1,1)之中。 
 
-- **sparsity_beta**: ([DL](#DL)) Specify the sparsity-based regularization optimization. For more information, refer to the following [link](http://www.mit.edu/~9.520/spring09/Classes/class11_sparsity.pdf).  
+- **sparsity_beta**: ([DL](#DL)) 指定基于稀疏的正则化优化。更多信息，请参考以下[link](http://www.mit.edu/~9.520/spring09/Classes/class11_sparsity.pdf).  
 
-- **max\_categorical\_features**: ([DL](#DL)) Specify the maximum number of categorical features enforced via hashing. 
+- **max\_categorical\_features**: ([DL](#DL)) 指定通过哈希实现的最大类别特征数量。
 
-- **reproducible**: ([DL](#DL)) To force reproducibility on small data, check this checkbox. If this option is enabled, the model takes more time to generate, since it uses only one thread. 
+- **reproducible**: ([DL](#DL)) 若要强制对小数据进行重现，请选中此复选框。如果启用此选项，则生成模型将花费更多时间，因为它只使用一个线程。
 
-- **export\_weights\_and\_biases**: ([DL](#DL)) To export the neural network weights and biases as H2O frames, check this checkbox. 
+- **export\_weights\_and\_biases**: ([DL](#DL)) 要导出神经网络权重和偏差为AIR数据帧 ，勾选此选项。 
 
-- **max\_after\_balance\_size**: ([DRF](#DRF), [GBM](#GBM), [DL](#DL)) Specify the maximum relative size of the training data after balancing class counts (can be less than 1.0). Requires **balance\_classes**. 
+- **max\_after\_balance\_size**: ([DRF](#DRF), [GBM](#GBM), [DL](#DL)) 指定平衡类计数后训练数据的最大相对大小（可以小于1.0）。需要启用 **balance\_classes**。 
 
-- **nbins\_top\_level**: ([DRF](#DRF), [GBM](#GBM)) (For numerical [real/int] columns only) Specify the maximum number of bins at the root level to use to build the histogram. This number will then be decreased by a factor of two per level.  
+- **nbins\_top\_level**: ([DRF](#DRF), [GBM](#GBM)) (只适用于数值型[real/int]列)指定用于构建直方图时在根级别的最大bins数量。这个数字将会每层减少2倍。 
 
-- **seed**: ([K-Means](#Kmeans), [GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF)) Specify the random number generator (RNG) seed for algorithm components dependent on randomization. The seed is consistent for each H2O instance so that you can create models with the same starting conditions in alternative configurations. 
+- **seed**: ([K-Means](#Kmeans), [GLM](#GLM), [GBM](#GBM), [DL](#DL), [DRF](#DRF)) 指定基于随机化的算法组建的随机数生成器(RNG)种子。对于每个AIR实例，种子是一致的，因此您可以在可选配置中创建具有相同初始条件的模型。
 
-- **intercept**: ([GLM](#GLM)) To include a constant term in the model, check this checkbox. This option is selected by default. 
+- **intercept**: ([GLM](#GLM)) 若要在模型中包含常数项，请选中此复选框。此选项是默认选中的。
 
-- **objective_epsilon**: ([GLM](#GLM)) Specify a threshold for convergence. If the objective value is less than this threshold, the model is converged. 
+- **objective_epsilon**: ([GLM](#GLM)) 为收敛指定一个阈值。如果目标值小于此阈值，则模型收敛。
 
-- **beta_epsilon**: ([GLM](#GLM)) Specify the beta epsilon value. If the L1 normalization of the current beta change is below this threshold, consider using convergence. 
+- **beta_epsilon**: ([GLM](#GLM)) 指定beta epsilon值。如果当前beta变化的L1归一化低于此阈值，则考虑使用收敛性。
 
-- **gradient_epsilon**: ([GLM](#GLM)) (For L-BFGS only) Specify a threshold for convergence. If the objective value (using the L-infinity norm) is less than this threshold, the model is converged. 
+- **gradient_epsilon**: ([GLM](#GLM)) （只适用于L-BFGS）为收敛指定一个阈值。如果目标值(使用L-infinity范数)小于此阈值，则模型收敛。
 
-- **prior**: ([GLM](#GLM)) Specify prior probability for y ==1. Use this parameter for logistic regression if the data has been sampled and the mean of response does not reflect reality.  
+- **prior**: ([GLM](#GLM)) 指定y==1的先验概率。如果数据已经采样，并且响应的平均值不能反映实际情况，则使用此参数进行逻辑回归。 
 
-- **max\_active\_predictors**: ([GLM](#GLM)) Specify the maximum number of active predictors during computation. This value is used as a stopping criterium to prevent expensive model building with many predictors. 
+- **max\_active\_predictors**: ([GLM](#GLM)) 指定计算期间活动预测变量（特征）的最大数目。此值用作停止标准，以防止构建过多预测变量的昂贵模型。
 
 
 
@@ -1188,17 +1188,17 @@ AIR中显示的当前数据帧的列表，其中包括每个帧的以下信息�
 
 如果您有谷歌账号，you can submit a request for assistance with H2O on our Google Groups page, [H2Ostream](https://groups.google.com/forum/#!forum/h2ostream). 
 
-To access H2Ostream from Flow:
+要从Flow中访问AIRstream:
 
-0. Click the **Help** menu.
-0. Click **Forum/Ask a question**. 
+0. 单击**帮助** 菜单。
+0. 单击 **论坛/提问**。
 0. Click the red **New topic** button.
 0. Enter your question and click the red **Post** button. If you are requesting assistance for an error you experienced, be sure to include your [logs](#DL_Logs). 
 
 
-You can also email your question to [h2ostream@googlegroups.com](mailto:h2ostream@googlegroups.com). 
+您也可以通过邮件把问题发给我们 [airstream@googlegroups.com](mailto:h2ostream@googlegroups.com)。
 
-Or, you can post your question on [Stack Overflow](https://stackoverflow.com/questions/tagged/h2o) using the "h2o" tag.
+或者，您可以用"air"标签提交问题到 [Stack Overflow](https://stackoverflow.com/questions/tagged/air)。
 
 
 ---
