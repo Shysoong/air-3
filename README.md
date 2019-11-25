@@ -11,21 +11,21 @@ AIR-3 (本库) 是H2O的汉化版版本，H2O的第三代版本，[H2O-2](https:
 ### 目录
 
 * [下载AIR-3](#Downloading)
-* [Open Source Resources](#Resources)
-    * [Issue Tracking and Feature Requests](#IssueTracking)
-    * [List of H2O Resources](#OpenSourceResources)
-* [Using H2O-3 Code Artifacts (libraries)](#Artifacts)
-* [Building H2O-3](#Building)
-* [Launching H2O after Building](#Launching)
-* [Building H2O on Hadoop](#BuildingHadoop)
+* [开源资源](#Resources)
+    * [问题跟踪和特性请求](#IssueTracking)
+    * [AIR资源列表](#OpenSourceResources)
+* [使用AIR-3代码构件(库)](#Artifacts)
+* [构建AIR-3](#Building)
+* [构建完成后启动AIR](#Launching)
+* [在Hadoop上构建AIR](#BuildingHadoop)
 * [Sparkling Water](#Sparkling)
-* [Documentation](#Documentation)
-* [Citing H2O](#Citing)
-* [Roadmap](#Roadmap)
-* [Community](#Community) / [Advisors](#Advisors) / [Investors](#Investors)
+* [文档](#Documentation)
+* [引用H2O](#Citing)
+* [产品路线图](#Roadmap)
+* [社区](#Community) / [顾问](#Advisors) / [投资人](#Investors)
 
 <a name="Downloading"></a>
-## 1. Downloading H2O-3
+## 1. 下载 H2O-3
 
 While most of this README is written for developers who do their own builds, most H2O users just download and use a pre-built version.  If you are a Python or R user, the easiest way to install H2O is via [PyPI](https://pypi.python.org/pypi/h2o) or [Anaconda](https://anaconda.org/h2oai/h2o) (for Python) or [CRAN](https://CRAN.R-project.org/package=h2o) (for R):  
 
@@ -46,14 +46,14 @@ For the latest stable, nightly, Hadoop (or Spark / Sparkling Water) releases, or
 More info on downloading & installing H2O is available in the [H2O User Guide](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/downloading.html).
 
 <a name="Resources"></a>
-## 2. Open Source Resources
+## 2. 开源资源
 
 Most people interact with three or four primary open source resources:  **GitHub** (which you've already found), **JIRA** (for bug reports and issue tracking), **Stack Overflow** for H2O code/software-specific questions, and **h2ostream** (a Google Group / email discussion forum) for questions not suitable for Stack Overflow.  There is also a **Gitter** H2O developer chat group, however for archival purposes & to maximize accessibility, we'd prefer that standard H2O Q&A be conducted on Stack Overflow.
 
 <a name="IssueTracking"></a>
-### 2.1 Issue Tracking and Feature Requests
+### 2.1 问题跟踪和特性请求
 
-> (Note: There is only one issue tracking system for the project.  GitHub issues are not enabled; you must use JIRA.)
+> （注意：本项目只有一个问题跟踪系统。GitHub issues没有被启用，您必须使用JIRA。）
 
 You can browse and create new issues in our open source **JIRA**:  <http://jira.h2o.ai>
 
@@ -712,7 +712,7 @@ Arora, A., Candel, A., Lanford, J., LeDell, E., and Parmar, V. (Oct. 2016). _Dee
 Click, C., Lanford, J., Malohlava, M., Parmar, V., and Roark, H. (Oct. 2016). _Gradient Boosted Models with H2O_. <http://docs.h2o.ai/h2o/latest-stable/h2o-docs/booklets/GBMBooklet.pdf>.
 
 <a name="Roadmap"></a>
-## 10. Roadmap
+## 10. 产品路线图
 
 ### H2O 3.28 - Autumn 2019 (Q4/2019)
 
@@ -740,7 +740,7 @@ Click, C., Lanford, J., Malohlava, M., Parmar, V., and Roark, H. (Oct. 2016). _G
 H2O has been built by a great many number of contributors over the years both within H2O.ai (the company) and the greater open source community.  You can begin to contribute to H2O by answering [Stack Overflow](http://stackoverflow.com/questions/tagged/h2o) questions or [filing bug reports](https://0xdata.atlassian.net/projects/PUBDEV/issues).  Please join us!  
 
 
-### Team & Committers
+### 团队 & 提交者
 
 ```
 SriSatish Ambati
@@ -816,9 +816,9 @@ Jan Sterba
 ```
 
 <a name="Advisors"></a>
-## Advisors
+## 顾问
 
-Scientific Advisory Council
+科学咨询委员会
 
 ```
 Stephen Boyd
@@ -826,7 +826,7 @@ Rob Tibshirani
 Trevor Hastie
 ```
 
-Systems, Data, FileSystems and Hadoop
+系统、数据、文件系统以及Hadoop
 
 ```
 Doug Lea
@@ -835,7 +835,7 @@ Dhruba Borthakur
 ```
 
 <a name="Investors"></a>
-## Investors
+## 投资人
 
 ```
 Jishnu Bhattacharjee, Nexus Venture Partners
