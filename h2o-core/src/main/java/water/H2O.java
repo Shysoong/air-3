@@ -249,6 +249,9 @@ final public class H2O {
     /** -internal_security_conf path (absolute or relative) to a file containing all internal security related configurations */
     public String internal_security_conf = null;
 
+    /** -internal_security_conf_rel_paths interpret paths of internal_security_conf relative to the main config file */
+    public boolean internal_security_conf_rel_paths = false;
+
     /** -internal_security_enabled is a boolean that indicates if internal communication paths are secured*/
     public boolean internal_security_enabled = false;
 
@@ -343,6 +346,9 @@ final public class H2O {
     
     /** -client, -client=true; Client-only; no work; no homing of Keys (but can cache) */
     public boolean client;
+
+    /** -allow_clients, -allow_clients=true; Enable clients to connect to this H2O node - disabled by default */
+    public boolean allow_clients = false;
 
     /** specifies a file to write when the node is up */
     public String notify_local;
@@ -523,6 +529,9 @@ final public class H2O {
       else if (s.matches("client")) {
         trgt.client = true;
       }
+      else if (s.matches("allow_clients")) {
+        trgt.allow_clients = true;
+      }
       else if (s.matches("notify_local")) {
         i = s.incrementAndCheck(i, args);
         trgt.notify_local = args[i];
@@ -647,6 +656,9 @@ final public class H2O {
       else if (s.matches("internal_security_conf")) {
         i = s.incrementAndCheck(i, args);
         trgt.internal_security_conf = args[i];
+      }
+      else if (s.matches("internal_security_conf_rel_paths")) {
+        trgt.internal_security_conf_rel_paths = true;
       }
       else if (s.matches("decrypt_tool")) {
         i = s.incrementAndCheck(i, args);
