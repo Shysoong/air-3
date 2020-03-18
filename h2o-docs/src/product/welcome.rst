@@ -1,13 +1,13 @@
-欢迎来到 AIR 3
+欢迎来到 AIR
 ================
 
-H2O is an open source, in-memory, distributed, fast, and scalable machine learning and predictive analytics platform that allows you to build machine learning models on big data and provides easy productionalization of those models in an enterprise environment.
+AIR是一个开源、内存式、分布式、快速、可伸缩的机器学习和预测分析平台，该平台允许您在大数据集上构建机器学习模型，并且在企业环境中提供这些模型的简单产品化。
 
-H2O's core code is written in Java. Inside H2O, a Distributed Key/Value store is used to access and reference data, models, objects, etc., across all nodes and machines. The algorithms are implemented on top of H2O's distributed Map/Reduce framework and utilize the Java Fork/Join framework for multi-threading. The data is read in parallel and is distributed across the cluster and stored in memory in a columnar format in a compressed way. H2O’s data parser has built-in intelligence to guess the schema of the incoming dataset and supports data ingest from multiple sources in various formats.
+AIR的核心代码是用Java写的。在AIR内部，一个分布式的Key/Value存储用来在跨节点和机器时访问和引用数据、模型、对象等等。算法在AIR的分布式Map/Reduce框架之上实现，并利用Java的Fork/Join框架进行多线程管理。数据是并行读取的，分布在集群中，并以压缩的方式以柱状格式存储在内存中。AIR的数据解析器具有内置的智能机构来猜测传入数据集的模式，并且支持从多数据源来的多种格式的数据的抽取。
 
-H2O’s REST API allows access to all the capabilities of H2O from an external program or script via JSON over HTTP. The Rest API is used by H2O’s web interface (Flow UI), R binding (H2O-R), and Python binding (H2O-Python).
+AIR的REST API允许通过外部程序或脚本在HTTP上通过JSON访问AIR的所有能力。Rest API被AIR的web接口（Flow用户界面）、R客户端（AIR-R）和Python客户端（AIR-Python）。
 
-The speed, quality, ease-of-use, and model-deployment for the various cutting edge Supervised and Unsupervised algorithms like Deep Learning, Tree Ensembles, and GLRM make H2O a highly sought after API for big data data science. 
+快速、优质、易用和众多各种前沿监督和非监督算法（例如深度学习、堆叠树、广义低秩模型）的模型部署让AIR成为大数据数据科学的热门API。
 
 要求
 ------------
@@ -21,42 +21,41 @@ The speed, quality, ease-of-use, and model-deployment for the various cutting ed
    -  Ubuntu 12.04
    -  RHEL/CentOS 6 或更高版本
 
--  **语言**: Scala, R, and Python are not required to use H2O unless you want to use H2O in those environments, but Java is always required. Supported versions include:
+-  **语言**: Scala、R和Python不是使用AIR所必须的，除非您想要在这些环境下使用AIR，但是Java总是需要。支持的版本包括：
 
-   -  Java 8, 9, 10, 11, and 12
+   -  Java 8、9、10、11和12
 
-      - To build H2O or run H2O tests, the 64-bit JDK is required.
-      - To run the H2O binary using either the command line, R, or Python packages, only 64-bit JRE is required.
-      - Both of these are available on the `Java download page <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`__.
+      - 要构建AIR或者运行AIR测试，64位JDK是必须的。
+      - 不管是用命令行、R或者Python包来运行AIR二进制文件时，只有64位JRE是必须的。
+      - 这些都可在此链接找啊都 `Java download page <http://www.oracle.com/technetwork/java/javase/downloads/index.html>`__。
 
    -  Scala 2.10 或更高版本
    -  R version 3 或更高版本
    -  Python 2.7.x, 3.5.x, 3.6.x 
 
--  **浏览器**: An internet browser is required to use H2O's web UI, Flow. Supported versions include the latest version of Chrome, Firefox, Safari, or Internet Explorer.
+-  **浏览器**: 要使用AIR的web用户界面（Flow）的话，web浏览器也是必须的。支持的版本包括最新版本的Chrome、Firefox、Safari或者Internet Explorer。
 
 附加要求
 ~~~~~~~~~~~~~~~~~~~~~~~
 
--  **Hadoop**: Hadoop is not required to run H2O unless you want to deploy H2O on a Hadoop cluster. Supported versions are listed on the `Download page <http://www.h2o.ai/download/>`_ (when you select the Install on Hadoop tab) and include:
+-  **Hadoop**: 要运行AIR，Hadoop不是必须的，除非您想在Hadoop集群上部署AIR。支持的版本列在了此页面 `Download page <http://www.h2o.ai/download/>`_ （当您在Hadoop选项卡上选择安装时），包括了:
 
-   -  Cloudera CDH 5.4 or later
-   -  Hortonworks HDP 2.2 or later
-   -  MapR 4.0 or later
+   -  Cloudera CDH 5.4 或更高版本
+   -  Hortonworks HDP 2.2 或更高版本
+   -  MapR 4.0 或更高版本
    -  IBM Open Platform 4.2
 
-  Refer to the :ref:`on-hadoop` section for detailed information.
+  详细信息参考 :ref:`on-hadoop` 部分。
 
--  **Conda 2.7, 3.5, or 3.6 repo**: Conda is not required to run H2O unless you want to run H2O on the Anaconda Cloud. Refer to the :ref:`anaconda` section for more information.
+-  **Conda 2.7、3.5或者3.6仓库**: 运行AIR，Conda不是必须的，除非您想在Anaconda Cloud上运行AIR。详细信息参考 :ref:`anaconda` 部分。
 
--  **Spark**: Version 2.1, 2.2, or 2.3. Spark is only required if you want to run `Sparkling Water <https://github.com/h2oai/sparkling-water>`__.
+-  **Spark**: 如果您想运行 `Sparkling Water <https://github.com/h2oai/sparkling-water>`__ ，2.1、2.2或2.3版本的Spark才是必须的。
 
 
 新用户
 ---------
 
-If you're just getting started with H2O, here are some links to help you
-learn more:
+如果您刚刚开始接触AIR，下面是一些可以帮助您了解更多信息的链接：
 
 -  `Downloads page <http://www.h2o.ai/download/>`_: First things first - download a copy of H2O here by selecting a build under "Download H2O" (the "Bleeding Edge" build contains the latest changes, while the latest alpha release is a more stable build), then use the installation instruction tabs to install H2O on your client of choice (standalone, R, Python, Hadoop, or Maven).
 
