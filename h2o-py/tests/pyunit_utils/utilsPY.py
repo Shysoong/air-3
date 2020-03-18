@@ -47,7 +47,24 @@ import scipy.special
 from h2o.utils.typechecks import is_type
 import datetime
 import time # needed to randomly generate time
+import threading
 import uuid # call uuid.uuid4() to generate unique uuid numbers
+
+
+class Timeout:
+
+    def __init__(self, timeout_secs, on_timeout=None):
+        enabled = timeout_secs is not None and timeout_secs >= 0
+        self.timer = threading.Timer(timeout_secs, on_timeout) if enabled else None
+
+    def __enter__(self):
+        if self.timer:
+            self.timer.start()
+        return self
+
+    def __exit__(self, *args):
+        if self.timer:
+            self.timer.cancel()
 
 
 class Namespace:
@@ -522,7 +539,7 @@ def hadoop_namenode():
 def pyunit_exec(test_name):
     with open(test_name, "r") as t: pyunit = t.read()
     pyunit_c = compile(pyunit, os.path.abspath(test_name), 'exec')
-    exec(pyunit_c, {})
+    exec(pyunit_c, dict(__name__='main'))  # forcing module name to ensure that the test behaves the same way as when executed using `python my_test.py`
 
 def standalone_test(test):
     if not h2o.connection() or not h2o.connection().connected:
@@ -788,7 +805,7 @@ def write_syn_mixed_dataset_glm(csv_training_data_filename, csv_training_data_fi
     # add column count of encoded categorical predictors, if maximum value for enum is 3, it has 4 levels.
     # hence 4 bits are used to encode it with true one hot encoding.  That is why we are adding 1 bit per
     # categorical columns added to our predictors
-    new_col_count = col_count - enum_col + sum(enum_level_vec) + enum_level_vec.shape[0]
+    new_col_count = col_count - enum_col + sum(enum_level_vec)+len(enum_level_vec)
 
     # generate the weights to be applied to the training/validation/test data sets
     # this is for true one hot encoding.  For reference+one hot encoding, will skip
@@ -1161,7 +1178,7 @@ def encode_enum_dataset(dataset, enum_level_vec, enum_col, true_one_hot, include
         if include_nans and np.any(enum_arrays[:, indc]):
             enum_col_num += 1
 
-        new_temp_enum = np.zeros((num_row, enum_col_num[0]))
+        new_temp_enum = np.zeros((num_row, enum_col_num))
         one_hot_matrix = one_hot_encoding(enum_col_num)
         last_col_index = enum_col_num-1
 
@@ -1248,7 +1265,6 @@ def generate_response_glm(weight, x_mat, noise_std, family_type, class_method='p
     :return: vector representing the response
     """
     (num_row, num_col) = x_mat.shape
-
     temp_ones_col = np.asmatrix(np.ones(num_row)).transpose()
     x_mat = np.concatenate((temp_ones_col, x_mat), axis=1)
     response_y = x_mat * weight + noise_std * np.random.standard_normal([num_row, 1])
@@ -1710,7 +1726,17 @@ def generate_sign_vec(table1, table2):
                 break       # found what we need.  Goto next column
 
     return sign_vec
-
+def equal_two_dicts(dict1, dict2, tolerance=1e-6, throwError=True):
+    size1 = len(dict1)
+    if (size1 == len(dict2)):   # only proceed if lengths are the same
+        for key1 in dict1.keys():
+            diff = abs(dict1[key1]-dict2[key1])
+            if (diff > tolerance):
+                if throwError:
+                    assert False, "Dict 1 value {0} and Dict 2 value {1} do not agree.".format(dict1[key1], dict2[key1])
+                else:
+                    return False
+                
 def equal_two_arrays(array1, array2, eps, tolerance, throwError=True):
     """
     This function will compare the values of two python tuples.  First, if the values are below
@@ -2910,7 +2936,8 @@ def write_hyper_parameters_json(dir1, dir2, json_filename, hyper_parameters):
         json.dump(hyper_parameters, test_file)
 
 
-def compare_frames(frame1, frame2, numElements, tol_time=0, tol_numeric=0, strict=False, compare_NA=True):
+def compare_frames(frame1, frame2, numElements, tol_time=0, tol_numeric=0, strict=False, compare_NA=True,
+                   custom_comparators=None):
     """
     This function will compare two H2O frames to make sure their dimension, and values in all cells are the same.
     It will not compare the column names though.
@@ -2926,6 +2953,7 @@ def compare_frames(frame1, frame2, numElements, tol_time=0, tol_numeric=0, stric
     :param compare_NA: optional parameter to compare NA or not.  For csv file generated from orc file, the
         NAs are represented as some other symbol but our CSV will not be able to parse it correctly as NA.
         In this case, do not compare the number of NAs.
+    :param custom_comparators: dictionary specifying custom comparators for some columns. 
     :return: boolean: True, the two frames are equal and False otherwise.
     """
 
@@ -2960,8 +2988,10 @@ def compare_frames(frame1, frame2, numElements, tol_time=0, tol_numeric=0, stric
             if str(c2_type) == 'enum':  # orc files do not have enum column type.  We convert it here
                 frame1[col_ind].asfactor()
 
-        # compare string
-        if (str(c1_type) == 'string') or (str(c1_type) == 'enum'):
+        if custom_comparators and c1_key in custom_comparators:        
+            custom_comparators[c1_key](frame1, frame2, col_ind, rows1, numElements)
+        elif (str(c1_type) == 'string') or (str(c1_type) == 'enum'):
+            # compare string
             compareOneStringColumn(frame1, frame2, col_ind, rows1, numElements)
         else:
             if str(c2_type) == 'time':  # compare time columns
@@ -3557,11 +3587,11 @@ def compare_frames_local(f1, f2, prob=0.5, tol=1e-6, returnResult=False):
             if returnResult:
                 result = compare_frames_local_onecolumn_NA_enum(f1[colInd], f2[colInd], prob=prob, tol=tol, returnResult=returnResult)
                 if not(result):
-                    return False;
+                    return False
             else:
                 result = compare_frames_local_onecolumn_NA_enum(f1[colInd], f2[colInd], prob=prob, tol=tol, returnResult=returnResult)
                 if not(result):
-                    return False;
+                    return False
         elif (typeDict[frameNames[colInd]]==u'string'):
             if returnResult:
                 result =  compare_frames_local_onecolumn_NA_string(f1[colInd], f2[colInd], prob=prob, returnResult=returnResult)

@@ -136,10 +136,7 @@ public class ModelBuilderTest extends TestUtil {
   
   @Test
   public void testMakeByModelParameters() {
-    
-    String registrationAlgoName = "dummymodelbuilder"; // by default it is a lower case of the ModelBuilder's simple name
-    DummyModelParameters params = new DummyModelParameters("dummy_MSG", Key.make( "dummyGBM_key"), registrationAlgoName);
-    new DummyModelBuilder(params, true); // as a side effect DummyModelBuilder will be registered in a static field ModelBuilder.ALGOBASES
+    DummyModelParameters params = new DummyModelParameters();
 
     ModelBuilder modelBuilder = ModelBuilder.make(params);
 
@@ -257,8 +254,10 @@ public class ModelBuilderTest extends TestUtil {
   }
 
   public static class DummyModelOutput extends Model.Output {
-    public DummyModelOutput(ModelBuilder b, Frame train) {
+    public final String _msg;
+    public DummyModelOutput(ModelBuilder b, Frame train, String msg) {
       super(b, train);
+      _msg = msg;
     }
     @Override
     public ModelCategory getModelCategory() {
@@ -269,15 +268,27 @@ public class ModelBuilderTest extends TestUtil {
       return true;
     }
   }
+  public static class DummyExtension extends AbstractH2OExtension {
+    @Override
+    public String getExtensionName() {
+      return "dummy";
+    }
+    @Override
+    public void init() {
+      DummyModelParameters params = new DummyModelParameters();
+      new DummyModelBuilder(params, true); // as a side effect DummyModelBuilder will be registered in a static field ModelBuilder.ALGOBASES
+    }
+  }
   public static class DummyModelParameters extends Model.Parameters {
-    private String _msg;
-    private Key _trgt;
-    private String _registrationAlgoName;
-    private boolean _makeModel;
-    public DummyModelParameters(String msg, Key trgt) { _msg = msg; _trgt = trgt; }
-    public DummyModelParameters(String msg, Key trgt, String algoRegistrationName) { _msg = msg; _trgt = trgt; _registrationAlgoName = algoRegistrationName; }
-    @Override public String fullName() { return _registrationAlgoName == null ? "dummy": _registrationAlgoName; }
-    @Override public String algoName() { return _registrationAlgoName == null ? "dummy": _registrationAlgoName; }
+    public DummyAction _action;
+    public boolean _makeModel;
+    public boolean _cancel_job;
+    public DummyModelParameters() {}
+    public DummyModelParameters(String msg, Key trgt) {
+      _action = new MessageInstallAction(trgt, msg);
+    }
+    @Override public String fullName() { return algoName(); }
+    @Override public String algoName() { return "dummymodelbuilder"; }
     @Override public String javaName() { return DummyModelBuilder.class.getName(); }
     @Override public long progressUnits() { return 1; }
   }
@@ -294,7 +305,9 @@ public class ModelBuilderTest extends TestUtil {
     @Override
     protected Futures remove_impl(Futures fs, boolean cascade) {
       super.remove_impl(fs, cascade);
-      DKV.remove(_parms._trgt);
+      if (_parms._action != null) {
+        _parms._action.cleanUp();
+      }
       return fs;
     }
   }
@@ -311,13 +324,17 @@ public class ModelBuilderTest extends TestUtil {
       return new Driver() {
         @Override
         public void computeImpl() {
-          DKV.put(_parms._trgt, new BufferedString("Computed " + _parms._msg));
+          if (_parms._cancel_job)
+            throw new Job.JobCancelledException();
+          String msg = null;
+          if (_parms._action != null) 
+            msg = _parms._action.run(_parms);
           if (! _parms._makeModel)
             return;
           init(true);
           Model model = null;
           try {
-            model = new DummyModel(dest(), _parms, new DummyModelOutput(DummyModelBuilder.this, train()));
+            model = new DummyModel(dest(), _parms, new DummyModelOutput(DummyModelBuilder.this, train(), msg));
             model.delete_and_lock(_job);
             model.update(_job);
           } finally {
@@ -338,5 +355,28 @@ public class ModelBuilderTest extends TestUtil {
       return true;
     }
   }
+  public static abstract class DummyAction<T> extends Iced<DummyAction<T>> {
+    protected abstract String run(DummyModelParameters parms);
+    protected void cleanUp() {};
+  }
+  private static class MessageInstallAction extends DummyAction<MessageInstallAction> {
+    private final Key _trgt;
+    private final String _msg;
+    
+    public MessageInstallAction(Key trgt, String msg) {
+      _trgt = trgt;
+      _msg = msg;
+    }
 
+    @Override
+    protected String run(DummyModelParameters parms) {
+      DKV.put(_trgt, new BufferedString("Computed " + _msg));
+      return _msg;
+    }
+
+    @Override
+    protected void cleanUp() {
+      DKV.remove(_trgt);
+    }
+  } 
 }

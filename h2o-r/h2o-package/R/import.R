@@ -287,11 +287,14 @@ h2o.import_sql_select<- function(connection_url, select_query, username, passwor
 #'
 #' Import Hive table to H2OFrame in memory.
 #' Make sure to start H2O with Hive on classpath. Uses hive-site.xml on classpath to connect to Hive.
-#'
+#' When database is specified as jdbc URL uses Hive JDBC driver to obtain table metadata. then 
+#' uses direct HDFS access to import data.
+#' 
 #' For example, 
 #'     my_citibike_data = h2o.import_hive_table("default", "citibike20k", partitions = list(c("2017", "01"), c("2017", "02")))
+#'     my_citibike_data = h2o.import_hive_table("jdbc:hive2://hive-server:10000/default", "citibike20k", allow_multi_format = TRUE)
 #'
-#' @param database Name of Hive database (default database will be used by default)
+#' @param database Name of Hive database (default database will be used by default), can be also a JDBC URL
 #' @param table name of Hive table to import
 #' @param partitions a list of lists of strings - partition key column values of partitions you want to import.
 #' @param allow_multi_format enable import of partitioned tables with different storage formats used. WARNING:
@@ -355,16 +358,20 @@ h2o.loadModel <- function(path) {
 #'
 #' @param secretKeyId Amazon S3 Secret Key ID (provided by Amazon)
 #' @param secretAccessKey Amazon S3 Secret Access Key (provided by Amazon)
+#' @param sessionToken Amazon Session Token (optional, only when using AWS Temporary Credentials)
 #' 
 #' @export
-h2o.set_s3_credentials <- function(secretKeyId, secretAccessKey){
+h2o.set_s3_credentials <- function(secretKeyId, secretAccessKey, sessionToken = NULL){
   if(is.null(secretKeyId)) stop("Secret key ID must not be null.")
   if(is.null(secretAccessKey)) stop("Secret acces key must not be null.")
   if(!is.character(secretKeyId) || nchar(secretKeyId) == 0) stop("Secret key ID must be a non-empty character string.")
   if(!is.character(secretAccessKey) || nchar(secretAccessKey) == 0) stop("Secret access key must a non-empty character string.")
   parms <- list()
   parms$secret_key_id <- secretKeyId
-  parms$secret_access_key = secretAccessKey
+  parms$secret_access_key <- secretAccessKey
+  if(!is.null(sessionToken)){
+    parms$session_token <- sessionToken
+  }
   
   res <- .h2o.__remoteSend("PersistS3", method = "POST", .params = parms, h2oRestApiVersion = 3)
   print("Credentials successfully set.")

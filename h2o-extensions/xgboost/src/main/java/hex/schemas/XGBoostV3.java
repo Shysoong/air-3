@@ -3,6 +3,7 @@ package hex.schemas;
 import hex.tree.xgboost.XGBoost;
 import hex.tree.xgboost.XGBoostModel.XGBoostParameters;
 import water.api.API;
+import water.api.schemas3.KeyV3;
 import water.api.schemas3.KeyValueV3;
 import water.api.schemas3.ModelParametersSchemaV3;
 
@@ -58,6 +59,11 @@ public class XGBoostV3 extends ModelBuilderSchema<XGBoost,XGBoostV3,XGBoostV3.XG
         //runtime
         "nthread",
         "save_matrix_directory",
+        "build_tree_one_node",
+
+        //platt scaling
+        "calibrate_model",
+        "calibration_frame",
 
         //lightgbm only
         "max_bins",
@@ -85,8 +91,6 @@ public class XGBoostV3 extends ModelBuilderSchema<XGBoost,XGBoostV3,XGBoostV3.XG
 
     @API(help="(same as n_estimators) Number of trees.", gridable = true)
     public int ntrees;
-    @API(help="(same as ntrees) Number of trees.", gridable = true)
-    public int n_estimators;
 
     @API(help="Maximum tree depth.", gridable = true)
     public int max_depth;
@@ -141,8 +145,17 @@ public class XGBoostV3 extends ModelBuilderSchema<XGBoost,XGBoostV3,XGBoostV3.XG
     @API(help = "Number of parallel threads that can be used to run XGBoost. Cannot exceed H2O cluster limits (-nthreads parameter). Defaults to maximum available", level = API.Level.expert)
     public int nthread;
 
+    @API(help="Run on one node only; no network overhead but fewer cpus used. Suitable for small datasets.", level = API.Level.expert, gridable = false)
+    public boolean build_tree_one_node;
+
     @API(help = "Directory where to save matrices passed to XGBoost library. Useful for debugging.", level = API.Level.expert)
     public String save_matrix_directory;
+
+    @API(help="Use Platt Scaling to calculate calibrated class probabilities. Calibration can provide more accurate estimates of class probabilities.", level = API.Level.expert)
+    public boolean calibrate_model;
+
+    @API(help="Calibration frame for Platt Scaling", level = API.Level.expert, direction = API.Direction.INOUT)
+    public KeyV3.FrameKeyV3 calibration_frame;
 
     @API(help = "For tree_method=hist only: maximum number of bins", level = API.Level.expert, gridable = true)
     public int max_bins;

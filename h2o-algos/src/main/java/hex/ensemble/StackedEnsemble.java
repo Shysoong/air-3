@@ -4,6 +4,7 @@ import hex.Model;
 import hex.ModelBuilder;
 import hex.ModelCategory;
 
+import hex.grid.Grid;
 import water.DKV;
 import water.Job;
 import water.Key;
@@ -13,6 +14,7 @@ import water.exceptions.H2OModelBuilderIllegalArgumentException;
 import water.fvec.Frame;
 import water.fvec.Vec;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -71,6 +73,28 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
     super.init(expensive);
 
     checkFoldColumnPresent(_parms._metalearner_fold_column, train(), valid(), _parms.blending());
+    validateAndExpandBaseModels();
+  }
+
+  /**
+   * Validates base models and if grid is provided instead of a model it gets expanded.
+   */
+  private void validateAndExpandBaseModels() {
+    List<Key> baseModels = new ArrayList<Key>();
+    for (Key baseModelKey : _parms._base_models) {
+      Object retrievedObject = DKV.getGet(baseModelKey);
+      if (retrievedObject instanceof Model) {
+        baseModels.add(baseModelKey);
+      } else if (retrievedObject instanceof Grid) {
+        Grid grid = (Grid) retrievedObject;
+        Collections.addAll(baseModels, grid.getModelKeys());
+      } else if (retrievedObject == null) {
+        throw new IllegalArgumentException(String.format("Specified id \"%s\" does not exist.", baseModelKey));
+      } else {
+        throw new IllegalArgumentException(String.format("Unsupported type \"%s\" as a base model.", retrievedObject.getClass().toString()));
+      }
+    }
+    _parms._base_models = baseModels.toArray(new Key[0]);
   }
 
   /**
@@ -172,79 +196,82 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
       return levelOneFrame;
     }
 
-  /**
-   * Prepare a "level one" frame for a given set of models and actuals.
-   * Used for preparing validation frames for the metalearning step, and could also be used for bulk predictions for a StackedEnsemble.
-   */
-  private Frame prepareLevelOneFrame(String levelOneKey, Key<Model>[] baseModelKeys, Frame actuals, boolean isTraining) {
-    List<Model> baseModels = new ArrayList<>();
-    List<Frame> baseModelPredictions = new ArrayList<>();
+    /**
+     * Prepare a "level one" frame for a given set of models and actuals.
+     * Used for preparing validation frames for the metalearning step, and could also be used for bulk predictions for a StackedEnsemble.
+     */
+    private Frame prepareLevelOneFrame(String levelOneKey, Key<Model>[] baseModelKeys, Frame actuals, boolean isTraining) {
+      List<Model> baseModels = new ArrayList<>();
+      List<Frame> baseModelPredictions = new ArrayList<>();
 
-    for (Key<Model> k : baseModelKeys) {
-      Model aModel = DKV.getGet(k);
-      if (null == aModel)
-        throw new H2OIllegalArgumentException("Failed to find base model: " + k);
+      for (Key<Model> k : baseModelKeys) {
+        Model aModel = DKV.getGet(k);
+        if (null == aModel)
+          throw new H2OIllegalArgumentException("Failed to find base model: " + k);
 
-      Frame predictions = getPredictionsForBaseModel(aModel, actuals, isTraining);
-      baseModels.add(aModel);
-      baseModelPredictions.add(predictions);
+        Frame predictions = getPredictionsForBaseModel(aModel, actuals, isTraining);
+        baseModels.add(aModel);
+        baseModelPredictions.add(predictions);
+      }
+      boolean keepLevelOneFrame = isTraining && _parms._keep_levelone_frame;
+      Frame levelOneFrame = prepareLevelOneFrame(levelOneKey, baseModels.toArray(new Model[0]), baseModelPredictions.toArray(new Frame[0]), actuals);
+      if (keepLevelOneFrame) {
+        levelOneFrame = levelOneFrame.deepCopy(levelOneFrame._key.toString());
+        levelOneFrame.write_lock(_job);
+        levelOneFrame.update(_job);
+        levelOneFrame.unlock(_job);
+        Scope.untrack(levelOneFrame.keysList());
+      }
+      return levelOneFrame;
     }
-    boolean keepLevelOneFrame = isTraining && _parms._keep_levelone_frame;
-    Frame levelOneFrame = prepareLevelOneFrame(levelOneKey, baseModels.toArray(new Model[0]), baseModelPredictions.toArray(new Frame[0]), actuals);
-    if (keepLevelOneFrame) {
-      levelOneFrame = levelOneFrame.deepCopy(levelOneFrame._key.toString());
-      levelOneFrame.write_lock(_job);
-      levelOneFrame.update(_job);
-      levelOneFrame.unlock(_job);
-      Scope.untrack(levelOneFrame.keysList());
+
+    protected Frame buildPredictionsForBaseModel(Model model, Frame frame) {
+      Key<Frame> predsKey = buildPredsKey(model, frame);
+      Frame preds = DKV.getGet(predsKey);
+      if (preds == null) {
+        preds =  model.score(frame, predsKey.toString(), null, false);  // no need for metrics here (leaks in client mode)
+        Scope.untrack(preds.keysList());
+      }
+      if (_model._output._base_model_predictions_keys == null)
+        _model._output._base_model_predictions_keys = new Key[0];
+
+      if (!ArrayUtils.contains(_model._output._base_model_predictions_keys, predsKey)){
+        _model._output._base_model_predictions_keys = ArrayUtils.append(_model._output._base_model_predictions_keys, predsKey);
+      }
+      //predictions are cleaned up by metalearner if necessary
+      return preds;
     }
-    return levelOneFrame;
-  }
 
-  protected Frame buildPredictionsForBaseModel(Model model, Frame frame) {
-    Key<Frame> predsKey = buildPredsKey(model, frame);
-    Frame preds = DKV.getGet(predsKey);
-    if (preds == null) {
-      preds =  model.score(frame, predsKey.toString(), null, false);  // no need for metrics here (leaks in client mode)
-      Scope.untrack(preds.keysList());
+    protected abstract StackedEnsembleModel.StackingStrategy strategy();
+
+    /**
+     * @RETURN THE FRAME THAT IS USED TO COMPUTE THE PREDICTIONS FOR THE LEVEL-ONE TRAINING FRAME.
+     */
+    protected abstract Frame getActualTrainingFrame();
+
+    protected abstract Frame getPredictionsForBaseModel(Model model, Frame actualsFrame, boolean isTrainingFrame);
+
+    private Key<Frame> buildPredsKey(Key model_key, long model_checksum, Key frame_key, long frame_checksum) {
+      return Key.make("preds_" + model_checksum + "_on_" + frame_checksum);
     }
-    if (_model._output._base_model_predictions_keys == null)
-      _model._output._base_model_predictions_keys = new Key[0];
 
-    if (!ArrayUtils.contains(_model._output._base_model_predictions_keys, predsKey)){
-      _model._output._base_model_predictions_keys = ArrayUtils.append(_model._output._base_model_predictions_keys, predsKey);
+    protected Key<Frame> buildPredsKey(Model model, Frame frame) {
+      return frame == null || model == null ? null : buildPredsKey(model._key, model.checksum(), frame._key, frame.checksum());
     }
-    //predictions are cleaned up by metalearner if necessary
-    return preds;
-  }
 
-  protected abstract StackedEnsembleModel.StackingStrategy strategy();
-
-  /**
-   * @RETURN THE FRAME THAT IS USED TO COMPUTE THE PREDICTIONS FOR THE LEVEL-ONE TRAINING FRAME.
-   */
-  protected abstract Frame getActualTrainingFrame();
-
-  protected abstract Frame getPredictionsForBaseModel(Model model, Frame actualsFrame, boolean isTrainingFrame);
-
-  private Key<Frame> buildPredsKey(Key model_key, long model_checksum, Key frame_key, long frame_checksum) {
-    return Key.make("preds_" + model_checksum + "_on_" + frame_checksum);
-  }
-
-  protected Key<Frame> buildPredsKey(Model model, Frame frame) {
-    return frame == null || model == null ? null : buildPredsKey(model._key, model.checksum(), frame._key, frame.checksum());
-  }
-
-  public void computeImpl() {
-    init(true);
-    if (error_count() > 0)
-        throw H2OModelBuilderIllegalArgumentException.makeFromBuilder(StackedEnsemble.this);
+    public void computeImpl() {
+      init(true);
+      if (error_count() > 0) throw H2OModelBuilderIllegalArgumentException.makeFromBuilder(StackedEnsemble.this);
 
       _model = new StackedEnsembleModel(dest(), _parms, new StackedEnsembleModel.StackedEnsembleOutput(StackedEnsemble.this));
       _model._output._stacking_strategy = strategy();
-      _model.delete_and_lock(_job); // and clear & write-lock it (smashing any prior)
-
-      _model.checkAndInheritModelProperties();
+      try {
+        _model.delete_and_lock(_job); // and clear & write-lock it (smashing any prior)
+        _model.checkAndInheritModelProperties();
+        _model.update(_job);
+      } finally {
+        _model.unlock(_job);
+      }
 
       String levelOneTrainKey = "levelone_training_" + _model._key.toString();
       Frame levelOneTrainingFrame = prepareLevelOneFrame(levelOneTrainKey, _model._parms._base_models, getActualTrainingFrame(), true);
@@ -255,7 +282,7 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
       }
 
       Metalearner.Algorithm metalearnerAlgoSpec = _model._parms._metalearner_algorithm;
-      Metalearner.Algorithm metalearnerAlgoImpl = Metalearner.getActualMetalearnerAlgo(metalearnerAlgoSpec);
+      Metalearner.Algorithm metalearnerAlgoImpl = Metalearners.getActualMetalearnerAlgo(metalearnerAlgoSpec);
 
       // Compute metalearner
       if(metalearnerAlgoImpl != null) {
@@ -267,23 +294,23 @@ public class StackedEnsemble extends ModelBuilder<StackedEnsembleModel,StackedEn
         boolean hasMetaLearnerParams = _model._parms._metalearner_parameters != null;
         long metalearnerSeed = _model._parms._seed;
 
-        Metalearner metalearner = Metalearner.createInstance(metalearnerAlgoSpec);
+        Metalearner metalearner = Metalearners.createInstance(metalearnerAlgoSpec.name());
         metalearner.init(
-          levelOneTrainingFrame,
-          levelOneValidationFrame,
-          _model._parms._metalearner_parameters,
-          _model,
-          _job,
-          metalearnerKey,
-          metalearnerJob,
-          _parms,
-          hasMetaLearnerParams,
-          metalearnerSeed
+                levelOneTrainingFrame,
+                levelOneValidationFrame,
+                _model._parms._metalearner_parameters,
+                _model,
+                _job,
+                metalearnerKey,
+                metalearnerJob,
+                _parms,
+                hasMetaLearnerParams,
+                metalearnerSeed
         );
         metalearner.compute();
       } else {
         throw new H2OIllegalArgumentException("Invalid `metalearner_algorithm`. Passed in " + metalearnerAlgoSpec +
-            " but must be one of " + Arrays.toString(Metalearner.Algorithm.values()));
+                " but must be one of " + Arrays.toString(Metalearner.Algorithm.values()));
       }
     } // computeImpl
   }

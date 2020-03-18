@@ -134,33 +134,33 @@ POJO允许用户使用AIR构建模型，然后使用POJO模型或对计分服务
 
 下面的代码片段展示了用AIR构建模型并从R脚本和Python脚本下载相应POJO的示例。 
 
-.. example-code::
-   .. code-block:: r
+.. tabs::
+   .. code-tab:: r R
 
-	    library(h2o)
-	    h2o.init()
-	    path <- system.file("extdata", "prostate.csv", package = "h2o")
-	    h2o_df <- h2o.importFile(path)
-	    h2o_df$CAPSULE <- as.factor(h2o_df$CAPSULE)
-	    model <- h2o.glm(y = "CAPSULE",
-	                    x = c("AGE", "RACE", "PSA", "GLEASON"),
-	                    training_frame = h2o_df,
-	                    family = "binomial")
-	    h2o.download_pojo(model)
+  	    library(h2o)
+  	    h2o.init()
+  	    path <- system.file("extdata", "prostate.csv", package = "h2o")
+  	    h2o_df <- h2o.importFile(path)
+  	    h2o_df$CAPSULE <- as.factor(h2o_df$CAPSULE)
+  	    model <- h2o.glm(y = "CAPSULE",
+  	                    x = c("AGE", "RACE", "PSA", "GLEASON"),
+  	                    training_frame = h2o_df,
+  	                    family = "binomial")
+  	    h2o.download_pojo(model)
 
-   .. code-block:: python
+   .. code-tab:: python
 
-	    import h2o
-	    h2o.init()
-	    from h2o.estimators.glm import H2OGeneralizedLinearEstimator
-	    path = "http://s3.amazonaws.com/h2o-public-test-data/smalldata/prostate/prostate.csv.zip"
-	    h2o_df = h2o.import_file(path)
-	    h2o_df['CAPSULE'] = h2o_df['CAPSULE'].asfactor()
-	    model = H2OGeneralizedLinearEstimator(family = "binomial")
-	    model.train(y = "CAPSULE",
-	                x = ["AGE", "RACE", "PSA", "GLEASON"],
-	                training_frame = h2o_df)
-	    h2o.download_pojo(model)
+  	    import h2o
+  	    h2o.init()
+  	    from h2o.estimators.glm import H2OGeneralizedLinearEstimator
+  	    path = "http://s3.amazonaws.com/h2o-public-test-data/smalldata/prostate/prostate.csv.zip"
+  	    h2o_df = h2o.import_file(path)
+  	    h2o_df['CAPSULE'] = h2o_df['CAPSULE'].asfactor()
+  	    model = H2OGeneralizedLinearEstimator(family = "binomial")
+  	    model.train(y = "CAPSULE",
+  	                x = ["AGE", "RACE", "PSA", "GLEASON"],
+  	                training_frame = h2o_df)
+  	    h2o.download_pojo(model)
 
 .. raw:: html
 
@@ -186,7 +186,11 @@ POJO允许用户使用AIR构建模型，然后使用POJO模型或对计分服务
 FAQ
 ~~~
 
--  **如何在生产环境中实时为新场景打分**
+-  **POJOs是线程安全的吗？**
+
+  是的，平台内所有的POJOs都是线程安全的。 
+
+-  **如何在生产环境中实时为新场景评分**
 
   如果您正在使用UI，请单击模型的 **预览 POJO** 按钮。这将生成一个Java类，其中包含可以在生产环境应用程序中引用和使用的方法。
 

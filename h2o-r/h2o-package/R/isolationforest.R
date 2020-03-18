@@ -17,7 +17,7 @@
 #' @param max_runtime_secs Maximum allowed runtime in seconds for model training. Use 0 to disable. Defaults to 0.
 #' @param seed Seed for random numbers (affects certain parts of the algo that are stochastic and those might or might not be enabled by default).
 #'        Defaults to -1 (time-based random number).
-#' @param build_tree_one_node \code{Logical}. Run on one node only; no network overhead but fewer cpus used.  Suitable for small datasets.
+#' @param build_tree_one_node \code{Logical}. Run on one node only; no network overhead but fewer cpus used. Suitable for small datasets.
 #'        Defaults to FALSE.
 #' @param mtries Number of variables randomly sampled as candidates at each split. If set to -1, defaults (number of
 #'        predictors)/3. Defaults to -1.
@@ -38,6 +38,22 @@
 #' @param stopping_tolerance Relative tolerance for metric-based stopping criterion (stop if relative improvement is not at least this
 #'        much) Defaults to 0.01.
 #' @param export_checkpoints_dir Automatically export generated models to this directory.
+#' @examples
+#' \dontrun{
+#' library(h2o)
+#' h2o.init()
+#' 
+#' # Import the cars dataset
+#' cars <- h2o.importFile("https://s3.amazonaws.com/h2o-public-test-data/smalldata/junit/cars_20mpg.csv")
+#' 
+#' # Set the predictors
+#' predictors <- c("displacement","power","weight","acceleration","year")
+#' 
+#' # Train the IF model
+#' cars_if <- h2o.isolationForest(x = predictors, training_frame = cars,
+#'                                seed = 1234, stopping_metric = "MSE",
+#'                                stopping_rounds = 3, stopping_tolerance = 0.1)
+#' }
 #' @export
 h2o.isolationForest <- function(training_frame,
                                 x,

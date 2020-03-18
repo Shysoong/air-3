@@ -12,6 +12,8 @@ from h2o.frame import H2OFrame
 from h2o.utils.typechecks import assert_is_type, Enum, numeric
 from h2o.utils.shared_utils import quoted
 from h2o.utils.typechecks import is_type
+from h2o.grid import H2OGridSearch
+from h2o.base import Keyed
 import json
 import ast
 
@@ -231,8 +233,9 @@ class H2OStackedEnsembleEstimator(H2OEstimator):
     @property
     def base_models(self):
         """
-        List of models (or model ids) to ensemble/stack together. If not using blending frame, then models must have
-        been cross-validated using nfolds > 1, and folds must be identical across models.
+        List of models or grids (or their ids) to ensemble/stack together. Grids are expanded to individual models. If
+        not using blending frame, then models must have been cross-validated using nfolds > 1, and folds must be
+        identical across models.
 
         Type: ``List[str]``  (default: ``[]``).
 
@@ -263,27 +266,39 @@ class H2OStackedEnsembleEstimator(H2OEstimator):
         >>> stack.train(x=x, y=y, training_frame=train, validation_frame=test)
         >>> stack.model_performance()
         """
-        return self._parms.get("base_models")
+        base_models = self.actual_params.get("base_models", [])
+        base_models = [base_model["name"] for base_model in base_models]
+        if len(base_models) == 0:
+            base_models = self._parms.get("base_models")
+        return base_models
 
     @base_models.setter
     def base_models(self, base_models):
-        if is_type(base_models, [H2OEstimator]):
-            base_models = [b.model_id for b in base_models]
+        def _get_id(something):
+            if isinstance(something, Keyed):
+                return something.key
+            return something
+
+        if not is_type(base_models, list):
+            base_models = [base_models]
+        if is_type(base_models, [H2OEstimator, H2OGridSearch, str]):
+            base_models = [_get_id(b) for b in base_models]
             self._parms["base_models"] = base_models
         else:
-            assert_is_type(base_models, None, [str])
-            self._parms["base_models"] = base_models
+            assert_is_type(base_models, None)
 
 
     @property
     def metalearner_algorithm(self):
         """
         Type of algorithm to use as the metalearner. Options include 'AUTO' (GLM with non negative weights; if
-        validation_frame is present, a lambda search is performed), 'glm' (GLM with default parameters), 'gbm' (GBM with
-        default parameters), 'drf' (Random Forest with default parameters), or 'deeplearning' (Deep Learning with
+        validation_frame is present, a lambda search is performed), 'deeplearning' (Deep Learning with default
+        parameters), 'drf' (Random Forest with default parameters), 'gbm' (GBM with default parameters), 'glm' (GLM with
+        default parameters), 'naivebayes' (NaiveBayes with default parameters), or 'xgboost' (if available, XGBoost with
         default parameters).
 
-        One of: ``"auto"``, ``"glm"``, ``"gbm"``, ``"drf"``, ``"deeplearning"``  (default: ``"auto"``).
+        One of: ``"auto"``, ``"deeplearning"``, ``"drf"``, ``"gbm"``, ``"glm"``, ``"naivebayes"``, ``"xgboost"``
+        (default: ``"auto"``).
 
         :examples:
 
@@ -321,7 +336,7 @@ class H2OStackedEnsembleEstimator(H2OEstimator):
 
     @metalearner_algorithm.setter
     def metalearner_algorithm(self, metalearner_algorithm):
-        assert_is_type(metalearner_algorithm, None, Enum("auto", "glm", "gbm", "drf", "deeplearning"))
+        assert_is_type(metalearner_algorithm, None, Enum("auto", "deeplearning", "drf", "gbm", "glm", "naivebayes", "xgboost"))
         self._parms["metalearner_algorithm"] = metalearner_algorithm
 
 
@@ -763,19 +778,20 @@ class H2OStackedEnsembleEstimator(H2OEstimator):
         print("No stacking strategy for this model")
 
     # Override train method to support blending
-    def train(self, x=None, y=None, training_frame=None, blending_frame=None, **kwargs):
+    def train(self, x=None, y=None, training_frame=None, blending_frame=None, verbose=False, **kwargs):
         has_training_frame = training_frame is not None or self.training_frame is not None
         blending_frame = H2OFrame._validate(blending_frame, 'blending_frame', required=not has_training_frame)
 
         if not has_training_frame:
             training_frame = blending_frame  # used to bypass default checks in super class and backend and to guarantee default metrics
 
+        sup = super(self.__class__, self)
+
         def extend_parms(parms):
             if blending_frame is not None:
                 parms['blending_frame'] = blending_frame
             if self.metalearner_fold_column is not None:
                 parms['ignored_columns'].remove(quoted(self.metalearner_fold_column))
+        parms = sup._make_parms(x, y, training_frame, extend_parms_fn=extend_parms, **kwargs)
 
-        super(self.__class__, self)._train(x, y, training_frame,
-                                           extend_parms_fn=extend_parms,
-                                           **kwargs)
+        sup._train(parms, verbose=verbose)

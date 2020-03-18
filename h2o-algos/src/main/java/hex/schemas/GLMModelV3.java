@@ -22,6 +22,9 @@ public class GLMModelV3 extends ModelSchemaV3<GLMModel, GLMModelV3, GLMModel.GLM
     @API(help="Table of Coefficients")
     TwoDimTableV3 coefficients_table;
 
+    @API(help="Table of Random Coefficients for HGLM")
+    TwoDimTableV3 random_coefficients_table;
+
     @API(help="Table of Coefficients with coefficients denoted with class names for GLM multinonimals only.")
     TwoDimTableV3 coefficients_table_multinomials_with_class_names;  // same as coefficients_table but with real class names.
 
@@ -47,8 +50,7 @@ public class GLMModelV3 extends ModelSchemaV3<GLMModel, GLMModelV3, GLMModel.GLM
       coefficients_table = new TwoDimTableV3();
       if (impl.nclasses() > 2) // only change coefficient names for multinomials
         coefficients_table_multinomials_with_class_names = new TwoDimTableV3();
-
-      if(impl.isStandardized()){
+      
         int n = impl.nclasses();
         String[] cols = new String[n*2];
         String[] cols2=null;
@@ -118,40 +120,6 @@ public class GLMModelV3 extends ModelSchemaV3<GLMModel, GLMModelV3, GLMModel.GLM
           standardized_coefficient_magnitudes = new TwoDimTableV3();
           standardized_coefficient_magnitudes.fillFromImpl(tdt);
         }
-      } else {
-        int n = impl.nclasses();
-        String [] cols = new String[n];
-        String [] cols2 = null;
-        if (n>2) {
-          String[] classNames = impl._domains[impl.responseIdx()];
-          cols2 = new String[n];
-          for (int i = 0; i < n; ++i) {
-            cols2[i] = "coefs_class_" + classNames[i];
-          }
-        }
-          for (int i = 0; i < n; ++i) {
-            cols[i] = "coefs_class_" +i;
-          }
-
-        String [] colTypes = new String[cols.length];
-        Arrays.fill(colTypes, "double");
-        String [] colFormats = new String[cols.length];
-        Arrays.fill(colFormats,"%5f");
-
-        TwoDimTable tdt = new TwoDimTable("Coefficients","glm multinomial coefficients", ns, cols, colTypes, colFormats, "names");
-
-        for(int c = 0; c < n; ++c) {
-          double [] beta = impl.get_global_beta_multinomial()[c];
-          tdt.set(0,c,beta[beta.length-1]);
-          for(int i = 0; i < beta.length-1; ++i)
-            tdt.set(i + 1, c, beta[i]);
-        }
-        coefficients_table.fillFromImpl(tdt);
-        if (n>2) {  // restore column names from pythonized ones
-          coefficients_table_multinomials_with_class_names.fillFromImpl(tdt);
-          revertCoeffNames(cols2, n, coefficients_table_multinomials_with_class_names);
-        }
-      }
 
       return this;
     }
@@ -166,6 +134,20 @@ public class GLMModelV3 extends ModelSchemaV3<GLMModel, GLMModelV3, GLMModel.GLM
           coeffs_table.columns[tableIndex+nclass].name = new String(colNames[tableIndex-1+nclass]);
       }
     }
+    
+    public TwoDimTable buildRandomCoefficients2DTable(double[] ubeta, String[] randomColNames) {
+      String [] colTypes = new String[]{"double"};
+      String [] colFormats = new String[]{"%5f"};
+      String [] colnames = new String[]{"Random Coefficients"};
+      TwoDimTable tdt = new TwoDimTable("HGLM Random Coefficients",
+              "HGLM random coefficients", randomColNames, colnames, colTypes, colFormats,
+              "names");
+      // fill in coefficients
+      for (int i = 0; i < ubeta.length; ++i) {
+        tdt.set(i, 0, ubeta[i]);
+      }
+      return tdt;
+    }
 
     @Override
     public GLMModelOutputV3 fillFromImpl(GLMModel.GLMOutput impl) {
@@ -179,6 +161,10 @@ public class GLMModelV3 extends ModelSchemaV3<GLMModel, GLMModelV3, GLMModel.GLM
       // put intercept as the first
       String [] ns = ArrayUtils.append(new String[]{"Intercept"},Arrays.copyOf(names,names.length-1));
       coefficients_table = new TwoDimTableV3();
+      if ((impl.ubeta() != null) && (impl.randomcoefficientNames()!= null)) {
+        random_coefficients_table = new TwoDimTableV3();
+        random_coefficients_table.fillFromImpl(buildRandomCoefficients2DTable(impl.ubeta(), impl.randomcoefficientNames()));
+      }
       final double [] magnitudes;
       double [] beta = impl.beta();
       if(beta == null) beta = MemoryManager.malloc8d(names.length);
@@ -192,20 +178,16 @@ public class GLMModelV3 extends ModelSchemaV3<GLMModel, GLMModelV3, GLMModel.GLM
         colnames = new String[]{"Coefficients","Std. Error","z value","p value"};
       }
       int stdOff = colnames.length;
-      if(impl.isStandardized()) {
-        colTypes = ArrayUtils.append(colTypes,"double");
-        colFormats = ArrayUtils.append(colFormats,"%5f");
-        colnames = ArrayUtils.append(colnames,"Standardized Coefficients");
-      }
+      colTypes = ArrayUtils.append(colTypes,"double");
+      colFormats = ArrayUtils.append(colFormats,"%5f");
+      colnames = ArrayUtils.append(colnames,"Standardized Coefficients");
       TwoDimTable tdt = new TwoDimTable("Coefficients","glm coefficients", ns, colnames, colTypes, colFormats, "names");
-      // fill in coefficients
-
       tdt.set(0, 0, beta[beta.length - 1]);
       for (int i = 0; i < beta.length - 1; ++i) {
         tdt.set(i + 1, 0, beta[i]);
       }
       double[] norm_beta = null;
-      if(impl.isStandardized() &&impl.beta() != null) {
+      if(impl.beta() != null) {
         norm_beta = impl.getNormBeta();
         tdt.set(0, stdOff, norm_beta[norm_beta.length - 1]);
         for (int i = 0; i < norm_beta.length - 1; ++i)
@@ -225,7 +207,7 @@ public class GLMModelV3 extends ModelSchemaV3<GLMModel, GLMModelV3, GLMModel.GLM
         }
       }
       coefficients_table.fillFromImpl(tdt);
-      if(impl.isStandardized() && impl.beta() != null) {
+      if(impl.beta() != null) {
         magnitudes = norm_beta.clone();
         for (int i = 0; i < magnitudes.length; ++i)
           if (magnitudes[i] < 0) magnitudes[i] *= -1;

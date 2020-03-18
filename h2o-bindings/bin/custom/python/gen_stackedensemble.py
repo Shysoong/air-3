@@ -97,28 +97,31 @@ def class_extensions():
         print("No stacking strategy for this model")
 
     # Override train method to support blending
-    def train(self, x=None, y=None, training_frame=None, blending_frame=None, **kwargs):
+    def train(self, x=None, y=None, training_frame=None, blending_frame=None, verbose=False, **kwargs):
         has_training_frame = training_frame is not None or self.training_frame is not None
         blending_frame = H2OFrame._validate(blending_frame, 'blending_frame', required=not has_training_frame)
 
         if not has_training_frame:
             training_frame = blending_frame  # used to bypass default checks in super class and backend and to guarantee default metrics
 
+        sup = super(self.__class__, self)
+
         def extend_parms(parms):
             if blending_frame is not None:
                 parms['blending_frame'] = blending_frame
             if self.metalearner_fold_column is not None:
                 parms['ignored_columns'].remove(quoted(self.metalearner_fold_column))
+        parms = sup._make_parms(x, y, training_frame, extend_parms_fn=extend_parms, **kwargs)
 
-        super(self.__class__, self)._train(x, y, training_frame,
-                                           extend_parms_fn=extend_parms,
-                                           **kwargs)
+        sup._train(parms, verbose=verbose)
 
 
 extensions = dict(
     __imports__="""
 from h2o.utils.shared_utils import quoted
 from h2o.utils.typechecks import is_type
+from h2o.grid import H2OGridSearch
+from h2o.base import Keyed
 import json
 import ast
 """,
@@ -128,12 +131,25 @@ import ast
 overrides = dict(
     base_models=dict(
         setter="""
-if is_type(base_models, {ptype}):
-    {pname} = [b.model_id for b in {pname}]
+def _get_id(something):
+    if isinstance(something, Keyed):
+        return something.key
+    return something
+
+if not is_type(base_models, list):
+    base_models = [base_models]
+if is_type(base_models, [H2OEstimator, H2OGridSearch, str]):
+    {pname} = [_get_id(b) for b in {pname}]
     self._parms["{sname}"] = {pname}
 else:
-    assert_is_type({pname}, None, [str])
-    self._parms["{sname}"] = {pname}
+    assert_is_type({pname}, None)
+""",
+        getter="""
+base_models = self.actual_params.get("base_models", [])
+base_models = [base_model["name"] for base_model in base_models]
+if len(base_models) == 0:
+    base_models = self._parms.get("base_models")
+return base_models
 """
     ),
 

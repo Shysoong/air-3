@@ -102,6 +102,7 @@ public class h2odriver extends Configured implements Tool {
   static String network = null;
   static boolean disown = false;
   static String clusterReadyFileName = null;
+  static String clusterFlatfileName = null;
   static String hadoopJobId = "";
   static String applicationId = "";
   static int cloudFormationTimeoutSeconds = DEFAULT_CLOUD_FORMATION_TIMEOUT_SECONDS;
@@ -148,6 +149,7 @@ public class h2odriver extends Configured implements Tool {
   static String keytabPath = null;
   static boolean reportHostname = false;
   static boolean driverDebug = false;
+  static String hiveJdbcUrlPattern = null; 
   static String hiveHost = null;
   static String hivePrincipal = null;
   static boolean refreshTokens = false;
@@ -170,7 +172,7 @@ public class h2odriver extends Configured implements Tool {
   // Output of clouding
   volatile String clusterIp = null;
   volatile int clusterPort = -1;
-  volatile String flatfileContent = null;
+  volatile static String flatfileContent = null;
   // Only used for debugging 
   volatile AtomicInteger numNodesStarted = new AtomicInteger();
 
@@ -388,11 +390,15 @@ public class h2odriver extends Configured implements Tool {
     }
   }
 
-  private void reportClientReady(String ip, int port) throws Exception {
+  private void reportClientReady(String ip, int port)  {
     assert client;
     if (clusterReadyFileName != null) {
       createClusterReadyFile(ip, port);
       System.out.println("Cluster notification file (" + clusterReadyFileName + ") created (using Client Mode).");
+    }
+    if (clusterFlatfileName != null) {
+      createFlatFile(flatfileContent);
+      System.out.println("Cluster flatfile (" + clusterFlatfileName+ ") created.");
     }
   }
 
@@ -403,19 +409,48 @@ public class h2odriver extends Configured implements Tool {
       createClusterReadyFile(url.getHost(), url.getPort());
       System.out.println("Cluster notification file (" + clusterReadyFileName + ") created (using Proxy Mode).");
     }
+    if (clusterFlatfileName != null) {
+      createFlatFile(flatfileContent);
+      System.out.println("Cluster flatfile (" + clusterFlatfileName+ ") created.");
+    }
   }
 
   private void reportClusterReady(String ip, int port) throws Exception {
     setClusterIpPort(ip, port);
+    if (clusterFlatfileName != null) {
+      createFlatFile(flatfileContent);
+      System.out.println("Cluster flatfile (" + clusterFlatfileName+ ") created.");
+    }
+
     if (client || proxy)
       return; // Hadoop cluster ready but we have to wait for client or proxy to come up
+
     if (clusterReadyFileName != null) {
       createClusterReadyFile(ip, port);
       System.out.println("Cluster notification file (" + clusterReadyFileName + ") created.");
     }
   }
 
-  private static void createClusterReadyFile(String ip, int port) throws Exception {
+  private static void createFlatFile(String flatFileContent) {
+    String fileName = clusterFlatfileName + ".tmp";
+    try {
+      File file = new File(fileName);
+      BufferedWriter output = new BufferedWriter(new FileWriter(file));
+      output.write(flatFileContent);
+      output.flush();
+      output.close();
+
+      File file2 = new File(clusterFlatfileName);
+      boolean success = file.renameTo(file2);
+      if (! success) {
+        throw new RuntimeException("Failed to create file " + clusterReadyFileName);
+      }
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private static void createClusterReadyFile(String ip, int port) {
     String fileName = clusterReadyFileName + ".tmp";
     String text1 = ip + ":" + port + "\n";
     String text2 = hadoopJobId + "\n";
@@ -430,10 +465,10 @@ public class h2odriver extends Configured implements Tool {
       File file2 = new File(clusterReadyFileName);
       boolean success = file.renameTo(file2);
       if (! success) {
-        throw new Exception ("Failed to create file " + clusterReadyFileName);
+        throw new RuntimeException("Failed to create file " + clusterReadyFileName);
       }
-    } catch ( IOException e ) {
-      e.printStackTrace();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
@@ -493,9 +528,6 @@ public class h2odriver extends Configured implements Tool {
       catch (Exception e) {
         System.out.println("Exception occurred in CallbackHandlerThread");
         System.out.println(e.toString());
-        if (e.getMessage() != null) {
-          System.out.println(e.getMessage());
-        }
         e.printStackTrace();
       }
     }
@@ -651,7 +683,7 @@ public class h2odriver extends Configured implements Tool {
         case NODE_FAILED:
           int exitCode = 42;
           try {
-            exitCode = Integer.valueOf(event.readPayload());
+            exitCode = Integer.parseInt(event.readPayload());
           } catch (Exception e) {
             e.printStackTrace();
           }
@@ -834,6 +866,7 @@ public class h2odriver extends Configured implements Tool {
                     "              (Note nnnnn is chosen randomly to produce a unique name)\n" +
                     "          [-principal <kerberos principal> -keytab <keytab path> [-run_as_user <impersonated hadoop username>] | -run_as_user <hadoop username>]\n" +
                     "          [-hiveHost <hostname:port> -hivePrincipal <hive server kerberos principal>]\n" +
+                    "          [-hiveJdbcUrlPattern <pattern for constructing hive jdbc url>]\n" +
                     "          [-refreshTokens]\n" +
                     "          [-clouding_method <callbacks|filesystem (defaults: to 'callbacks')>]\n" +
                     "          [-driverif <ip address of mapper->driver callback interface>]\n" +
@@ -845,6 +878,7 @@ public class h2odriver extends Configured implements Tool {
                     "          [-timeout <seconds>]\n" +
                     "          [-disown]\n" +
                     "          [-notify <notification file name>]\n" +
+                    "          [-flatfile <generated flatfile name>]\n" +
                     "          [-extramempercent <0 to 20>]\n" +
                     "          [-nthreads <maximum typical worker threads, i.e. cpus to use>]\n" +
                     "          [-context_path <context_path> the context path for jetty]\n" +
@@ -1094,6 +1128,10 @@ public class h2odriver extends Configured implements Tool {
         i++; if (i >= args.length) { usage(); }
         clusterReadyFileName = args[i];
       }
+      else if (s.equals("-flatfile")) {
+        i++; if (i >= args.length) { usage(); }
+        clusterFlatfileName = args[i];
+      }
       else if (s.equals("-nthreads")) {
         i++; if (i >= args.length) { usage(); }
         nthreads = Integer.parseInt(args[i]);
@@ -1285,6 +1323,9 @@ public class h2odriver extends Configured implements Tool {
         reportHostname = true;
       } else if (s.equals("-driver_debug")) {
         driverDebug = true;
+      } else if (s.equals("-hiveJdbcUrlPattern")) {
+        i++; if (i >= args.length) { usage (); }
+        hiveJdbcUrlPattern = args[i];
       } else if (s.equals("-hiveHost")) {
         i++; if (i >= args.length) { usage (); }
         hiveHost = args[i];
@@ -1991,17 +2032,12 @@ public class h2odriver extends Configured implements Tool {
       final File flatfile = File.createTempFile("h2o", "txt");
       flatfile.deleteOnExit();
 
-      boolean flatfileCreated = false;
       try (Writer w = new BufferedWriter(new FileWriter(flatfile))) {
         w.write(flatfileContent);
         w.close();
-        flatfileCreated = true;
       } catch (IOException e) {
-        e.printStackTrace();
-      }
-
-      if (!flatfileCreated) {
         System.out.println("ERROR: Failed to write flatfile.");
+        e.printStackTrace();
         System.exit(1);
       }
 
@@ -2090,7 +2126,7 @@ public class h2odriver extends Configured implements Tool {
     j.setOutputKeyClass(Text.class);
     j.setOutputValueClass(Text.class);
 
-    HiveTokenGenerator.addHiveDelegationTokenIfHivePresent(j, hiveHost, hivePrincipal);
+    HiveTokenGenerator.addHiveDelegationTokenIfHivePresent(j, hiveJdbcUrlPattern, hiveHost, hivePrincipal);
     if (refreshTokens && principal != null && keytabPath != null) {
       j.getConfiguration().set(H2O_AUTH_PRINCIPAL, principal);
       byte[] payloadData = readBinaryFile(keytabPath);

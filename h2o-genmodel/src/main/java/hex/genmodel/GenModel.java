@@ -7,8 +7,8 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 /**
  * This is a helper class to support Java generated models.
@@ -42,6 +42,10 @@ public abstract class GenModel implements IGenModel, IGeneratedModel, Serializab
   @Deprecated
   public GenModel(String[] names, String[][] domains) {
     this(names, domains, null);
+  }
+
+  public boolean requiresOffset() {
+    return false;
   }
 
   //--------------------------------------------------------------------------------------------------------------------
@@ -102,7 +106,16 @@ public abstract class GenModel implements IGenModel, IGeneratedModel, Serializab
   @Override public String[] getNames() {
     return _names;
   }
-
+  
+  public int getOrigNumCols() {
+    String[] origNames = getOrigNames();
+    if (origNames == null || origNames.length == 0)
+      return 0;
+    String responseName = getResponseName();
+    boolean hasResponse = origNames[origNames.length - 1].equals(responseName);
+    return hasResponse ? origNames.length - 1 : origNames.length;
+  }
+  
   /** The original names of all columns used, including response and offset columns. */
   @Override public String[] getOrigNames() {
     return null;
@@ -577,7 +590,7 @@ public abstract class GenModel implements IGenModel, IGeneratedModel, Serializab
   /** ??? */
   public String getHeader() { return null; }
 
-  // Helper for DeepWater and XGBoost Native (models that require explicit one-hot encoding on the fly)
+  // Helper for XGBoost Native (models that require explicit one-hot encoding on the fly)
   static public void setInput(final double[] from, float[] to, int _nums, int _cats, int[] _catOffsets, double[] _normMul, double[] _normSub, boolean useAllFactorLevels, boolean replaceMissingWithZero) {
     double[] nums = new double[_nums]; // a bit wasteful - reallocated each time
     int[] cats = new int[_cats]; // a bit wasteful - reallocated each time
@@ -689,8 +702,5 @@ public abstract class GenModel implements IGenModel, IGeneratedModel, Serializab
       }
     }
   }
-
-  // Helpers for deeplearning mojo
-
-
+  
 }

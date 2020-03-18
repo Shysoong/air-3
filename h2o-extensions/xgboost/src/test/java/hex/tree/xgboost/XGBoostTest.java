@@ -5,13 +5,12 @@ import hex.genmodel.MojoModel;
 import hex.genmodel.MojoReaderBackend;
 import hex.genmodel.MojoReaderBackendFactory;
 import hex.genmodel.algos.xgboost.XGBoostMojoModel;
-import hex.genmodel.algos.xgboost.XGBoostMojoReader;
-import hex.genmodel.algos.xgboost.XGBoostNativeMojoModel;
 import hex.genmodel.easy.EasyPredictModelWrapper;
 import hex.genmodel.easy.RowData;
 import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.prediction.BinomialModelPrediction;
 import hex.genmodel.utils.DistributionFamily;
+import hex.tree.xgboost.util.BoosterDump;
 import hex.tree.xgboost.util.FeatureScore;
 import ml.dmlc.xgboost4j.java.*;
 import ml.dmlc.xgboost4j.java.DMatrix;
@@ -34,6 +33,7 @@ import java.io.*;
 import java.util.*;
 
 import static hex.genmodel.utils.DistributionFamily.bernoulli;
+import static hex.genmodel.utils.DistributionFamily.multinomial;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.*;
 import static water.util.FileUtils.getFile;
@@ -42,16 +42,13 @@ import static water.util.FileUtils.getFile;
 public class XGBoostTest extends TestUtil {
 
   @Parameterized.Parameters(name = "XGBoost(javaMojoScoring={0},javaPredict={1}")
-  public static Collection<Object[]> data() {
-    return Arrays.asList(new Object[][]{
-            {"false", "false"}, {"true", "true"}, {"true", "false"}, {"false", "true"}
+  public static Collection<Object> data() {
+    return Arrays.asList(new Object[]{
+            "false", "true"
     });
   }
 
   @Parameterized.Parameter
-  public String confMojoJavaScoring;
-
-  @Parameterized.Parameter(1)
   public String confJavaPredict;
 
   @Rule
@@ -62,10 +59,7 @@ public class XGBoostTest extends TestUtil {
   
   @Before
   public void setupMojoJavaScoring() {
-    System.setProperty("sys.ai.h2o.xgboost.scoring.java.enable", confMojoJavaScoring); // mojo scoring
     System.setProperty("sys.ai.h2o.xgboost.predict.java.enable", confJavaPredict); // in-h2o predict
-
-    assertEquals(Boolean.valueOf(confMojoJavaScoring), XGBoostMojoReader.useJavaScoring(true, null)); // check that MOJO scoring config was applied
   }
 
   public static final class FrameMetadata {
@@ -1394,7 +1388,6 @@ public class XGBoostTest extends TestUtil {
 
   @Test
   public void testMojoBoosterDump() throws IOException { 
-    Assume.assumeFalse(XGBoostMojoReader.useJavaScoring(true, null));
     Scope.enter();
     try {
       Frame tfr = Scope.track(parse_test_file("./smalldata/prostate/prostate.csv"));
@@ -1413,11 +1406,35 @@ public class XGBoostTest extends TestUtil {
       XGBoostModel model = (XGBoostModel) Scope.track_generic(new hex.tree.xgboost.XGBoost(parms).trainModel().get());
       Log.info(model);
 
-      XGBoostMojoModel mojo = getMojo(model);
-      assertTrue(mojo instanceof XGBoostNativeMojoModel);
-
-      String[] dump = ((XGBoostNativeMojoModel) mojo).getBoosterDump(false, "text");
+      String[] dump = BoosterDump.getBoosterDump(model.model_info()._boosterBytes, model.model_info()._featureMap, false, "text");
       assertEquals(parms._ntrees, dump.length);
+    } finally {
+      Scope.exit();
+    }
+  }
+
+  @Test
+  public void testMojoSerializable() throws IOException {
+    Scope.enter();
+    try {
+      Frame tfr = Scope.track(parse_test_file("./smalldata/prostate/prostate.csv"));
+
+      XGBoostModel.XGBoostParameters parms = new XGBoostModel.XGBoostParameters();
+      parms._train = tfr._key;
+      parms._response_column = "AGE";
+      parms._ignored_columns = new String[]{"ID"};
+      parms._seed = 42;
+      parms._ntrees = 7;
+
+      XGBoostModel model = (XGBoostModel) Scope.track_generic(new hex.tree.xgboost.XGBoost(parms).trainModel().get());
+
+      XGBoostMojoModel mojo = getMojo(model);
+
+      ByteArrayOutputStream bos = new ByteArrayOutputStream();
+      try (ObjectOutput out = new ObjectOutputStream(bos)) {
+        out.writeObject(mojo);
+      }
+      assertNotNull(bos.toByteArray());
     } finally {
       Scope.exit();
     }
@@ -1674,7 +1691,6 @@ public class XGBoostTest extends TestUtil {
 
   @Test
   public void testScoreContributionsBernoulli() throws IOException, PredictException {
-    Assume.assumeTrue("true".equalsIgnoreCase(confMojoJavaScoring));
     try {
       Scope.enter();
       Frame fr = Scope.track(parse_test_file("smalldata/junit/titanic_alt.csv"));
@@ -1711,6 +1727,53 @@ public class XGBoostTest extends TestUtil {
         assertArrayEquals("Contributions should match, row=" + row, 
                 toNumericRow(contributions, row), ArrayUtils.toDouble(pr.contributions), 0);
       }
+    } finally {
+      Scope.exit();
+    }
+  }
+
+  // Scoring should output original probabilities and probabilities calibrated by Platt Scaling
+  @Test public void testPredictWithCalibration() {
+    Scope.enter();
+    try {
+      Frame train = parse_test_file("smalldata/gbm_test/ecology_model.csv");
+      Frame calib = parse_test_file("smalldata/gbm_test/ecology_eval.csv");
+
+      // Fix training set
+      train.remove("Site").remove();     // Remove unique ID
+      Scope.track(train.vec("Angaus"));
+      train.replace(train.find("Angaus"), train.vecs()[train.find("Angaus")].toCategoricalVec());
+      Scope.track(train);
+      DKV.put(train); // Update frame after hacking it
+
+      // Fix calibration set (the same way as training)
+      Scope.track(calib.vec("Angaus"));
+      calib.replace(calib.find("Angaus"), calib.vecs()[calib.find("Angaus")].toCategoricalVec());
+      Scope.track(calib);
+      DKV.put(calib); // Update frame after hacking it
+      
+      XGBoostModel.XGBoostParameters parms = new XGBoostModel.XGBoostParameters();
+      parms._train = train._key;
+      parms._calibrate_model = true;
+      parms._calibration_frame = calib._key;
+      parms._response_column = "Angaus"; // Train on the outcome
+      parms._distribution = multinomial;
+      parms._ntrees = 5;
+      parms._min_rows = 1;
+      parms._seed = 42;
+      
+      hex.tree.xgboost.XGBoost job = new hex.tree.xgboost.XGBoost(parms);
+      XGBoostModel model = job.trainModel().get();
+      Scope.track_generic(model);
+
+      Frame pred = parse_test_file("smalldata/gbm_test/ecology_eval.csv");
+      pred.remove("Angaus").remove();    // No response column during scoring
+      Scope.track(pred);
+      Frame res = Scope.track(model.score(pred));
+
+      assertArrayEquals(new String[]{"predict", "p0", "p1", "cal_p0", "cal_p1"}, res._names);
+      assertEquals(res.vec("cal_p0").mean(), 0.7860, 1e-4);
+      assertEquals(res.vec("cal_p1").mean(), 0.2140, 1e-4);
     } finally {
       Scope.exit();
     }

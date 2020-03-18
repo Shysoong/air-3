@@ -18,12 +18,15 @@
 #' @param validation_frame Id of the validation data frame.
 #' @param blending_frame Frame used to compute the predictions that serve as the training frame for the metalearner (triggers blending
 #'        mode if provided)
-#' @param base_models List of models (or model ids) to ensemble/stack together. If not using blending frame, then models must have
-#'        been cross-validated using nfolds > 1, and folds must be identical across models.
+#' @param base_models List of models or grids (or their ids) to ensemble/stack together. Grids are expanded to individual models. If
+#'        not using blending frame, then models must have been cross-validated using nfolds > 1, and folds must be
+#'        identical across models.
 #' @param metalearner_algorithm Type of algorithm to use as the metalearner. Options include 'AUTO' (GLM with non negative weights; if
-#'        validation_frame is present, a lambda search is performed), 'glm' (GLM with default parameters), 'gbm' (GBM
-#'        with default parameters), 'drf' (Random Forest with default parameters), or 'deeplearning' (Deep Learning with
-#'        default parameters). Must be one of: "AUTO", "glm", "gbm", "drf", "deeplearning". Defaults to AUTO.
+#'        validation_frame is present, a lambda search is performed), 'deeplearning' (Deep Learning with default
+#'        parameters), 'drf' (Random Forest with default parameters), 'gbm' (GBM with default parameters), 'glm' (GLM
+#'        with default parameters), 'naivebayes' (NaiveBayes with default parameters), or 'xgboost' (if available,
+#'        XGBoost with default parameters). Must be one of: "AUTO", "deeplearning", "drf", "gbm", "glm", "naivebayes",
+#'        "xgboost". Defaults to AUTO.
 #' @param metalearner_nfolds Number of folds for K-fold cross-validation of the metalearner algorithm (0 to disable or >= 2). Defaults to
 #'        0.
 #' @param metalearner_fold_assignment Cross-validation fold assignment scheme for metalearner cross-validation.  Defaults to AUTO (which is
@@ -36,8 +39,54 @@
 #' @param export_checkpoints_dir Automatically export generated models to this directory.
 #' @examples
 #' \dontrun{
-#' # See example R code here:
-#' # http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html
+#' library(h2o)
+#' h2o.init()
+#' 
+#' # Import a sample binary outcome train/test set
+#' train <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_train_10k.csv")
+#' test <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_test_5k.csv")
+#' 
+#' # Identify predictors and response
+#' y <- "response"
+#' x <- setdiff(names(train), y)
+#' 
+#' # For binary classification, response should be a factor
+#' train[,y] <- as.factor(train[,y])
+#' test[,y] <- as.factor(test[,y])
+#' 
+#' # Number of CV folds
+#' nfolds <- 5
+#' 
+#' # Train & Cross-validate a GBM
+#' my_gbm <- h2o.gbm(x = x,
+#'                   y = y,
+#'                   training_frame = train,
+#'                   distribution = "bernoulli",
+#'                   ntrees = 10,
+#'                   max_depth = 3,
+#'                   min_rows = 2,
+#'                   learn_rate = 0.2,
+#'                   nfolds = nfolds,
+#'                   fold_assignment = "Modulo",
+#'                   keep_cross_validation_predictions = TRUE,
+#'                   seed = 1)
+#' 
+#' # Train & Cross-validate a RF
+#' my_rf <- h2o.randomForest(x = x,
+#'                           y = y,
+#'                           training_frame = train,
+#'                           ntrees = 50,
+#'                           nfolds = nfolds,
+#'                           fold_assignment = "Modulo",
+#'                           keep_cross_validation_predictions = TRUE,
+#'                           seed = 1)
+#' 
+#' # Train a stacked ensemble using the GBM and RF above
+#' ensemble <- h2o.stackedEnsemble(x = x,
+#'                                 y = y,
+#'                                 training_frame = train,
+#'                                 model_id = "my_ensemble_binomial",
+#'                                 base_models = list(my_gbm, my_rf))
 #' }
 #' @export
 h2o.stackedEnsemble <- function(x,
@@ -47,7 +96,7 @@ h2o.stackedEnsemble <- function(x,
                                 validation_frame = NULL,
                                 blending_frame = NULL,
                                 base_models = list(),
-                                metalearner_algorithm = c("AUTO", "glm", "gbm", "drf", "deeplearning"),
+                                metalearner_algorithm = c("AUTO", "deeplearning", "drf", "gbm", "glm", "naivebayes", "xgboost"),
                                 metalearner_nfolds = 0,
                                 metalearner_fold_assignment = c("AUTO", "Random", "Modulo", "Stratified"),
                                 metalearner_fold_column = NULL,
@@ -75,21 +124,16 @@ h2o.stackedEnsemble <- function(x,
   # Validate other args
   # Get the base models from model IDs (if any) that will be used for constructing model summary
   if(!is.list(base_models) && is.vector(x)) {
-     base_models <- as.list(base_models)
+    base_models <- if (inherits(base_models, "H2OGrid")) list(base_models) else as.list(base_models)
   }
-  baselearners <- lapply(base_models, function(base_model) {
-    if (is.character(base_model))
-      base_model <- h2o.getModel(base_model)
-    base_model
-  })
 
   # Get base model IDs that will be passed to REST API later
   if (length(base_models) == 0) stop('base_models is empty')
 
   # If base_models contains models instead of ids, replace with model id
   for (i in 1:length(base_models)) {
-    if (inherits(base_models[[i]], 'H2OModel')) {
-      base_models[[i]] <- base_models[[i]]@model_id
+    if (inherits(base_models[[i]], c('H2OModel', 'H2OGrid'))) {
+      base_models[[i]] <- h2o.keyof(base_models[[i]])
     }
   }
 
@@ -132,6 +176,15 @@ h2o.stackedEnsemble <- function(x,
   if (!missing(metalearner_params)) {
       model@parameters$metalearner_params <- list(fromJSON(model@parameters$metalearner_params))[[1]] #Need the `[[ ]]` to avoid a nested list
   }
+  model@model <- .h2o.fill_stackedensemble(model@model, model@parameters, model@allparams)
+
+  # Get the actual models (that were potentially expanded from H2OGrid on the backend)
+  baselearners <- lapply(model@model$base_models, function(base_model) {
+    if (is.character(base_model))
+      base_model <- h2o.getModel(base_model)
+    base_model
+  })
+
   model@model$model_summary <- capture.output({
 
     print_ln <- function(...) cat(..., sep = "\n")
@@ -164,3 +217,11 @@ h2o.stackedEnsemble <- function(x,
   class(model@model$model_summary) <- "h2o.stackedEnsemble.summary"
   return(model)
 }
+
+
+.h2o.fill_stackedensemble <- function(model, parameters, allparams) {
+  # Store base models for the Stacked Ensemble in user-readable form
+  model$base_models <- unlist(lapply(parameters$base_models, function (base_model) base_model$name))
+  return(model)
+}
+

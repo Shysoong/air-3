@@ -3,11 +3,10 @@ package hex.tree;
 import hex.*;
 import hex.genmodel.GenModel;
 import hex.genmodel.utils.DistributionFamily;
-import hex.glm.GLM;
-import hex.glm.GLMModel;
 import hex.quantile.Quantile;
 import hex.quantile.QuantileModel;
 import hex.util.CheckpointUtils;
+import hex.tree.gbm.GBMModel;
 import hex.util.LinearAlgebraUtils;
 import jsr166y.CountedCompleter;
 import org.joda.time.format.DateTimeFormat;
@@ -29,7 +28,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends SharedTreeModel.SharedTreeParameters, O extends SharedTreeModel.SharedTreeOutput> extends ModelBuilder<M,P,O> {
+public abstract class SharedTree<
+    M extends SharedTreeModel<M,P,O>, 
+    P extends SharedTreeModel.SharedTreeParameters, 
+    O extends SharedTreeModel.SharedTreeOutput> 
+    extends ModelBuilder<M,P,O> 
+    implements PlattScalingHelper.ModelBuilderWithCalibration<M, P, O> {
 
   private static final boolean DEBUG_PUBDEV_6686 = Boolean.getBoolean(H2O.OptArgs.SYSTEM_PROP_PREFIX + "debug.pubdev6686");
 
@@ -65,8 +69,7 @@ public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends Sha
 
   protected Random _rand;
 
-  protected final Frame calib() { return _calib; }
-  protected transient Frame _calib;
+  private transient Frame _calib;
 
   protected final Frame validWorkspace() { return _validWorkspace; }
   protected transient Frame _validWorkspace;
@@ -160,19 +163,7 @@ public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends Sha
     if( _train != null )
       _ncols = _train.numCols()-(isSupervised()?1:0)-numSpecialCols();
 
-    // Calibration
-    Frame cf = _parms.calib();  // User-given calibration set
-    if (cf != null) {
-      if (! _parms._calibrate_model)
-        warn("_calibration_frame", "Calibration frame was specified but calibration was not requested.");
-      _calib = init_adaptFrameToTrain(cf, "Calibration Frame", "_calibration_frame", expensive);
-    }
-    if (_parms._calibrate_model) {
-      if (nclasses() != 2)
-        error("_calibrate_model", "Model calibration is only currently supported for binomial models.");
-      if (cf == null)
-        error("_calibrate_model", "Calibration frame was not specified.");
-    }
+    PlattScalingHelper.initCalibration(this, _parms, expensive);
   }
 
   protected void validateRowSampleRate() {
@@ -218,9 +209,16 @@ public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends Sha
 
         // Compute the response domain; makes for nicer printouts
         String[] domain = isSupervised() ? _response.domain() : null;
-        if (_parms._distribution == DistributionFamily.quasibinomial) {
-          domain = new String[]{"0", "1"};
+
+        // Quasibinomial GBM can have different domains than {0, 1}
+        boolean isQuasibinomial = false;
+        if(_parms._distribution == DistributionFamily.quasibinomial){
+          isQuasibinomial = true;
+          domain = new VecUtils.CollectDoubleDomain(null,2).doAll(_response).stringDomain(_response.isInt());
+          ((GBMModel)_model)._output._quasibinomialDomains = domain;
         }
+
+        // Compute the response domain; makes for nicer printouts
         assert (_nclass > 1 && domain != null) || (_nclass==1 && domain==null);
         if( _nclass==1 ) domain = new String[] {"r"}; // For regression, give a name to class 0
 
@@ -233,23 +231,36 @@ public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends Sha
           // model.score() corrects the probabilities back using the
           // distribution ratios
           if(_model._output.isClassifier() && _parms._balance_classes ) {
-
             float[] trainSamplingFactors = new float[_train.lastVec().domain().length]; //leave initialized to 0 -> will be filled up below
             if (_parms._class_sampling_factors != null) {
               if (_parms._class_sampling_factors.length != _train.lastVec().domain().length)
                 throw new IllegalArgumentException("class_sampling_factors must have " + _train.lastVec().domain().length + " elements");
               trainSamplingFactors = _parms._class_sampling_factors.clone(); //clone: don't modify the original
             }
-            Frame stratified = water.util.MRUtils.sampleFrameStratified(_train, _train.lastVec(), _train.vec(_model._output.weightsName()), trainSamplingFactors, (long)(_parms._max_after_balance_size*_train.numRows()), _parms._seed, true, false);
+            boolean verboseSampling = Boolean.getBoolean(H2O.OptArgs.SYSTEM_PROP_PREFIX + "debug.sharedTree.sampleFrameStratified.verbose");
+            Frame stratified;
+            if(isQuasibinomial) {
+              stratified = water.util.MRUtils.sampleFrameStratified(_train, _train.lastVec(), _train.vec(_model._output.weightsName()), trainSamplingFactors, (long) (_parms._max_after_balance_size * _train.numRows()), _parms._seed, true, false, domain);
+            } else {
+              stratified = water.util.MRUtils.sampleFrameStratified(_train, _train.lastVec(), _train.vec(_model._output.weightsName()), trainSamplingFactors, (long) (_parms._max_after_balance_size * _train.numRows()), _parms._seed, true, false, null);
+            }
             if (stratified != _train) {
               _train = stratified;
               _response = stratified.vec(_parms._response_column);
               _weights = stratified.vec(_parms._weights_column);
               // Recompute distribution since the input frame was modified
-              MRUtils.ClassDist cdmt2 = _weights != null ?
-                      new MRUtils.ClassDist(_nclass).doAll(_response, _weights) : new MRUtils.ClassDist(_nclass).doAll(_response);
-              _model._output._distribution = cdmt2.dist();
-              _model._output._modelClassDist = cdmt2.rel_dist();
+              if (isQuasibinomial){
+                  MRUtils.ClassDistQuasibinomial cdmt2 = _weights != null ?
+                          new MRUtils.ClassDistQuasibinomial(domain).doAll(_response, _weights) : new MRUtils.ClassDistQuasibinomial(domain).doAll(_response);
+                  _model._output._distribution = cdmt2.dist();
+                  _model._output._modelClassDist = cdmt2.relDist();
+                  _model._output._domains[_model._output._domains.length] = domain;
+              }  else {
+                  MRUtils.ClassDist cdmt2 = _weights != null ?
+                          new MRUtils.ClassDist(_nclass).doAll(_response, _weights) : new MRUtils.ClassDist(_nclass).doAll(_response);
+                  _model._output._distribution = cdmt2.dist();
+                  _model._output._modelClassDist = cdmt2.relDist();
+              }
             }
           }
           Log.info("Prior class distribution: " + Arrays.toString(_model._output._priorClassDist));
@@ -329,7 +340,7 @@ public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends Sha
         final int [] cons = new int[_nclass];
         for( int i=0; i<_nclass; i++ ) {
           names[i] = "NIDs_" + domain[i];
-          cons[i] = isSupervised() && ((_parms._distribution == DistributionFamily.quasibinomial || _model._output._distribution[i]==0)) ? -1 : 0;
+          cons[i] = isSupervised() && _model._output._distribution[i] == 0 ? -1 : 0;
         }
         Vec [] vs = templateVec().makeVolatileInts(cons);
         _train.add(names, vs);
@@ -760,63 +771,31 @@ public abstract class SharedTree<M extends SharedTreeModel<M,P,O>, P extends Sha
     if( updated ) _model.update(_job);
 
     // Model Calibration (only for the final model, not CV models)
-    if (finalScoring && _parms._calibrate_model && (! _parms._is_cv_model)) {
-      Key<Frame> calibInputKey = Key.make();
-      try {
-        Scope.enter();
-        _job.update(0, "Calibrating probabilities");
-        Vec calibWeights = _parms._weights_column != null ? calib().vec(_parms._weights_column) : null;
-        Frame calibPredict = Scope.track(_model.score(calib(), null, _job, false));
-
-        Frame calibInput = new Frame(calibInputKey,
-                new String[]{"p", "response"}, new Vec[]{calibPredict.vec(1), calib().vec(_parms._response_column)});
-        if (calibWeights != null) {
-          calibInput.add("weights", calibWeights);
-        }
-        DKV.put(calibInput);
-
-        Key<Model> calibModelKey = Key.make();
-        Job calibJob = new Job<>(calibModelKey, ModelBuilder.javaName("glm"), "Platt Scaling (GLM)");
-        GLM calibBuilder = ModelBuilder.make("GLM", calibJob, calibModelKey);
-        calibBuilder._parms._intercept = true;
-        calibBuilder._parms._response_column = "response";
-        calibBuilder._parms._train = calibInput._key;
-        calibBuilder._parms._family = GLMModel.GLMParameters.Family.binomial;
-        calibBuilder._parms._lambda = new double[] {0.0};
-        if (calibWeights != null) {
-          calibBuilder._parms._weights_column = "weights";
-        }
-
-        _model._output._calib_model = calibBuilder.trainModel().get();
-        _model.update(_job);
-      } finally {
-        Scope.exit();
-        DKV.remove(calibInputKey);
-      }
+    if (finalScoring && _parms.calibrateModel() && (!_parms._is_cv_model)) {
+      _model._output._calib_model = PlattScalingHelper.buildCalibrationModel(SharedTree.this, _parms, _job, _model);
+      _model.update(_job);
     }
 
     return updated;
   }
 
-  protected void addCustomInfo(O out) {
-    // nothing by default - can be overridden in subclasses
+  @Override
+  public ModelBuilder getModelBuilder() {
+    return this;
   }
 
-  static int counter = 0;
-  // helper for debugging
-  @SuppressWarnings("unused")
-  static protected void printGenerateTrees(DTree[] trees) {
-    for( DTree dtree : trees )
-      if( dtree != null ) {
-        try {
-          PrintWriter writer = new PrintWriter("/tmp/h2o-3.tree" + ++counter + ".txt", "UTF-8");
-          writer.println(dtree.root().toString2(new StringBuilder(), 0));
-          writer.close();
-        } catch (FileNotFoundException|UnsupportedEncodingException e) {
-          e.printStackTrace();
-        }
-        System.out.println(dtree.root().toString2(new StringBuilder(), 0));
-      }
+  @Override
+  public final Frame getCalibrationFrame() { 
+    return _calib; 
+  }
+
+  @Override
+  public void setCalibrationFrame(Frame f) {
+    _calib = f;
+  }
+
+  protected void addCustomInfo(O out) {
+    // nothing by default - can be overridden in subclasses
   }
 
   protected TwoDimTable createScoringHistoryTable() {

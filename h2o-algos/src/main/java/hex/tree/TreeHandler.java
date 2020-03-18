@@ -182,7 +182,7 @@ public class TreeHandler extends Handler {
         int[] nodeLevels = node.getParent().isBitset() ? extractNodeLevels(node) : null;
         nodeDescriptionBuilder.append("Node has id ");
         nodeDescriptionBuilder.append(node.getNodeNumber());
-        if (node.getColName() != null) {
+        if (node.getColName() != null && node.isLeaf()) {
             nodeDescriptionBuilder.append(" and splits on column '");
             nodeDescriptionBuilder.append(node.getColName());
             nodeDescriptionBuilder.append("'. ");
@@ -195,16 +195,21 @@ public class TreeHandler extends Handler {
         if (!Float.isNaN(node.getParent().getSplitValue())) {
             nodeDescriptionBuilder.append(" Parent node split threshold is ");
             nodeDescriptionBuilder.append(node.getParent().getSplitValue());
+            nodeDescriptionBuilder.append(". Prediction: ");
+            nodeDescriptionBuilder.append(node.getPredValue());
             nodeDescriptionBuilder.append(".");
         } else if (node.getParent().isBitset()) {
             nodeLevels = extractNodeLevels(node);
-            assert nodeLevels != null;
             nodeDescriptionBuilder.append(" Parent node split on column [");
             nodeDescriptionBuilder.append(node.getParent().getColName());
-            nodeDescriptionBuilder.append("]. Inherited categorical levels from parent split: ");
-            for (int nodeLevelsindex = 0; nodeLevelsindex < nodeLevels.length; nodeLevelsindex++) {
-                nodeDescriptionBuilder.append(node.getParent().getDomainValues()[nodeLevels[nodeLevelsindex]]);
-                if (nodeLevelsindex != nodeLevels.length - 1) nodeDescriptionBuilder.append(",");
+            if(nodeLevels != null) {
+                nodeDescriptionBuilder.append("]. Inherited categorical levels from parent split: ");
+                for (int nodeLevelsindex = 0; nodeLevelsindex < nodeLevels.length; nodeLevelsindex++) {
+                    nodeDescriptionBuilder.append(node.getParent().getDomainValues()[nodeLevels[nodeLevelsindex]]);
+                    if (nodeLevelsindex != nodeLevels.length - 1) nodeDescriptionBuilder.append(",");
+                }
+            } else {
+                nodeDescriptionBuilder.append("]. No categoricals levels inherited from parent.");
             }
         } else {
             nodeDescriptionBuilder.append("Split value is NA.");
@@ -269,9 +274,11 @@ public class TreeHandler extends Handler {
             nodeDescriptionBuilder.append(leftChild.getNodeNumber());
             nodeDescriptionBuilder.append(") inherits categorical levels: ");
 
-            for (int nodeLevelsindex = 0; nodeLevelsindex < leftChildLevels.length; nodeLevelsindex++) {
-                nodeDescriptionBuilder.append(node.getDomainValues()[leftChildLevels[nodeLevelsindex]]);
-                if (nodeLevelsindex != leftChildLevels.length - 1) nodeDescriptionBuilder.append(",");
+            if (leftChildLevels != null) {
+                for (int nodeLevelsindex = 0; nodeLevelsindex < leftChildLevels.length; nodeLevelsindex++) {
+                    nodeDescriptionBuilder.append(node.getDomainValues()[leftChildLevels[nodeLevelsindex]]);
+                    if (nodeLevelsindex != leftChildLevels.length - 1) nodeDescriptionBuilder.append(",");
+                }
             }
         }
 
@@ -280,9 +287,11 @@ public class TreeHandler extends Handler {
             nodeDescriptionBuilder.append(rightChild.getNodeNumber());
             nodeDescriptionBuilder.append(") inherits categorical levels: ");
 
-            for (int nodeLevelsindex = 0; nodeLevelsindex < rightChildLevels.length; nodeLevelsindex++) {
-                nodeDescriptionBuilder.append(node.getDomainValues()[rightChildLevels[nodeLevelsindex]]);
-                if (nodeLevelsindex != rightChildLevels.length - 1) nodeDescriptionBuilder.append(",");
+            if (rightChildLevels != null) {
+                for (int nodeLevelsindex = 0; nodeLevelsindex < rightChildLevels.length; nodeLevelsindex++) {
+                    nodeDescriptionBuilder.append(node.getDomainValues()[rightChildLevels[nodeLevelsindex]]);
+                    if (nodeLevelsindex != rightChildLevels.length - 1) nodeDescriptionBuilder.append(",");
+                }
             }
         }
         nodeDescriptionBuilder.append(". ");

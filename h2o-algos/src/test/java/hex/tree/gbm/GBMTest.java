@@ -1,6 +1,7 @@
 package hex.tree.gbm;
 
 import hex.*;
+import hex.genmodel.GenModel;
 import hex.genmodel.MojoModel;
 import hex.genmodel.algos.gbm.GbmMojoModel;
 import hex.genmodel.algos.tree.SharedTreeNode;
@@ -10,11 +11,13 @@ import hex.genmodel.easy.RowData;
 import hex.genmodel.easy.exception.PredictException;
 import hex.genmodel.easy.prediction.BinomialModelPrediction;
 import hex.genmodel.easy.prediction.MultinomialModelPrediction;
+import hex.genmodel.tools.PredictCsv;
 import hex.genmodel.utils.DistributionFamily;
 import hex.tree.Constraints;
 import hex.tree.SharedTreeModel;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import water.*;
@@ -23,12 +26,14 @@ import water.exceptions.H2OModelBuilderIllegalArgumentException;
 import water.fvec.*;
 import water.parser.BufferedString;
 import water.parser.ParseDataset;
+import water.parser.ParseSetup;
 import water.util.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 
 import static hex.genmodel.utils.DistributionFamily.*;
@@ -41,6 +46,9 @@ public class GBMTest extends TestUtil {
   @Rule
   public transient ExpectedException expectedException = ExpectedException.none();
 
+  @Rule
+  public transient TemporaryFolder temporaryFolder = new TemporaryFolder();
+  
   @BeforeClass public static void stall() { stall_till_cloudsize(1); }
 
   @Parameterized.Parameters(name = "{index}: gbm({0})")
@@ -115,17 +123,20 @@ public class GBMTest extends TestUtil {
     }
   }
 
-  @Test public void testOneHotExplicitWithPOJO() {
+  @Test public void testOneHotExplicitWithPOJO() throws Exception {
     try {
       Scope.enter();
       final String response = "CAPSULE";
-      Frame fr = parse_test_file("./smalldata/logreg/prostate.csv")
+      final String testFile = "./smalldata/logreg/prostate.csv";
+      Frame fr = parse_test_file(testFile)
               .toCategoricalCol("RACE")
+              .toCategoricalCol("GLEASON")
               .toCategoricalCol(response);
       fr.remove("ID").remove();
+      fr.vec("RACE").setDomain(ArrayUtils.append(fr.vec("RACE").domain(), "3"));
       Scope.track(fr);
       DKV.put(fr);
-
+      
       GBMModel.GBMParameters parms = makeGBMParameters();
       parms._train = fr._key;
       parms._response_column = response;
@@ -142,6 +153,28 @@ public class GBMTest extends TestUtil {
       // Build a POJO & MOJO, validate same results
       Assert.assertTrue(gbm.testJavaScoring(fr, scored,1e-15));
 
+      File pojoScoringOutput = temporaryFolder.newFile(gbm._key + "_scored.csv");
+
+      String modelName = JCodeGen.toJavaId(gbm._key.toString());
+      String pojoSource = gbm.toJava(false, true);
+      Class pojoClass = JCodeGen.compile(modelName, pojoSource);
+
+      PredictCsv predictor = PredictCsv.make(
+              new String[]{
+              "--embedded",
+              "--input", TestUtil.makeNfsFileVec(testFile).getPath(),
+              "--output", pojoScoringOutput.getAbsolutePath(),
+              "--decimal"}, (GenModel) pojoClass.newInstance());
+      predictor.run();
+      Frame scoredWithMojo = Scope.track(parse_test_file(pojoScoringOutput.getAbsolutePath(), new ParseSetupTransformer() {
+        @Override
+        public ParseSetup transformSetup(ParseSetup guessedSetup) {
+          return guessedSetup.setCheckHeader(1);
+        }
+      }));
+
+      scoredWithMojo.setNames(scored.names());
+      assertFrameEquals(scored, scoredWithMojo, 1e-8);
     } finally {
       Scope.exit();
     }
@@ -3402,15 +3435,14 @@ public class GBMTest extends TestUtil {
     }
   }
 
-
   // PUBDEV-3482
   @Test public void testQuasibinomial(){
     Scope.enter();
     // test it behaves like binomial on binary data
-    GBMModel model=null, model2=null, model3=null;
+    GBMModel model=null, model2=null, model3=null, model4=null, model5=null;
     Frame fr = parse_test_file("smalldata/glm_test/prostate_cat_replaced.csv");
     // turn numeric response 0/1 into a categorical factor
-    Frame preds=null, preds2=null, preds3=null;
+    Frame preds=null, preds2=null, preds3=null, preds4=null, preds5=null;
     Vec r = fr.vec("CAPSULE").toCategoricalVec();
     fr.remove("CAPSULE").remove();
     fr.add("CAPSULE", r);
@@ -3430,18 +3462,41 @@ public class GBMTest extends TestUtil {
       }
     }.doAll(fr3);
 
+    // same dataset, but make numeric response -1/2, can only be handled by quasibinomial
+    Frame fr4 = parse_test_file("smalldata/glm_test/prostate_cat_replaced.csv");
+    new MRTask() {
+      @Override
+      public void map(Chunk[] cs) {
+        for (int i=0;i<cs[0]._len;++i) {
+          cs[1].set(i, cs[1].at8(i) == 1 ? 2 : -1);
+        }
+      }
+    }.doAll(fr4);
+
+    // same dataset, but make numeric response 0/2.2, can only be handled by quasibinomial
+    Frame fr5 = parse_test_file("smalldata/glm_test/prostate_cat_replaced.csv");
+    new MRTask() {
+      @Override
+      public void map(Chunk[] cs) {
+        for (int i=0;i<cs[0]._len;++i) {
+          cs[1].set(i, cs[1].at8(i) == 1 ? 2.2 : 2.4);
+        }
+      }
+    }.doAll(fr5);
+
     try {
       GBMModel.GBMParameters params = new GBMModel.GBMParameters();
       params._response_column = "CAPSULE";
       params._ignored_columns = new String[]{"ID"};
       params._seed = 5;
-      params._ntrees = 500;
+      params._ntrees = 100;
       params._nfolds = 3;
       params._learn_rate = 0.01;
       params._min_rows = 1;
       params._min_split_improvement = 0;
       params._stopping_rounds = 10;
       params._stopping_tolerance = 0;
+      params._score_tree_interval = 10;
 
       // binomial - categorical response, optimize logloss
       params._train = fr._key;
@@ -3457,12 +3512,26 @@ public class GBMTest extends TestUtil {
       model2 = gbm2.trainModel().get();
       preds2 = model2.score(fr2);
 
-      // quasibinomial - numeric response 0/20, minimize deviance (negative log-likelihood)
+      // quasibinomial - numeric response 0/2, minimize deviance (negative log-likelihood)
       params._distribution = DistributionFamily.quasibinomial;
       params._train = fr3._key;
       GBM gbm3 = new GBM(params);
       model3 = gbm3.trainModel().get();
       preds3 = model3.score(fr3);
+
+      // quasibinomial - numeric response -1/2, minimize deviance (negative log-likelihood)
+      params._distribution = DistributionFamily.quasibinomial;
+      params._train = fr4._key;
+      GBM gbm4 = new GBM(params);
+      model4 = gbm4.trainModel().get();
+      preds4 = model4.score(fr4);
+
+      // quasibinomial - numeric response 0/2.2, minimize deviance (negative log-likelihood)
+      params._distribution = DistributionFamily.quasibinomial;
+      params._train = fr5._key;
+      GBM gbm5 = new GBM(params);
+      model5 = gbm5.trainModel().get();
+      preds5 = model5.score(fr5);
 
       // Done building model; produce a score column with predictions
       if (preds!=null)
@@ -3471,38 +3540,57 @@ public class GBMTest extends TestUtil {
         Log.info(preds2.toTwoDimTable());
       if (preds3!=null)
         Log.info(preds3.toTwoDimTable());
-
-      // compare training metrics of both models
+      if (preds4!=null)
+        Log.info(preds4.toTwoDimTable());
+      if (preds5!=null)
+        Log.info(preds5.toTwoDimTable());
+      
       if (model!=null && model2!=null) {
+        System.out.println("Compare training metrics of both distributions.");
         assertEquals(
-            ((ModelMetricsBinomial) model._output._training_metrics).logloss(),
-            ((ModelMetricsBinomial) model2._output._training_metrics).logloss(), 2e-3);
-
-        // compare CV metrics of both models
+                ((ModelMetricsBinomial) model._output._training_metrics).logloss(),
+                ((ModelMetricsBinomial) model2._output._training_metrics).logloss(), 2e-3);
+        
+        System.out.println("Compare CV metrics of both distributions.");
         assertEquals(
             ((ModelMetricsBinomial) model._output._cross_validation_metrics).logloss(),
             ((ModelMetricsBinomial) model2._output._cross_validation_metrics).logloss(), 1e-3);
       }
-
+      
       // Build a POJO/MOJO, validate same results
       if (model2!=null)
-        Assert.assertTrue(model2.testJavaScoring(fr2,preds2,1e-15));
+        System.out.println("Build a POJO/MOJO, validate same results - model2");
+        
       if (model3!=null)
+        System.out.println("Build a POJO/MOJO, validate same results - model3");
         Assert.assertTrue(model3.testJavaScoring(fr3,preds3,1e-15));
+
+      if (model4!=null)
+        System.out.println("Build a POJO/MOJO, validate same results - model4");
+        Assert.assertTrue(model4.testJavaScoring(fr4,preds4,1e-15));
+
+      if (model5!=null)
+        System.out.println("Build a POJO/MOJO, validate same results - model5");
+      Assert.assertTrue(model5.testJavaScoring(fr5,preds5,1e-15));
 
       // compare training predictions of both models (just compare probs)
       if (preds!=null && preds2!=null) {
         preds.remove(0);
         preds2.remove(0);
-        assertTrue(isIdenticalUpToRelTolerance(preds, preds2, 1e-2));
+        System.out.println("Compare training predictions of both models (just compare probs)");
+        assertIdenticalUpToRelTolerance(preds, preds2, 1e-2);
       }
     } finally {
       if (preds!=null) preds.delete();
       if (preds2!=null) preds2.delete();
       if (preds3!=null) preds3.delete();
+      if (preds4!=null) preds4.delete();
+      if (preds5!=null) preds5.delete();
       if (fr!=null) fr.delete();
       if (fr2!=null) fr2.delete();
       if (fr3!=null) fr3.delete();
+      if (fr4!=null) fr4.delete();
+      if (fr5!=null) fr5.delete();
       if(model != null){
         model.deleteCrossValidationModels();
         model.delete();
@@ -3514,6 +3602,14 @@ public class GBMTest extends TestUtil {
       if(model3 != null){
         model3.deleteCrossValidationModels();
         model3.delete();
+      }
+      if(model4 != null){
+        model4.deleteCrossValidationModels();
+        model4.delete();
+      }
+      if(model5 != null){
+        model5.deleteCrossValidationModels();
+        model5.delete();
       }
       Scope.exit();
     }

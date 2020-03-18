@@ -12,16 +12,16 @@
 
 运行以下命令来加载驻留在运行AIR的同一台机器上的数据。
 
-.. example-code::
-   .. code-block:: r
+.. tabs::
+   .. code-tab:: r R
 	
-	library(h2o)
-	h2o.init()
-	irisPath <- "../smalldata/iris/iris_wheader.csv"
-	iris.hex <- h2o.uploadFile(path = irisPath, destination_frame = "iris.hex")
+		library(h2o)
+		h2o.init()
+		irisPath <- "../smalldata/iris/iris_wheader.csv"
+		iris.hex <- h2o.uploadFile(path = irisPath, destination_frame = "iris.hex")
 	  
-   .. code-block:: python
+   .. code-tab:: python
    
-	import h2o
-	h2o.init()
-	iris_df = h2o.upload_file("../smalldata/iris/iris_wheader.csv")
+		import h2o
+		h2o.init()
+		iris_df = h2o.upload_file("../smalldata/iris/iris_wheader.csv")

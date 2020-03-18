@@ -40,6 +40,7 @@ public class RabitTrackerH2O implements IRabitTracker {
         envs.put("DMLC_TRACKER_URI", H2O.SELF_ADDRESS.getHostAddress());
         envs.put("DMLC_TRACKER_PORT", Integer.toString(port));
         envs.put("DMLC_TASK_ID", Integer.toString(H2O.SELF.index()));
+        envs.put("DMLC_WORKER_STOP_PROCESS_ON_ERROR", "false");
         envs.put("rabit_world_size", Integer.toString(workers));
         return envs;
     }
@@ -212,6 +213,7 @@ public class RabitTrackerH2O implements IRabitTracker {
                 this.trackerThread.join(timeout);
             } catch (InterruptedException e) {
                 Log.debug("Rabit tracker thread got suddenly interrupted.", e);
+                Thread.currentThread().interrupt();
             }
         }
         return 0;
@@ -219,6 +221,8 @@ public class RabitTrackerH2O implements IRabitTracker {
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
+        Log.err("Uncaught exception occurred on Rabit tracker thread " + t.getName(), e);
+        Log.err(e);
         stop();
     }
 }

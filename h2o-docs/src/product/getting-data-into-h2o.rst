@@ -193,31 +193,48 @@ core-site.xml must be configured for at least the following properties (class, p
 Direct Hive import
 ~~~~~~~~~~~~~~~~~~
 
-H2O supports direct ingestion of data managed by Hive in Hadoop. This feature is available only when H2O is running as a Hadoop job. Internally H2O uses metadata in Hive Metastore database to determine the location and format of given Hive table. H2O then imports data directly from HDFS so limitations of supported formats mentioned above apply. Data from hive can pulled into H2O using ``import_hive_table`` function.
+H2O supports direct ingestion of data managed by Hive in Hadoop. This feature is available only when H2O is running as a Hadoop job. Internally H2O uses metadata in Hive Metastore database to determine the location and format of given Hive table. H2O then imports data directly from HDFS so limitations of supported formats mentioned above apply. Data from hive can pulled into H2O using ``import_hive_table`` function. H2O can read Hive table metadata two ways - either via direct Metastore access or via JDBC.
 
 Requirements:
 
-- Hive jars and configuration must be present on H2O job classpath - either via adding it to yarn.application.classpath (or similar property for your resource manger of choice) or by adding Hive jars and configuration to libjars
-- user running H2O must have read access to Hive and the files it manages
+- Direct Metastore access - Hive jars and configuration must be present on H2O job classpath - either via adding it to yarn.application.classpath (or similar property for your resource manger of choice) or by adding Hive jars and configuration to libjars.
+- JDBC metadata access - Hive JDBC Driver must be on H2O job classpath. (See below for details about access Kerberized Hive via JDBC.)
+- The user running H2O must have read access to Hive and the files it manages.
 
 Limitations
 
-- imported table must be stored in a format supported by H2O (see above)
+- Imported table must be stored in a format supported by H2O. (See above.)
 - CSV - Hive table property ``skip.header.line.count`` is currently not supported, CSV files with header rows will be imported with header row as data
-- partitioned tables with different storage formats - H2O supports importing partitioned tables which use different storage formats for different partitions, however in some cases (for example large number of small partitions) H2O may run out of memory while importing even though the final data would easily fit into the memory allocated to the H2O cluster
+- Partitioned tables with different storage formats. H2O supports importing partitioned tables that use different storage formats for different partitions; however in some cases (for example large number of small partitions), H2O may run out of memory while importing even though the final data would easily fit into the memory allocated to the H2O cluster.
 
-.. example-code::
-   .. code-block:: r
+.. tabs::
+   .. code-tab:: r R
 
-    basic_import <- h2o.import_hive_table("default", "table_name")
-    multi_format_enabled <- h2o.import_hive_table("default", "table_name", allow_multi_format=True)
-    with_partition_filter <- h2o.import_hive_table("default", "table_name", [["2017", "02"]])
 
-   .. code-block:: python
+        basic_import <- h2o.import_hive_table("default", "table_name")
+        multi_format_enabled <- h2o.import_hive_table("default", "table_name", allow_multi_format=True)
+        with_partition_filter <- h2o.import_hive_table("default", "table_name", [["2017", "02"]])
 
-    basic_import = h2o.import_hive_table("default", "table_name")
-    multi_format_enabled = h2o.import_hive_table("default", "table_name", allow_multi_format=True)
-    with_partition_filter = h2o.import_hive_table("default", "table_name", [["2017", "02"]])
+        # access metadata via JDBC
+        basic_import <- h2o.import_hive_table("jdbc:hive2://hive-server:10000/default", "table_name")
+        # access metadata via Metastore
+        multi_format_enabled <- h2o.import_hive_table("default", "table_name", allow_multi_format=True)
+        with_partition_filter <- h2o.import_hive_table("default", "table_name", [["2017", "02"]])
+
+
+   .. code-tab:: python
+
+
+        basic_import = h2o.import_hive_table("default", "table_name")
+        multi_format_enabled = h2o.import_hive_table("default", "table_name", allow_multi_format=True)
+        with_partition_filter = h2o.import_hive_table("default", "table_name", [["2017", "02"]])
+
+        # access metadata via JDBC
+        basic_import = h2o.import_hive_table("jdbc:hive2://hive-server:10000/default", "table_name")
+        # access metadata via Metastore
+        multi_format_enabled = h2o.import_hive_table("default", "table_name", allow_multi_format=True)
+        with_partition_filter = h2o.import_hive_table("default", "table_name", [["2017", "02"]])
+
 
 
 JDBC Databases
@@ -252,22 +269,22 @@ The ``import_sql_table`` function accepts the following parameters:
 - ``optimize``: Specifies to optimize the import of SQL table for faster imports. Note that this option is experimental.
 - ``fetch_mode``: Set to DISTRIBUTED to enable distributed import. Set to SINGLE to force a sequential read by a single node from the database.
 
-.. example-code::
-   .. code-block:: r
+.. tabs::
+   .. code-tab:: r R
 
-    connection_url <- "jdbc:mysql://172.16.2.178:3306/ingestSQL?&useSSL=false"
-    table <- "citibike20k"
-    username <- "root"
-    password <- "abc123"
-    my_citibike_data <- h2o.import_sql_table(connection_url, table, username, password)
+        connection_url <- "jdbc:mysql://172.16.2.178:3306/ingestSQL?&useSSL=false"
+        table <- "citibike20k"
+        username <- "root"
+        password <- "abc123"
+        my_citibike_data <- h2o.import_sql_table(connection_url, table, username, password)
 
-   .. code-block:: python
+   .. code-tab:: python
 
-    connection_url = "jdbc:mysql://172.16.2.178:3306/ingestSQL?&useSSL=false"
-    table = "citibike20k"
-    username = "root"
-    password = "abc123"
-    my_citibike_data = h2o.import_sql_table(connection_url, table, username, password)
+        connection_url = "jdbc:mysql://172.16.2.178:3306/ingestSQL?&useSSL=false"
+        table = "citibike20k"
+        username = "root"
+        password = "abc123"
+        my_citibike_data = h2o.import_sql_table(connection_url, table, username, password)
 
 
 ``import_sql_select``
@@ -292,23 +309,23 @@ The ``import_sql_select`` function accepts the following parameters:
 - ``temp_table_name``: The name of the temporary table to be created by ``select_query``.
 - ``fetch_mode``: Set to DISTRIBUTED to enable distributed import. Set to SINGLE to force a sequential read by a single node from the database.
 
-.. example-code::
-   .. code-block:: r
+.. tabs::
+   .. code-tab:: r R
 
-    connection_url <- "jdbc:mysql://172.16.2.178:3306/ingestSQL?&useSSL=false"
-    select_query <-  "SELECT  bikeid  from  citibike20k"
-    username <- "root"
-    password <- "abc123"
-    my_citibike_data <- h2o.import_sql_select(connection_url, select_query, username, password)
+        connection_url <- "jdbc:mysql://172.16.2.178:3306/ingestSQL?&useSSL=false"
+        select_query <-  "SELECT  bikeid  from  citibike20k"
+        username <- "root"
+        password <- "abc123"
+        my_citibike_data <- h2o.import_sql_select(connection_url, select_query, username, password)
 
 
-   .. code-block:: python
+   .. code-tab:: python
 
-    connection_url = "jdbc:mysql://172.16.2.178:3306/ingestSQL?&useSSL=false"
-    select_query = "SELECT bikeid from citibike20k"
-    username = "root"
-    password = "abc123"
-    my_citibike_data = h2o.import_sql_select(connection_url, select_query, username, password)
+        connection_url = "jdbc:mysql://172.16.2.178:3306/ingestSQL?&useSSL=false"
+        select_query = "SELECT bikeid from citibike20k"
+        username = "root"
+        password = "abc123"
+        my_citibike_data = h2o.import_sql_select(connection_url, select_query, username, password)
 
 .. _hive2:
 
@@ -341,14 +358,14 @@ Add the Hive JDBC driver to H2O's classpath:
 
 Start the h2o.jar in the terminal with your downloaded JDBC driver in the classpath: 
 
-.. example-code::
-   .. code-block:: r
+.. tabs::
+   .. code-tab:: r R
 
-    h2o.init(extra_classpath = "hive-jdbc.jar")
+        h2o.init(extra_classpath = "hive-jdbc.jar")
 
-   .. code-block:: python
+   .. code-tab:: python
 
-    h2o.init(extra_classpath=["hive-jdbc.jar"])
+        h2o.init(extra_classpath=["hive-jdbc.jar"])
 
 After the jar file with JDBC driver is added, then data from the Hive databases can be pulled into H2O using the aforementioned ``import_sql_table`` and ``import_sql_select`` functions. 
 
@@ -364,6 +381,12 @@ H2O is able to generate Hive delegation tokens in three modes:
 - On the mapper side, a token refresh thread is started, periodically re-generating the token.
 - A combination of both of the above.
 
+H2O arguments used to configure the JDBC URL for Hive delegation token generation:
+
+- ``hiveHost`` - The full address of HiveServer2, for example ``hostname:10000``
+- ``hivePrincipal`` -  Hiveserver2 Kerberos principal, for example ``hive/hostname@DOMAIN.COM``
+- ``hiveJdbcUrlPattern`` - (optional) Can be used to further customize the way the driver constructs the Hive JDBC URL. The default pattern used is ``jdbc:hive2://{{host}}/;principal={{principal}}``.
+
 **Note on libjars:**
 
 In the examples below, we are omitting the ``-libjars`` option of the ``hadoop.jar`` command because it is not necessary for token generation. You may need to add it to be able to import data from Hive via JDBC. 
@@ -376,8 +399,7 @@ The advantage of this approach is that the Hive delegation token is available im
 Requirements:
 
 - The Hive JDBC driver is on h2odriver classpath. (Only used to acquire Hive delegation token.)
-- The ``hiveHost`` argument needs to be set with the address of HiveServer2.
-- The ``hivePrincipal`` argument is set with the value of Hiveserver2 Kerberos principal.
+- The ``hiveHost``, ``hivePrincipal`` and optionally ``hiveJdbcUrlPattern`` arguments are present. (See above for details.)  
 
 Example command:
 
@@ -386,8 +408,8 @@ Example command:
       export HADOOP_CLASSPATH=/path/to/hive-jdbc-standalone.jar
       hadoop jar h2odriver.jar \
           -nodes 1 -mapperXmx 4G \
-          -hiveHost hostname:10000 -hivePrincipal hive/hostname@EXAMPLE.COM
-
+          -hiveHost hostname:10000 -hivePrincipal hive/hostname@EXAMPLE.COM \
+          -hiveJdbcUrlPattern "jdbc:hive2://{{host}}/;ssl=true;sslTrustStore=/path/to/keystore.jks;principal={{principal}}"
 
 Generating the Token in the Mapper and Token Refresh
 ####################################################
@@ -399,8 +421,7 @@ The disadvantage of this approach is that the delegation token is not available 
 Requirements:
 
 - The Hive JDBC driver is on the h2o mapper classpath (either via libjars or YARN configuration).
-- The ``hiveHost`` argument needs to be set with the address of HiveServer2.
-- The ``hivePrincipal`` argument is set with the value of your HiveServer2 Kerberos principal.
+- The ``hiveHost``, ``hivePrincipal`` and optionally ``hiveJdbcUrlPattern`` arguments are present. (See above for details.)  
 - The ``principal`` argument is set with the value of the users's Kerberos principal.
 - The ``keytab`` argument set pointing to the file with the user's Kerberos keytab file.
 - The ``refreshTokens`` argument is present.
@@ -429,7 +450,7 @@ This is the best-of-bothpworlds approach. The token is generated first in the dr
 Requirements:
 
 - The Hive JDBC driver is on the h2o driver and mapper classpaths.
-- The ``hiveHost`` and ``hivePrincipal`` arguments are set.
+- The ``hiveHost``, ``hivePrincipal`` and optionally ``hiveJdbcUrlPattern`` arguments are present. (See above for details.)  
 - The ``keytab`` and ``principal`` arguments are set.
 - The ``refreshTokens`` argument is present.
 
@@ -450,17 +471,17 @@ Using a Delegation Token when Connecting to Hive via JDBC
 
 When running the actual data-load, specify the JDBC URL with the delegation token parameter:
 
-.. example-code::
-   .. code-block:: r
+.. tabs::
+   .. code-tab:: r R
 
-    my_citibike_data <- h2o.import_sql_table(
-        "jdbc:hive2://hostname:10000/default;auth=delegationToken", 
-        "citibike20k", "", ""
-    )
+        my_citibike_data <- h2o.import_sql_table(
+            "jdbc:hive2://hostname:10000/default;auth=delegationToken", 
+            "citibike20k", "", ""
+        )
 
-   .. code-block:: python
+   .. code-tab:: python
 
-    my_citibike_data = h2o.import_sql_table(
-        "jdbc:hive2://hostname:10000/default;auth=delegationToken", 
-        "citibike20k", "", ""
-    )
+        my_citibike_data = h2o.import_sql_table(
+            "jdbc:hive2://hostname:10000/default;auth=delegationToken", 
+            "citibike20k", "", ""
+        )

@@ -36,7 +36,7 @@
 #' @param stopping_metric Metric to use for early stopping (AUTO: logloss for classification, deviance for regression and
 #'        anonomaly_score for Isolation Forest). Note that custom and custom_increasing can only be used in GBM and DRF
 #'        with the Python client. Must be one of: "AUTO", "deviance", "logloss", "MSE", "RMSE", "MAE", "RMSLE", "AUC",
-#'        "lift_top_group", "misclassification", "AUCPR", "mean_per_class_error", "custom", "custom_increasing".
+#'        "AUCPR", "lift_top_group", "misclassification", "mean_per_class_error", "custom", "custom_increasing".
 #'        Defaults to AUTO.
 #' @param stopping_tolerance Relative tolerance for metric-based stopping criterion (stop if relative improvement is not at least this
 #'        much) Defaults to 0.001.
@@ -74,6 +74,11 @@
 #' @param nthread Number of parallel threads that can be used to run XGBoost. Cannot exceed H2O cluster limits (-nthreads
 #'        parameter). Defaults to maximum available Defaults to -1.
 #' @param save_matrix_directory Directory where to save matrices passed to XGBoost library. Useful for debugging.
+#' @param build_tree_one_node \code{Logical}. Run on one node only; no network overhead but fewer cpus used. Suitable for small datasets.
+#'        Defaults to FALSE.
+#' @param calibrate_model \code{Logical}. Use Platt Scaling to calculate calibrated class probabilities. Calibration can provide more
+#'        accurate estimates of class probabilities. Defaults to FALSE.
+#' @param calibration_frame Calibration frame for Platt Scaling
 #' @param max_bins For tree_method=hist only: maximum number of bins Defaults to 256.
 #' @param max_leaves For tree_method=hist only: maximum number of leaves Defaults to 0.
 #' @param min_sum_hessian_in_leaf For tree_method=hist only: the mininum sum of hessian in a leaf to keep splitting Defaults to 100.0.
@@ -95,6 +100,30 @@
 #'        auto.
 #' @param gpu_id Which GPU to use.  Defaults to 0.
 #' @param verbose \code{Logical}. Print scoring history to the console (Metrics per tree). Defaults to FALSE.
+#' @examples
+#' \dontrun{
+#' library(h2o)
+#' h2o.init()
+#' 
+#' # Import the titanic dataset
+#' titanic <- h2o.importFile("https://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/titanic.csv")
+#' 
+#' # Set predictors and response; set response as a factor
+#' titanic['survived'] <- as.factor(titanic['survived'])
+#' predictors <- setdiff(colnames(titanic), colnames(titanic)[2:3])
+#' response <- "survived"
+#' 
+#' # Split the dataset into train and valid
+#' titanic.splits <- h2o.splitFrame(data =  titanic, ratios = .8, seed = 1234)
+#' train <- titanic.splits[[1]]
+#' valid <- titanic.splits[[2]]
+#' 
+#' # Train the XGB model
+#' titanic_xgb <- h2o.xgboost(x = predictors, y = response,
+#'                            training_frame = train, validation_frame = valid,
+#'                            booster = "dart", normalize_type = "tree",
+#'                            seed = 1234)
+#' }
 #' @export
 h2o.xgboost <- function(x,
                         y,
@@ -112,7 +141,7 @@ h2o.xgboost <- function(x,
                         offset_column = NULL,
                         weights_column = NULL,
                         stopping_rounds = 0,
-                        stopping_metric = c("AUTO", "deviance", "logloss", "MSE", "RMSE", "MAE", "RMSLE", "AUC", "lift_top_group", "misclassification", "AUCPR", "mean_per_class_error", "custom", "custom_increasing"),
+                        stopping_metric = c("AUTO", "deviance", "logloss", "MSE", "RMSE", "MAE", "RMSLE", "AUC", "AUCPR", "lift_top_group", "misclassification", "mean_per_class_error", "custom", "custom_increasing"),
                         stopping_tolerance = 0.001,
                         max_runtime_secs = 0,
                         seed = -1,
@@ -142,6 +171,9 @@ h2o.xgboost <- function(x,
                         gamma = 0.0,
                         nthread = -1,
                         save_matrix_directory = NULL,
+                        build_tree_one_node = FALSE,
+                        calibrate_model = FALSE,
+                        calibration_frame = NULL,
                         max_bins = 256,
                         max_leaves = 0,
                         min_sum_hessian_in_leaf = 100.0,
@@ -271,6 +303,12 @@ h2o.xgboost <- function(x,
     parms$nthread <- nthread
   if (!missing(save_matrix_directory))
     parms$save_matrix_directory <- save_matrix_directory
+  if (!missing(build_tree_one_node))
+    parms$build_tree_one_node <- build_tree_one_node
+  if (!missing(calibrate_model))
+    parms$calibrate_model <- calibrate_model
+  if (!missing(calibration_frame))
+    parms$calibration_frame <- calibration_frame
   if (!missing(max_bins))
     parms$max_bins <- max_bins
   if (!missing(max_leaves))

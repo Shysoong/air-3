@@ -586,20 +586,20 @@ h2o.clusterStatus <- function() {
       error = function(err) {
         print(err)
         stop("You have a 32-bit version of Java. H2O works best with 64-bit Java.\n",
-        "Please download the latest Java SE JDK 8 from the following URL:\n",
-        "http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html")
+        "Please download the latest Java SE JDK from the following URL:\n",
+        "https://www.oracle.com/technetwork/java/javase/downloads/index.html")
       }
     )
   jver_error <- .h2o.check_java_version(jver);
   if (!is.null(jver_error)) {
     stop(jver_error, "\n",
-    "Please download the latest Java SE JDK 8 from the following URL:\n",
-    "http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html")
+    "Please download the latest Java SE JDK from the following URL:\n",
+    "https://www.oracle.com/technetwork/java/javase/downloads/index.html")
   }
   if(any(grepl("Client VM", jver))) {
     warning("You have a 32-bit version of Java. H2O works best with 64-bit Java.\n",
-            "Please download the latest Java SE JDK 8 from the following URL:\n",
-            "http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html")
+            "Please download the latest Java SE JDK from the following URL:\n",
+            "https://www.oracle.com/technetwork/java/javase/downloads/index.html")
 
     # Set default max_memory to be 1g for 32-bit JVM.
     if(is.null(max_memory)) max_memory = "1g"
@@ -668,12 +668,14 @@ h2o.clusterStatus <- function() {
     usr <- gsub("[^A-Za-z0-9]", "_", Sys.getenv("USER", unset="UnknownUser"))
   }
 
+  temp_dir_path <- tempfile()
+  dir.create(temp_dir_path)
   if(type == "stdout")
-    file.path(tempdir(), paste("h2o", usr, "started_from_r.out", sep="_"))
+    file.path(temp_dir_path, paste("h2o", usr, "started_from_r.out", sep="_"))
   else if(type == "stderr")
-    file.path(tempdir(), paste("h2o", usr, "started_from_r.err", sep="_"))
+    file.path(temp_dir_path, paste("h2o", usr, "started_from_r.err", sep="_"))
   else
-    file.path(tempdir(), paste("h2o", usr, "started_from_r.pid", sep="_"))
+    file.path(temp_dir_path, paste("h2o", usr, "started_from_r.pid", sep="_"))
 }
 
 .h2o.startedH2O <- function() {

@@ -8,7 +8,7 @@
 #' @param training_frame Id of the training data frame.
 #' @param model_id Destination id for this model; auto-generated if not specified.
 #' @param min_word_freq This will discard words that appear less than <int> times Defaults to 5.
-#' @param word_model Use the Skip-Gram model Must be one of: "SkipGram". Defaults to SkipGram.
+#' @param word_model The word model to use (SkipGram or CBOW) Must be one of: "SkipGram", "CBOW". Defaults to SkipGram.
 #' @param norm_model Use Hierarchical Softmax Must be one of: "HSM". Defaults to HSM.
 #' @param vec_size Set size of word vectors Defaults to 100.
 #' @param window_size Set max skip length between words Defaults to 5.
@@ -19,11 +19,27 @@
 #' @param pre_trained Id of a data frame that contains a pre-trained (external) word2vec model
 #' @param max_runtime_secs Maximum allowed runtime in seconds for model training. Use 0 to disable. Defaults to 0.
 #' @param export_checkpoints_dir Automatically export generated models to this directory.
+#' @examples
+#' \dontrun{
+#' library(h2o)
+#' h2o.init()
+#' 
+#' # Import the CraigslistJobTitles dataset
+#' job.titles.path = "https://raw.githubusercontent.com/h2oai/sparkling-water/rel-1.6/examples/smalldata/craigslistJobTitles.csv"
+#' job.titles <- h2o.importFile(job.titles.path, destination_frame = "jobtitles",
+#'                              col.names = c("category", "jobtitle"),
+#'                              col.types = c("String", "String"), header = TRUE)
+#' 
+#' # Build and train the Word2Vec model
+#' words <- h2o.tokenize(job.titles, " ")
+#' vec <- h2o.word2vec(training_frame = words)
+#' h2o.findSynonyms(vec, "teacher", count = 20)
+#' }
 #' @export
 h2o.word2vec <- function(training_frame = NULL,
                          model_id = NULL,
                          min_word_freq = 5,
-                         word_model = c("SkipGram"),
+                         word_model = c("SkipGram", "CBOW"),
                          norm_model = c("HSM"),
                          vec_size = 100,
                          window_size = 5,

@@ -2,6 +2,7 @@ package ml.dmlc.xgboost4j.java;
 
 import hex.*;
 import hex.tree.xgboost.*;
+import hex.tree.xgboost.util.BoosterHelper;
 import water.*;
 import water.fvec.*;
 
@@ -121,7 +122,7 @@ public class XGBoostScoreTask extends MRTask<XGBoostScoreTask> {
         _computeMetrics = computeMetrics;
         _weightsChunkId = weightsChunkId;
         _model = model;
-        _threshold = Model.defaultThreshold(_output);
+        _threshold = model.defaultThreshold();
     }
 
     /**
@@ -164,7 +165,9 @@ public class XGBoostScoreTask extends MRTask<XGBoostScoreTask> {
                     dataInfo,
                     cs,
                     fr.find(parms._response_column),
-                    output._sparse);
+                    output._sparse, 
+                    fr.find(parms._offset_column)
+            );
 
             // No local chunks for this frame
             if (data.rowNum() == 0) {

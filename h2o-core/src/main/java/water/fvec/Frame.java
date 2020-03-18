@@ -13,6 +13,8 @@ import water.util.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /** A collection of named {@link Vec}s, essentially an R-like Distributed Data Frame.
  *
@@ -841,7 +843,7 @@ public class Frame extends Lockable<Frame> {
   /**
    * Removes this {@link Frame} object and all directly linked {@link Keyed} objects and POJOs, while retaining
    * the keys defined by the retainedKeys parameter. Aimed to be used for removal of {@link Frame} objects pointing
-   * to shared resources (Vectors, Chuinks etc.) internally.
+   * to shared resources (Vectors, Chunks etc.) internally.
    * <p>
    * WARNING: UNSTABLE API, might be removed/replaced at any time.
    *
@@ -1569,6 +1571,7 @@ public class Frame extends Lockable<Frame> {
 
     boolean _headers = true;
     boolean _hex_string = false;
+    boolean _escape_quotes = false;
     char _separator = DEFAULT_SEPARATOR;
 
     public CSVStreamParams setHeaders(boolean headers) {
@@ -1585,6 +1588,11 @@ public class Frame extends Lockable<Frame> {
       _separator = (char) separator;
       return this;
     }
+
+    public CSVStreamParams setEscapeQuotes(boolean backslash_escape) {
+      _escape_quotes = backslash_escape;
+      return this;
+    }
   }
 
   public static class CSVStream extends InputStream {
@@ -1595,6 +1603,7 @@ public class Frame extends Lockable<Frame> {
     Chunk[] _curChks;
     int _lastChkIdx;
     public volatile int _curChkIdx; // used only for progress reporting
+    private transient final String[][] _escapedCategoricalVecDomains;
 
     public CSVStream(Frame fr, CSVStreamParams parms) {
       this(firstChunks(fr), parms._headers ? fr.names() : null, fr.anyVec().nChunks(), parms);
@@ -1619,13 +1628,51 @@ public class Frame extends Lockable<Frame> {
       StringBuilder sb = new StringBuilder();
       if (names != null) {
         sb.append('"').append(names[0]).append('"');
-        for(int i = 1; i < names.length; i++)
+        for (int i = 1; i < names.length; i++)
           sb.append(_parms._separator).append('"').append(names[i]).append('"');
         sb.append('\n');
       }
       _line = StringUtils.bytesOf(sb);
       _chkRow = -1; // first process the header line
       _curChks = chks;
+      _escapedCategoricalVecDomains = escapeCategoricalVecDomains(_curChks);
+    }
+
+    /**
+     * Escapes categorical levels of vectors and puts them in a map of escaped categorical levels.
+     * Only the domains with at least one level with an escaped quote are saved. If a domain does not need
+     * any escaping, it is considered better practice to reach to the `vec.domain()` method itself and not duplicate entries
+     * in memory here.
+     *
+     * @param chunks
+     * @return A 2D array of String[][]. Elements can be null of give domain does not need escaping.
+     */
+    private String[][] escapeCategoricalVecDomains(final Chunk[] chunks) {
+      if(chunks == null) return null;
+      final String[][] localEscapedCategoricalVecDomains = new String[chunks.length][];
+
+      for (int i = 0; i < chunks.length; i++) {
+        final Vec vec = chunks[i].vec();
+        if (!vec.isCategorical()) continue;
+
+        final String[] originalDomain = vec.domain();
+        final String[] escapedDomain = new String[originalDomain.length];
+
+        boolean escapingRequired = false;
+        for (int level = 0; level < originalDomain.length; level++) {
+          escapedDomain[level] = escapeQuotesForCsv(originalDomain[level]);
+          escapingRequired = escapingRequired || !escapedDomain[level].equals(originalDomain[level]);
+        }
+
+        if (escapingRequired) {
+          localEscapedCategoricalVecDomains[i] = escapedDomain;
+        } else {
+          // If the domain does not need escaping, simply link to the original domain and drop the escaped array
+          localEscapedCategoricalVecDomains[i] = originalDomain;
+        }
+      }
+
+      return localEscapedCategoricalVecDomains;
     }
 
     public int getCurrentRowSize() throws IOException {
@@ -1634,18 +1681,23 @@ public class Frame extends Lockable<Frame> {
       return _line.length;
     }
 
+
     byte[] getBytesForRow() {
       StringBuilder sb = new StringBuilder();
       BufferedString tmpStr = new BufferedString();
-      for (int i = 0; i < _curChks.length; i++ ) {
+      for (int i = 0; i < _curChks.length; i++) {
         Vec v = _curChks[i]._vec;
-        if(i > 0) sb.append(_parms._separator);
-        if(!_curChks[i].isNA(_chkRow)) {
-          if( v.isCategorical() ) sb.append('"').append(v.factor(_curChks[i].at8(_chkRow))).append('"');
-          else if( v.isUUID() ) sb.append(PrettyPrint.UUID(_curChks[i].at16l(_chkRow), _curChks[i].at16h(_chkRow)));
-          else if( v.isInt() ) sb.append(_curChks[i].at8(_chkRow));
-          else if (v.isString()) sb.append('"').append(_curChks[i].atStr(tmpStr, _chkRow)).append('"');
-          else {
+        if (i > 0) sb.append(_parms._separator);
+        if (!_curChks[i].isNA(_chkRow)) {
+          if (v.isCategorical()) {
+            final String escapedString = _escapedCategoricalVecDomains[i][(int) _curChks[i].at8(_chkRow)];
+            sb.append('"').append(escapedString).append('"');
+          } else if (v.isUUID()) sb.append(PrettyPrint.UUID(_curChks[i].at16l(_chkRow), _curChks[i].at16h(_chkRow)));
+          else if (v.isInt()) sb.append(_curChks[i].at8(_chkRow));
+          else if (v.isString()) {
+            final String escapedString = escapeQuotesForCsv(_curChks[i].atStr(tmpStr, _chkRow).toString());
+            sb.append('"').append(escapedString).append('"');
+          } else {
             double d = _curChks[i].atd(_chkRow);
             // R 3.1 unfortunately changed the behavior of read.csv().
             // (Really type.convert()).
@@ -1665,7 +1717,22 @@ public class Frame extends Lockable<Frame> {
       return StringUtils.bytesOf(sb);
     }
 
-    @Override public int available() throws IOException {
+    private static final Pattern DOUBLE_QUOTE_PATTERN = Pattern.compile("\"");
+
+    /**
+     * Escapes  double-quotes (ASCII 34) in a String.
+     *
+     * @param unescapedString An unescaped {@link String} to escape
+     * @return String with escaped double-quotes, if found.
+     */
+    private String escapeQuotesForCsv(final String unescapedString) {
+      if (!_parms._escape_quotes) return unescapedString;
+      final Matcher matcher = DOUBLE_QUOTE_PATTERN.matcher(unescapedString);
+      return matcher.replaceAll("\"\"");
+    }
+
+    @Override
+    public int available() {
       // Case 1:  There is more data left to read from the current line.
       if (_position != _line.length) {
         return _line.length - _position;
@@ -1747,7 +1814,7 @@ public class Frame extends Lockable<Frame> {
   public Frame sort(int[] cols, int[] ascending) {
     return Merge.sort(this, cols, ascending);
   }
-
+  
   /**
    * A structure for fast lookup in the set of frame's vectors.
    * Purpose of this class is to avoid multiple O(n) searches in {@link Frame}'s vectors.

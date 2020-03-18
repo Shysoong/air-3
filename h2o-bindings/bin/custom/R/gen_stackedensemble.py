@@ -23,21 +23,16 @@ if (is.null(training_frame)) training_frame <- blending_frame  # guarantee prese
     validate_params="""
 # Get the base models from model IDs (if any) that will be used for constructing model summary
 if(!is.list(base_models) && is.vector(x)) {
-   base_models <- as.list(base_models)
+  base_models <- if (inherits(base_models, "H2OGrid")) list(base_models) else as.list(base_models)
 }
-baselearners <- lapply(base_models, function(base_model) {
-  if (is.character(base_model))
-    base_model <- h2o.getModel(base_model)
-  base_model
-})
 
 # Get base model IDs that will be passed to REST API later
 if (length(base_models) == 0) stop('base_models is empty')
 
 # If base_models contains models instead of ids, replace with model id
 for (i in 1:length(base_models)) {
-  if (inherits(base_models[[i]], 'H2OModel')) {
-    base_models[[i]] <- base_models[[i]]@model_id
+  if (inherits(base_models[[i]], c('H2OModel', 'H2OGrid'))) {
+    base_models[[i]] <- h2o.keyof(base_models[[i]])
   }
 }
 """,
@@ -56,6 +51,15 @@ if (!missing(metalearner_params))
 if (!missing(metalearner_params)) {
     model@parameters$metalearner_params <- list(fromJSON(model@parameters$metalearner_params))[[1]] #Need the `[[ ]]` to avoid a nested list
 }
+model@model <- .h2o.fill_stackedensemble(model@model, model@parameters, model@allparams)
+
+# Get the actual models (that were potentially expanded from H2OGrid on the backend)
+baselearners <- lapply(model@model$base_models, function(base_model) {
+  if (is.character(base_model))
+    base_model <- h2o.getModel(base_model)
+  base_model
+})
+
 model@model$model_summary <- capture.output({
 
   print_ln <- function(...) cat(..., sep = "\\n")
@@ -86,6 +90,13 @@ model@model$model_summary <- capture.output({
 
 })
 class(model@model$model_summary) <- "h2o.stackedEnsemble.summary"
+""",
+    module="""
+.h2o.fill_stackedensemble <- function(model, parameters, allparams) {
+  # Store base models for the Stacked Ensemble in user-readable form
+  model$base_models <- unlist(lapply(parameters$base_models, function (base_model) base_model$name))
+  return(model)
+}
 """
 )
 
@@ -106,7 +117,53 @@ Seed for random numbers; passed through to the metalearner algorithm. Defaults t
 """
     ),
     examples="""
-# See example R code here:
-# http://docs.h2o.ai/h2o/latest-stable/h2o-docs/data-science/stacked-ensembles.html
+library(h2o)
+h2o.init()
+
+# Import a sample binary outcome train/test set
+train <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_train_10k.csv")
+test <- h2o.importFile("https://s3.amazonaws.com/erin-data/higgs/higgs_test_5k.csv")
+
+# Identify predictors and response
+y <- "response"
+x <- setdiff(names(train), y)
+
+# For binary classification, response should be a factor
+train[,y] <- as.factor(train[,y])
+test[,y] <- as.factor(test[,y])
+
+# Number of CV folds
+nfolds <- 5
+
+# Train & Cross-validate a GBM
+my_gbm <- h2o.gbm(x = x,
+                  y = y,
+                  training_frame = train,
+                  distribution = "bernoulli",
+                  ntrees = 10,
+                  max_depth = 3,
+                  min_rows = 2,
+                  learn_rate = 0.2,
+                  nfolds = nfolds,
+                  fold_assignment = "Modulo",
+                  keep_cross_validation_predictions = TRUE,
+                  seed = 1)
+
+# Train & Cross-validate a RF
+my_rf <- h2o.randomForest(x = x,
+                          y = y,
+                          training_frame = train,
+                          ntrees = 50,
+                          nfolds = nfolds,
+                          fold_assignment = "Modulo",
+                          keep_cross_validation_predictions = TRUE,
+                          seed = 1)
+
+# Train a stacked ensemble using the GBM and RF above
+ensemble <- h2o.stackedEnsemble(x = x,
+                                y = y,
+                                training_frame = train,
+                                model_id = "my_ensemble_binomial",
+                                base_models = list(my_gbm, my_rf))
 """
 )

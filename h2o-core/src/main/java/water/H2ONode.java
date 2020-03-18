@@ -40,13 +40,13 @@ public final class H2ONode extends Iced<H2ONode> implements Comparable {
   transient public int _tcp_readers;               // Count of started TCP reader threads
     
   transient private short _timestamp;
-
   transient private boolean _removed_from_cloud;
+  transient private volatile boolean _accessed_local_dkv; // Did this remote node ever accessed the local portion of DKV?   
 
   public final boolean isClient() {
     return _heartbeat._client;
   }
-
+  
   final void setTimestamp(short newTimestamp) {
     if (!H2ONodeTimestamp.isDefined(_timestamp) && H2ONodeTimestamp.isDefined(newTimestamp)) {
       // Note: time stamp is only known when the H2ONode actually opens a connection to this node
@@ -164,6 +164,10 @@ public final class H2ONode extends Iced<H2ONode> implements Comparable {
     static int SIZE = SIZE_OF_IP /* ip */ + 2 /* port */;
   }
 
+  public String getIp() {
+    return _key.getHostString();
+  }
+
   public String getIpPortString() {
     return _key.getIpPortString();
   }
@@ -195,6 +199,14 @@ public final class H2ONode extends Iced<H2ONode> implements Comparable {
     return (now - _last_heard_from) < HeartBeatThread.TIMEOUT;
   }
 
+  public void markLocalDKVAccess() {
+    _accessed_local_dkv = true;
+  }
+
+  public boolean accessedLocalDKV() {
+    return _accessed_local_dkv;
+  }
+  
   // ---------------
   // A dense integer index for every unique IP ever seen, since the JVM booted.
   // Used to track "known replicas" per-key across Cloud change-ups.  Just use
@@ -374,7 +386,6 @@ public final class H2ONode extends Iced<H2ONode> implements Comparable {
     sb.append("(");
     sb.append("timestamp=").append(_timestamp);
     if (_heartbeat != null) {
-      sb.append(", ").append("watchdog=").append(_heartbeat._watchdog_client);
       sb.append(", ").append("cloud_name_hash=").append(_heartbeat._cloud_name_hash);
     }
     sb.append(")");
@@ -469,20 +480,13 @@ public final class H2ONode extends Iced<H2ONode> implements Comparable {
 
   /**
    * Returns a new connection of type {@code tcpType}, the type can be either
-   *   TCPReceiverThread.TCP_SMALL, TCPReceiverThread.TCP_BIG or
-   *   TCPReceiverThread.TCP_EXTERNAL.
-   *
-   * In case of TCPReceiverThread.TCP_EXTERNAL, we need to keep in mind that this method is executed in environment
-   * where H2O is not running, but it is just on the classpath so users can establish connection with the external H2O
-   * cluster.
+   *   TCPReceiverThread.TCP_SMALL or TCPReceiverThread.TCP_BIG.
    *
    * If socket channel factory is set, the communication will considered to be secured - this depends on the
    * configuration of the {@link SocketChannelFactory}. In case of the factory is null, the communication won't be secured.
    * @return new socket channel
    */
   public static ByteChannel openChan(byte tcpType, SocketChannelFactory socketFactory, InetAddress originAddr, int originPort, short nodeTimeStamp) throws IOException {
-    // This method can't internally use static fields which depends on initialized H2O cluster in case of
-    //communication to the external H2O cluster
     // Must make a fresh socket
     SocketChannel sock = SocketChannel.open();
     sock.socket().setReuseAddress(true);
@@ -494,9 +498,6 @@ public final class H2ONode extends Iced<H2ONode> implements Comparable {
     assert !sock.isConnectionPending() && sock.isBlocking() && sock.isConnected() && sock.isOpen();
     sock.socket().setTcpNoDelay(true);
     ByteBuffer bb = ByteBuffer.allocate(6).order(ByteOrder.nativeOrder());
-    // In Case of tcpType == TCPReceiverThread.TCP_EXTERNAL, H2O.H2O_PORT is 0 as it is undefined, because
-    // H2O cluster is not running in this case. However,
-    // it is fine as the receiver of the external backend does not use this value.
     bb.put(tcpType).putShort(nodeTimeStamp).putChar((char)H2O.H2O_PORT).put((byte) 0xef).flip();
 
     ByteChannel wrappedSocket = socketFactory.clientChannel(sock, isa.getHostName(), isa.getPort());
@@ -529,6 +530,7 @@ public final class H2ONode extends Iced<H2ONode> implements Comparable {
 
     SmallMessagesSendThread(){
       super(SEND_THREAD_NAME_PREFIX + H2ONode.this);
+      ThreadHelper.initCommonThreadProperties(this);
       _bb = AutoBuffer.BBP_BIG.make();
     }
 

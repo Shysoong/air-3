@@ -99,6 +99,14 @@ h2o.removeAll <- function(timeout_secs=0, retained_elements = c()) {
 #' @param ids The object or hex key associated with the object to be removed or a vector/list of those things.
 #' @param cascade Boolean, if set to TRUE (default), the object dependencies (e.g. submodels) are also removed.
 #' @seealso \code{\link{h2o.assign}}, \code{\link{h2o.ls}}
+#' @examples 
+#' \dontrun{
+#' library(h2o)
+#' h2o.init()
+#' iris_hex <- as.h2o(iris)
+#' model <- h2o.glm(1:4,5,training = iris_hex, family = "multinomial")
+#' h2o.rm(iris_hex)
+#' }
 #' @export
 h2o.rm <- function(ids, cascade=TRUE) {
   gc()
@@ -129,6 +137,30 @@ h2o.rm <- function(ids, cascade=TRUE) {
 #' Get the reference to a frame with the given id in the H2O instance.
 #'
 #' @param id A string indicating the unique frame of the dataset to retrieve.
+#' @examples 
+#' \dontrun{
+#' library(h2o)
+#' h2o.init()
+#' train <- h2o.importFile("http://h2o-public-test-data.s3.amazonaws.com/smalldata/iris/iris_train.csv")
+#' y <- "species"
+#' x <- setdiff(names(train), y)
+#' train[,y] <- as.factor(train[,y])
+#' nfolds <- 5
+#' num_base_models <- 2
+#' my_gbm <- h2o.gbm(x = x, y = y, training_frame = train, 
+#'                   distribution = "multinomial", ntrees = 10, 
+#'                   max_depth = 3, min_rows = 2, learn_rate = 0.2, 
+#'                   nfolds = nfolds, fold_assignment = "Modulo", 
+#'                   keep_cross_validation_predictions = TRUE, seed = 1)
+#' my_rf <- h2o.randomForest(x = x, y = y, training_frame = train, 
+#'                           ntrees = 50, nfolds = nfolds, fold_assignment = "Modulo", 
+#'                           keep_cross_validation_predictions = TRUE, seed = 1)
+#' stack <- h2o.stackedEnsemble(x = x, y = y, training_frame = train, 
+#'                              model_id = "my_ensemble_l1", 
+#'                              base_models = list(my_gbm@model_id, my_rf@model_id), 
+#'                              keep_levelone_frame = TRUE)
+#' h2o.getFrame(stack@model$levelone_frame_id$name)
+#' }
 #' @export
 h2o.getFrame <- function(id) {
   fr <- .newH2OFrame(id,id,-1,-1)
@@ -169,6 +201,10 @@ h2o.getModel <- function(model_id) {
   if (model_category %in% c("Binomial", "Multinomial", "Ordinal", "Regression")) { # add the missing metrics manually where
     model$coefficients <- model$coefficients_table[,2]
     names(model$coefficients) <- model$coefficients_table[,1]
+    if (!is.null(model$random_coefficients_table)) {
+      model$random_coefficients <- model$random_coefficients_table[,2]
+      names(model$random_coefficients) <- model$random_coefficients_table[,1]
+    }
   }
   parameters <- list()
   allparams  <- list()
@@ -206,6 +242,11 @@ h2o.getModel <- function(model_id) {
     }
   })
 
+  # Run model specific hooks
+  model_fill_func <- paste0(".h2o.fill_", json$algo)
+  if (exists(model_fill_func, mode="function")) {
+    model <- do.call(model_fill_func, list(model, parameters, allparams))
+  }
 
   # Convert ignored_columns/response_column to valid R x/y
 
@@ -219,11 +260,20 @@ h2o.getModel <- function(model_id) {
     parameters$x <- setdiff(parameters$x, parameters$y)
     allparams$x <- setdiff(allparams$x, allparams$y)
   }
-
   allparams$ignored_columns <- NULL
   allparams$response_column <- NULL
   parameters$ignored_columns <- NULL
   parameters$response_column <- NULL
+  if (identical("glm", json$algo) && allparams$HGLM) {
+    .newH2OModel(Class         = Class,
+                 model_id      = model_id,
+                 algorithm     = json$algo,
+                 parameters    = parameters,
+                 allparameters = allparams,
+                 have_pojo     = FALSE,
+                 have_mojo     = FALSE,
+                 model         = model)
+  } else {
   .newH2OModel(Class         = Class,
                model_id      = model_id,
                algorithm     = json$algo,
@@ -232,6 +282,7 @@ h2o.getModel <- function(model_id) {
                have_pojo     = json$have_pojo,
                have_mojo     = json$have_mojo,
                model         = model)
+  }
 }
 
 #'
@@ -391,4 +442,45 @@ h2o.download_mojo <- function(model, path=getwd(), get_genmodel_jar=FALSE, genmo
     writeBin(.h2o.doSafeGET(urlSuffix = urlSuffix, binary = TRUE), jar.path, useBytes = TRUE)
   }
   return(paste0(model_id,".zip"))
+}
+
+#'
+#' Download the model in binary format.
+#'
+#' @param model An H2OModel
+#' @param path The path where binary file should be downloaded. Downloaded to current directory by default.
+#'
+#' @examples
+#' \dontrun{
+#' library(h2o)
+#' h <- h2o.init()
+#' fr <- as.h2o(iris)
+#' my_model <- h2o.gbm(x = 1:4, y = 5, training_frame = fr)
+#' h2o.download_model(my_model)  # save to the current working directory
+#' }
+#' @export
+h2o.download_model <- function(model, path=NULL) {
+
+    if(!is.null(path) && !(is.character(path))){
+      stop("The 'path' variable should be of type character")
+    }
+    if(!is.null(path) && !(file.exists(path))){
+      stop(paste0("'path',",path,", to save pojo cannot be found."))
+    }
+    if(is.null(path)){
+      path = getwd()
+    }
+    
+    #Get model id
+    model_id <- model@model_id
+    
+    #prepare suffix to get the right endpoint
+    urlSuffix = paste0(.h2o.__MODELS, ".fetch.bin/", model_id)
+    modelname = gsub("[+\\-* !@#$%^&()={}\\[\\]|;:'\"<>,.?/]","_",model_id,perl=T)
+    
+    #Path to save model, if `path` is provided
+    file_path <- file.path(path, paste0(modelname))
+    writeBin(.h2o.doSafeGET(urlSuffix = urlSuffix, binary = TRUE), file_path, useBytes = TRUE)
+    
+    return(paste0(file_path))
 }

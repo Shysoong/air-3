@@ -142,7 +142,7 @@ public class AutoMLBuildSpecV99 extends SchemaV3<AutoMLBuildSpec, AutoMLBuildSpe
             level = API.Level.secondary)
     public int max_models;
 
-    @API(help = "Maximum time to spend building all models (optional).",
+    @API(help = "This argument specifies the maximum time that the AutoML process will run for, prior to training the final Stacked Ensemble models. If neither max_runtime_secs nor max_models are specified by the user, then max_runtime_secs defaults to 3600 seconds (1 hour).",
             level = API.Level.secondary)
     public double max_runtime_secs;
 
@@ -192,9 +192,11 @@ public class AutoMLBuildSpecV99 extends SchemaV3<AutoMLBuildSpec, AutoMLBuildSpe
               StoppingMetric.AUC,
               StoppingMetric.AUCPR,
               StoppingMetric.deviance,
+              StoppingMetric.lift_top_group,
               StoppingMetric.logloss,
               StoppingMetric.MAE,
               StoppingMetric.mean_per_class_error,
+              StoppingMetric.misclassification,
               StoppingMetric.MSE,
               StoppingMetric.RMSE,
               StoppingMetric.RMSLE
@@ -316,24 +318,5 @@ public class AutoMLBuildSpecV99 extends SchemaV3<AutoMLBuildSpec, AutoMLBuildSpe
   @Override
   public AutoMLBuildSpec fillImpl(AutoMLBuildSpec impl) {
     return super.fillImpl(impl, new String[] {"job"});
-  }
-
-  @Override
-  public AutoMLBuildSpecV99 fillFromBody(String body) {
-    AutoMLBuildSpecV99 schema = super.fillFromBody(body); //default JSON filling
-
-    // TODO: need to understand why we set stopping tolerance to AUTO iff stopping_criteria is provided without stopping_tolerance
-    Map<String, Object> json_body = JSONUtils.parse(body);
-    if (json_body.containsKey("build_control")) {
-      Map<String, Object> build_control = (Map)json_body.get("build_control");
-      if (build_control.containsKey("stopping_criteria")) {
-        Map<String, Object> stopping_criteria = (Map)build_control.get("stopping_criteria");
-
-        if (!stopping_criteria.containsKey("stopping_tolerance")) {
-          schema.build_control.stopping_criteria.stopping_tolerance = AUTO_STOPPING_TOLERANCE;
-        }
-      }
-    }
-    return schema;
   }
 }

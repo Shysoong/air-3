@@ -93,6 +93,8 @@ abstract public class ModelBuilder<M extends Model<M,P,O>, P extends Model.Param
   private static String[] SCHEMAS = new String[0];
   private static ModelBuilder[] BUILDERS = new ModelBuilder[0];
 
+  protected boolean _startUpOnceModelBuilder = false;
+
   /** One-time start-up only ModelBuilder, endlessly cloned by the GUI for the
    *  default settings. */
   protected ModelBuilder(P parms, boolean startup_once) { this(parms,startup_once,"hex.schemas."); }
@@ -100,6 +102,7 @@ abstract public class ModelBuilder<M extends Model<M,P,O>, P extends Model.Param
     String base = getName();
     if (!startup_once)
       throw H2O.fail("Algorithm " + base + " registration issue. It can only be called at startup.");
+    _startUpOnceModelBuilder = true;
     _job = null;
     _result = null;
     _parms = parms;
@@ -239,12 +242,16 @@ abstract public class ModelBuilder<M extends Model<M,P,O>, P extends Model.Param
         computeImpl();
         saveModelCheckpointIfConfigured();
       } finally {
-        setFinalState();
         _parms.read_unlock_frames(_job);
         if (!_parms._is_cv_model) cleanUp(); //cv calls cleanUp on its own terms
         Scope.exit();
       }
       tryComplete();
+    }
+
+    @Override
+    public void onCompletion(CountedCompleter caller) {
+      setFinalState();
       if (_modelBuilderListener != null) {
         _modelBuilderListener.onModelSuccess(_result.get());
       }
@@ -252,6 +259,7 @@ abstract public class ModelBuilder<M extends Model<M,P,O>, P extends Model.Param
 
     @Override
     public boolean onExceptionalCompletion(Throwable ex, CountedCompleter caller) {
+      setFinalState();
       if (_modelBuilderListener != null) {
         _modelBuilderListener.onModelFailure(ex, _parms);
       }
@@ -268,6 +276,10 @@ abstract public class ModelBuilder<M extends Model<M,P,O>, P extends Model.Param
     if (res != null && res._output != null) {
       res._output._job = _job;
       res._output.stopClock();
+//      res.unlock(_job == null ? null : _job._key, false); // last resort: dirty way to force unlock to be able to reacquire lock
+      res.write_lock(_job);
+      res.update(_job);
+      res.unlock(_job);
     }
     Log.info("Completing model "+ reskey);
   }
@@ -1263,12 +1275,22 @@ abstract public class ModelBuilder<M extends Model<M,P,O>, P extends Model.Param
           error("_response_column", "Response column parameter not set.");
           return;
         }
+        
         if(_response != null && computePriorClassDistribution()) {
-          if (isClassifier() && isSupervised() && _parms._distribution != DistributionFamily.quasibinomial) {
-            MRUtils.ClassDist cdmt =
-                _weights != null ? new MRUtils.ClassDist(nclasses()).doAll(_response, _weights) : new MRUtils.ClassDist(nclasses()).doAll(_response);
-            _distribution = cdmt.dist();
-            _priorClassDist = cdmt.rel_dist();
+          if (isClassifier() && isSupervised()) {
+            if(_parms._distribution == DistributionFamily.quasibinomial){
+              String[] quasiDomains = new VecUtils.CollectDoubleDomain(null,2).doAll(_response).stringDomain(_response.isInt());
+              MRUtils.ClassDistQuasibinomial cdmt =
+                      _weights != null ? new MRUtils.ClassDistQuasibinomial(quasiDomains).doAll(_response, _weights) : new MRUtils.ClassDistQuasibinomial(quasiDomains).doAll(_response);
+              _distribution = cdmt.dist();
+              _priorClassDist = cdmt.relDist();
+            } else {
+              MRUtils.ClassDist cdmt =
+                      _weights != null ? new MRUtils.ClassDist(nclasses()).doAll(_response, _weights) : new MRUtils.ClassDist(nclasses()).doAll(_response);
+              _distribution = cdmt.dist();
+              _priorClassDist = cdmt.relDist();
+              
+            }
           } else {                    // Regression; only 1 "class"
             _distribution = new double[]{ (_weights != null ? _weights.mean() : 1.0) * train().numRows() };
             _priorClassDist = new double[]{1.0f};
@@ -1434,7 +1456,7 @@ abstract public class ModelBuilder<M extends Model<M,P,O>, P extends Model.Param
    * @param expensive indicates full ("expensive") processing
    * @return adapted frame
    */
-  protected Frame init_adaptFrameToTrain(Frame fr, String frDesc, String field, boolean expensive) {
+  public Frame init_adaptFrameToTrain(Frame fr, String frDesc, String field, boolean expensive) {
     Frame adapted = adaptFrameToTrain(fr, frDesc, field, expensive);
     if (expensive)
       adapted = encodeFrameCategoricals(adapted, true);
@@ -1559,10 +1581,7 @@ abstract public class ModelBuilder<M extends Model<M,P,O>, P extends Model.Param
   }
 
   public void checkDistributions() {
-    if (_parms._distribution == DistributionFamily.quasibinomial) {
-      if (_response.min() != 0)
-        error("_response", "For quasibinomial distribution, response must have a low value of 0 (negative class), but instead has min value of " + _response.min() + ".");
-    } else if (_parms._distribution == DistributionFamily.poisson) {
+    if (_parms._distribution == DistributionFamily.poisson) {
       if (_response.min() < 0)
         error("_response", "Response must be non-negative for Poisson distribution.");
     } else if (_parms._distribution == DistributionFamily.gamma) {

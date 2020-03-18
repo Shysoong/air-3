@@ -185,6 +185,9 @@ public class GBM extends SharedTree<GBMModel,GBMModel.GBMParameters,GBMModel.GBM
       // for Bernoulli, we compute the initial value with Newton-Raphson iteration, otherwise it might be NaN here
       DistributionFamily distr = _parms._distribution;
       _initialPrediction = _nclass > 2 || distr == DistributionFamily.laplace || distr == DistributionFamily.huber || distr == DistributionFamily.quantile ? 0 : getInitialValue();
+      if(distr == DistributionFamily.quasibinomial){
+        _model._output._quasibinomialDomains = new VecUtils.CollectDoubleDomain(null,2).doAll(_response).stringDomain(_response.isInt());
+      }
       if (distr == DistributionFamily.bernoulli || distr == DistributionFamily.quasibinomial) {
         if (hasOffsetCol())
           _initialPrediction = getInitialValueBernoulliOffset(_train);
@@ -388,6 +391,7 @@ public class GBM extends SharedTree<GBMModel,GBMModel.GBMParameters,GBMModel.GBM
       }
 
       if ((cs != null) && constraintCheckEnabled()) {
+        _job.update(0, "Checking monotonicity constraints on the final model");
         checkConstraints(ktrees, leaves, cs);
       }
 
@@ -556,7 +560,7 @@ public class GBM extends SharedTree<GBMModel,GBMModel.GBMParameters,GBMModel.GBM
       // where huberDelta is the alpha-percentile of the residual across all observations
       Frame tmpFrame2 = new Frame(_train.vecs());
       tmpFrame2.add("resMinusMedianRes", diffMinusMedianDiff);
-      double[] huberGamma = new HuberLeafMath(frameMap, huberDelta,strata).doAll(tmpFrame2)._huberGamma;
+      double[] huberGamma = new HuberLeafMath(frameMap, huberDelta, strata).doAll(tmpFrame2)._huberGamma;
 
       // now assign the median per leaf + the above _huberCorrection[i] to each leaf
       final DTree tree = ktrees[0];
@@ -954,8 +958,9 @@ public class GBM extends SharedTree<GBMModel,GBMModel.GBMParameters,GBMModel.GBM
 
     @Override
     public void map(Chunk[] cs) {
-      if (_strataMin < 0 || _strataMax < 0) {
+      if (_strata.length() == 0) {
         Log.warn("No Huber math can be done since there's no strata.");
+        _huberGamma = new double[0];
         return;
       }
       final int nstrata = _strataMax - _strataMin + 1;

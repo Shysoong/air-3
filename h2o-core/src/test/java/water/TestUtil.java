@@ -41,7 +41,7 @@ public class TestUtil extends Iced {
   /** Minimal cloud size to start test. */
   protected static int MINCLOUDSIZE = Integer.parseInt(System.getProperty("cloudSize", "1"));
   /** Default time in ms to wait for clouding */
-  protected static int DEFAULT_TIME_FOR_CLOUDING = 30000 /* ms */;
+  protected static int DEFAULT_TIME_FOR_CLOUDING = 60000 /* ms */;
 
   public TestUtil() { this(1); }
   public TestUtil(int minCloudSize) {
@@ -309,28 +309,46 @@ public class TestUtil extends Iced {
 
   // ==== Data Frame Creation Utilities ====
 
-  /** Compare 2 frames
+  /** 
+   * Compare 2 frames
    *  @param fr1 Frame
    *  @param fr2 Frame
    *  @param epsilon Relative tolerance for floating point numbers
-   *  @return true if equal  */
-  public static boolean isIdenticalUpToRelTolerance(Frame fr1, Frame fr2, double epsilon) {
-    if (fr1 == fr2) return true;
-    if( fr1.numCols() != fr2.numCols() ) return false;
-    if( fr1.numRows() != fr2.numRows() ) return false;
-    Scope.enter();
-    if( !fr1.isCompatible(fr2) ) fr1.makeCompatible(fr2);
-    boolean identical = !(new Cmp1(epsilon).doAll(new Frame(fr1).add(fr2))._unequal);
-    Scope.exit();
-    return identical;
+   */
+  public static void assertIdenticalUpToRelTolerance(Frame fr1, Frame fr2, double epsilon) {
+    assertIdenticalUpToRelTolerance(fr1, fr2, epsilon, true, "");
   }
 
-  /** Compare 2 frames
+  public static void assertIdenticalUpToRelTolerance(Frame fr1, Frame fr2, double epsilon, String messagePrefix) {
+    assertIdenticalUpToRelTolerance(fr1, fr2, epsilon, true, messagePrefix);
+  }
+
+  public static void assertIdenticalUpToRelTolerance(Frame fr1, Frame fr2, double epsilon, boolean expected) {
+    assertIdenticalUpToRelTolerance(fr1, fr2, epsilon, expected, "");
+  }
+
+  public static void assertIdenticalUpToRelTolerance(Frame fr1, Frame fr2, double epsilon, boolean expected, String messagePrefix) {
+    if (fr1 == fr2) return;
+    if (expected) {
+      assertEquals("Number of columns differ.", fr1.numCols(), fr2.numCols());
+      assertEquals("Number of rows differ.", fr1.numRows(), fr2.numRows());
+    } else if (fr1.numCols() != fr2.numCols() || fr1.numRows() != fr2.numRows()) {
+      return;
+    }
+    Scope.enter();
+    if( !fr1.isCompatible(fr2) ) fr1.makeCompatible(fr2);
+    Cmp1 cmp = new Cmp1(epsilon, messagePrefix).doAll(new Frame(fr1).add(fr2));
+    Scope.exit();
+    assertTrue(cmp._message, expected == !cmp._unequal);
+  }
+
+  /** 
+   * Compare 2 frames
    *  @param fr1 Frame
    *  @param fr2 Frame
-   *  @return true if equal  */
-  public static boolean isBitIdentical(Frame fr1, Frame fr2) {
-    return isIdenticalUpToRelTolerance(fr1,fr2,0);
+   */
+  public static void assertBitIdentical(Frame fr1, Frame fr2) {
+    assertIdenticalUpToRelTolerance(fr1, fr2, 0);
   }
 
   static File[] contentsOf(String name, File folder) {
@@ -702,7 +720,10 @@ public class TestUtil extends Iced {
   public static void assertFrameEquals(Frame expected, Frame actual, Double absDelta, Double relativeDelta) {
     assertEquals("Frames have different number of vecs. ", expected.vecs().length, actual.vecs().length);
     for (int i = 0; i < expected.vecs().length; i++) {
-      assertVecEquals(i + "/" + expected._names[i] + " ", expected.vec(i), actual.vec(i), absDelta, relativeDelta);
+      if (expected.vec(i).isString())
+        assertStringVecEquals(expected.vec(i), actual.vec(i));
+      else
+        assertVecEquals(i + "/" + expected._names[i] + " ", expected.vec(i), actual.vec(i), absDelta, relativeDelta);
     }
   }
 
@@ -823,6 +844,56 @@ public class TestUtil extends Iced {
     return flipped;
   }
 
+  public static boolean equalTwoArrays(double[] array1, double[] array2, double tol) {
+    assert array1.length==array2.length:"Arrays have different lengths";
+    for (int index=0; index < array1.length; index++) {
+      if (Math.abs(array1[index]-array2[index])>tol)
+        return false;
+    }
+    return true;
+  }
+
+  public static class StandardizeColumns extends MRTask<StandardizeColumns> {
+    int[] _columns2Transform;
+    double[] _colMeans;
+    double[] _oneOStd;
+
+    public StandardizeColumns(int[] cols, double[] colMeans, double[] oneOSigma,
+                              Frame transF) {
+      assert cols.length==colMeans.length;
+      assert colMeans.length==oneOSigma.length;
+      _columns2Transform = cols;
+      _colMeans = colMeans;
+      _oneOStd = oneOSigma;
+
+      int numCols = transF.numCols();
+      for (int cindex:cols) { // check to make sure columns are numerical
+        assert transF.vec(cindex).isNumeric();
+      }
+    }
+
+    @Override public void map(Chunk[] chks) {
+      int chunkLen = chks[0].len();
+      int colCount = 0;
+      for (int cindex:_columns2Transform) {
+        for (int rindex=0; rindex < chunkLen; rindex++) {
+          double temp = (chks[cindex].atd(rindex)-_colMeans[colCount])*_oneOStd[colCount];
+          chks[cindex].set(rindex, temp);
+        }
+        colCount += 1;
+      }
+    }
+  }
+  
+  public static boolean equalTwoHashMaps(HashMap<String, Double> coeff1, HashMap<String, Double> coeff2, double tol) {
+    assert coeff1.size()==coeff2.size():"HashMap sizes are differenbt";
+    for (String key:coeff1.keySet()) {
+      if (Math.abs(coeff1.get(key)-coeff2.get(key)) > tol)
+        return false;
+    }
+    return true;
+  }
+  
   public static boolean equalTwoDimTables(TwoDimTable tab1, TwoDimTable tab2, double tol) {
     boolean same = true;
     //compare colHeaders
@@ -924,15 +995,20 @@ public class TestUtil extends Iced {
 
   protected static class Cmp1 extends MRTask<Cmp1> {
     final double _epsilon;
-    public Cmp1( double epsilon ) { _epsilon = epsilon; }
+    final String _messagePrefix;
+    public Cmp1( double epsilon ) { _epsilon = epsilon; _messagePrefix = ""; }
+    public Cmp1( double epsilon, String msg ) { _epsilon = epsilon; _messagePrefix = msg + " "; }
     public boolean _unequal;
+    public String _message;
     @Override public void map( Chunk chks[] ) {
       for( int cols=0; cols<chks.length>>1; cols++ ) {
         Chunk c0 = chks[cols                 ];
         Chunk c1 = chks[cols+(chks.length>>1)];
         for( int rows = 0; rows < chks[0]._len; rows++ ) {
+          String msgBase = _messagePrefix + "At [" + rows + ", " + cols + "]: ";
           if (c0.isNA(rows) != c1.isNA(rows)) {
             _unequal = true;
+            _message = msgBase + "c0.isNA " + c0.isNA(rows) + " != c1.isNA " + c1.isNA(rows);
             return;
           } else if (!(c0.isNA(rows) && c1.isNA(rows))) {
             if (c0 instanceof C16Chunk && c1 instanceof C16Chunk) {
@@ -940,6 +1016,7 @@ public class TestUtil extends Iced {
               long hi0 = c0.at16h(rows), hi1 = c1.at16h(rows);
               if (lo0 != lo1 || hi0 != hi1) {
                 _unequal = true;
+                _message = msgBase + " lo0 " + lo0 + " != lo1 " + lo1 + " || hi0 " + hi0 + " != hi1 " + hi1;
                 return;
               }
             } else if (c0 instanceof CStrChunk && c1 instanceof CStrChunk) {
@@ -948,18 +1025,21 @@ public class TestUtil extends Iced {
               c1.atStr(s1, rows);
               if (s0.compareTo(s1) != 0) {
                 _unequal = true;
+                _message = msgBase + " s0 " + s0 + " != s1 " + s1;
                 return;
               }
             } else if ((c0 instanceof C8Chunk) && (c1 instanceof C8Chunk)) {
               long d0 = c0.at8(rows), d1 = c1.at8(rows);
               if (d0 != d1) {
                 _unequal = true;
+                _message = msgBase + " d0 " + d0 + " != d1 " + d1;
                 return;
               }
             } else {
               double d0 = c0.atd(rows), d1 = c1.atd(rows);
               if (!(Math.abs(d0 - d1) <= Math.abs(d0 + d1) * _epsilon)) {
                 _unequal = true;
+                _message = msgBase + " d0 " + d0 + " != d1 " + d1;
                 return;
               }
             }
@@ -967,7 +1047,13 @@ public class TestUtil extends Iced {
         }
       }
     }
-    @Override public void reduce( Cmp1 cmp ) { _unequal |= cmp._unequal; }
+    @Override public void reduce( Cmp1 cmp ) {
+      if (_unequal) return;
+      if (cmp._unequal) {
+        _unequal = true;
+        _message = cmp._message;
+      }
+    }
   }
 
   public static void assertFrameAssertion(FrameAssertion frameAssertion) {

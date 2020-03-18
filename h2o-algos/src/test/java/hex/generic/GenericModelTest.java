@@ -2,6 +2,11 @@ package hex.generic;
 
 import hex.ModelCategory;
 import hex.ModelMetricsBinomial;
+import hex.deeplearning.DeepLearning;
+import hex.deeplearning.DeepLearningModel;
+import hex.ensemble.Metalearner;
+import hex.ensemble.StackedEnsemble;
+import hex.ensemble.StackedEnsembleModel;
 import hex.glm.GLM;
 import hex.glm.GLMModel;
 import hex.tree.drf.DRF;
@@ -11,24 +16,28 @@ import hex.tree.gbm.GBMModel;
 import hex.tree.isofor.IsolationForest;
 import hex.tree.isofor.IsolationForestModel;
 import org.apache.commons.io.FileUtils;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.junit.runner.RunWith;
 import water.*;
 import water.fvec.Frame;
+import water.runner.CloudSize;
+import water.runner.H2ORunner;
+import water.util.FrameUtilsTest;
 
 import java.io.*;
-import java.nio.file.Files;
 import java.util.ArrayList;
 
 import static hex.genmodel.utils.DistributionFamily.AUTO;
 import static org.junit.Assert.*;
 
+@RunWith(H2ORunner.class)
+@CloudSize(1)
 public class GenericModelTest extends TestUtil {
-
-    @Before
-    public void setUp() {
-        TestUtil.stall_till_cloudsize(1);
-    }
+    
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Test
     public void testJavaScoring_gbm_binomial() throws Exception {
@@ -61,7 +70,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
 
             assertNotNull(genericModel._output._training_metrics);
@@ -111,7 +120,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             predictions = genericModel.score(testFrame);
             assertEquals(2691, predictions.numRows());
@@ -158,7 +167,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             predictions = genericModel.score(testFrame);
             assertEquals(2691, predictions.numRows());
@@ -205,7 +214,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             predictions = genericModel.score(testFrame);
             assertEquals(2691, predictions.numRows());
@@ -252,7 +261,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             predictions = genericModel.score(testFrame);
             assertEquals(2691, predictions.numRows());
@@ -299,7 +308,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             predictions = genericModel.score(testFrame);
             assertEquals(2691, predictions.numRows());
@@ -345,7 +354,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             predictions = genericModel.score(testFrame);
             assertEquals(2691, predictions.numRows());
@@ -393,7 +402,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
             assertNotNull(genericModel._output._model_summary);
             assertNotNull(genericModel._output._variable_importances);
 
@@ -442,7 +451,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             predictions = genericModel.score(testFrame);
             assertEquals(2691, predictions.numRows());
@@ -489,7 +498,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             predictions = genericModel.score(testFrame);
             assertEquals(2691, predictions.numRows());
@@ -538,7 +547,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             // Compare the two MOJOs byte-wise
             final File genericModelMojoFile = File.createTempFile("mojo", "zip");
@@ -585,7 +594,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             // Compare the two MOJOs byte-wise
             final File genericModelMojoFile = File.createTempFile("mojo", "zip");
@@ -632,7 +641,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             // Compare the two MOJOs byte-wise
             final File genericModelMojoFile = File.createTempFile("mojo", "zip");
@@ -677,7 +686,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             // Compare the two MOJOs byte-wise
             final File genericModelMojoFile = File.createTempFile("mojo", "zip");
@@ -717,7 +726,7 @@ public class GenericModelTest extends TestUtil {
             final GenericModelParameters genericModelParameters = new GenericModelParameters();
             genericModelParameters._model_key = mojo;
             final Generic generic = new Generic(genericModelParameters);
-            genericModel = generic.trainModel().get();
+            genericModel = trainAndCheck(generic);
 
             // Compare the two MOJOs byte-wise
             final File genericModelMojoFile = File.createTempFile("mojo", "zip");
@@ -725,19 +734,203 @@ public class GenericModelTest extends TestUtil {
             assertArrayEquals(FileUtils.readFileToByteArray(originalModelMojoFile), FileUtils.readFileToByteArray(genericModelMojoFile));
 
         } finally {
-            if(originalModel != null) originalModel.remove();
+            if (originalModel != null) originalModel.remove();
             if (mojo != null) mojo.remove();
             if (genericModel != null) genericModel.remove();
             if (trainingFrame != null) trainingFrame.remove();
         }
     }
 
+    @Test
+    public void testJavaScoring_deeplearning() throws Exception {
+        try {
+            Scope.enter();
+            // Create new GBM model
+            final Frame trainingFrame = parse_test_file("./smalldata/testng/airlines_train.csv");
+            Scope.track(trainingFrame);
+            final Frame testFrame = parse_test_file("./smalldata/testng/airlines_test.csv");
+            Scope.track(testFrame);
+
+            DeepLearningModel.DeepLearningParameters parms = new DeepLearningModel.DeepLearningParameters();
+            parms._train = trainingFrame._key;
+            parms._distribution = AUTO;
+            parms._epochs = 1;
+            parms._response_column = "IsDepDelayed";
+
+            DeepLearning job = new DeepLearning(parms);
+            final DeepLearningModel model = job.trainModel().get();
+            Scope.track_generic(model);
+            assertEquals(model._output.getModelCategory(), ModelCategory.Binomial);
+            final ByteArrayOutputStream originalModelMojo = new ByteArrayOutputStream();
+            final File originalModelMojoFile = File.createTempFile("mojo", "zip");
+            model.getMojo().writeTo(originalModelMojo);
+            model.getMojo().writeTo(new FileOutputStream(originalModelMojoFile));
+
+            final Key mojo = importMojo(originalModelMojoFile.getAbsolutePath());
+
+            final GenericModelParameters genericModelParameters = new GenericModelParameters();
+            genericModelParameters._model_key = mojo;
+            final Generic generic = new Generic(genericModelParameters);
+            final GenericModel genericModel = trainAndCheck(generic);
+            Scope.track_generic(genericModel);
+
+
+            assertNotNull(genericModel._output._training_metrics);
+            assertTrue(genericModel._output._training_metrics instanceof ModelMetricsBinomial);
+
+            final Frame predictions = genericModel.score(testFrame);
+            Scope.track(predictions);
+
+            final boolean equallyScored = genericModel.testJavaScoring(testFrame, predictions, 0);
+            assertTrue(equallyScored);
+
+        } finally {
+            Scope.exit();
+        }
+    }
+
+    @Test
+    public void downloadable_mojo_deeplearning() throws IOException {
+        try {
+            Scope.enter();
+            final Frame trainingFrame = parse_test_file("./smalldata/testng/airlines_train.csv");
+            Scope.track(trainingFrame);
+
+            DeepLearningModel.DeepLearningParameters parms = new DeepLearningModel.DeepLearningParameters();
+            parms._train = trainingFrame._key;
+            parms._distribution = AUTO;
+            parms._epochs = 1;
+            parms._response_column = "IsDepDelayed";
+
+            DeepLearning job = new DeepLearning(parms);
+            final DeepLearningModel originalModel = job.trainModel().get();
+            Scope.track_generic(originalModel);
+            final File originalModelMojoFile = File.createTempFile("mojo", "zip");
+            originalModel.getMojo().writeTo(new FileOutputStream(originalModelMojoFile));
+
+            final Key<Frame> mojo = importMojo(originalModelMojoFile.getAbsolutePath());
+
+            // Create Generic model from given imported MOJO
+            final GenericModelParameters genericModelParameters = new GenericModelParameters();
+            genericModelParameters._model_key = mojo;
+            final Generic generic = new Generic(genericModelParameters);
+            final GenericModel genericModel = trainAndCheck(generic);
+            Scope.track_generic(genericModel);
+
+            // Compare the two MOJOs byte-wise
+            final File genericModelMojoFile = temporaryFolder.newFile();
+            genericModelMojoFile.deleteOnExit();
+            genericModel.getMojo().writeTo(new FileOutputStream(genericModelMojoFile));
+            assertArrayEquals(FileUtils.readFileToByteArray(originalModelMojoFile), FileUtils.readFileToByteArray(genericModelMojoFile));
+
+        } finally {
+            Scope.exit();
+        }
+    }
+
+
+    @Test
+    public void stackedEnsembleMojoTest() throws IOException {
+        try {
+            Scope.enter();
+
+            final Frame trainingFrame = parse_test_file("./smalldata/testng/airlines_train.csv");
+            Scope.track(trainingFrame);
+
+            // Create DeepLearning Model
+            final DeepLearningModel.DeepLearningParameters deepLearningParameters = new DeepLearningModel.DeepLearningParameters();
+            deepLearningParameters._train = trainingFrame._key;
+            deepLearningParameters._distribution = AUTO;
+            deepLearningParameters._epochs = 1;
+            deepLearningParameters._response_column = "IsDepDelayed";
+            deepLearningParameters._nfolds = 2;
+            deepLearningParameters._keep_cross_validation_predictions = true;
+            deepLearningParameters._seed = 0XFEED;
+
+            final DeepLearning deepLearning = new DeepLearning(deepLearningParameters);
+            final DeepLearningModel deepLearningModel = deepLearning.trainModel().get();
+            Scope.track_generic(deepLearningModel);
+
+
+            // Create GBM model
+            final GBMModel.GBMParameters gbmParameters = new GBMModel.GBMParameters();
+            gbmParameters._train = trainingFrame._key;
+            gbmParameters._distribution = AUTO;
+            gbmParameters._response_column = "IsDepDelayed";
+            gbmParameters._ntrees = 1;
+            gbmParameters._nfolds = 2;
+            gbmParameters._keep_cross_validation_predictions = true;
+
+            gbmParameters._seed = 0XFEED;
+
+            final GBM gbm = new GBM(gbmParameters);
+            final GBMModel gbmModel = gbm.trainModel().get();
+            Scope.track_generic(gbmModel);
+
+            final StackedEnsembleModel.StackedEnsembleParameters stackedEnsembleParameters = new StackedEnsembleModel.StackedEnsembleParameters();
+            stackedEnsembleParameters._train = trainingFrame._key;
+            stackedEnsembleParameters._response_column = "IsDepDelayed";
+            stackedEnsembleParameters._metalearner_algorithm = Metalearner.Algorithm.AUTO;
+            stackedEnsembleParameters._base_models = new Key[]{deepLearningModel._key, gbmModel._key};
+            stackedEnsembleParameters._seed = 0xFEED;
+
+            final StackedEnsemble stackedEnsemble = new StackedEnsemble(stackedEnsembleParameters);
+            final StackedEnsembleModel stackedEnsembleModel = stackedEnsemble.trainModel().get();
+            Scope.track_generic(stackedEnsembleModel);
+            assertNotNull(stackedEnsembleModel);
+
+            final File originalModelMojoFile = File.createTempFile("mojo", "zip");
+            stackedEnsembleModel.getMojo().writeTo(new FileOutputStream(originalModelMojoFile));
+
+            final Key<Frame> mojo = importMojo(originalModelMojoFile.getAbsolutePath());
+
+            // Create Generic model from given imported MOJO
+            final GenericModelParameters genericModelParameters = new GenericModelParameters();
+            genericModelParameters._model_key = mojo;
+            final Generic generic = new Generic(genericModelParameters);
+            final GenericModel genericModel = trainAndCheck(generic);
+            Scope.track_generic(genericModel);
+
+            // Compare the two MOJOs byte-wise
+            final File genericModelMojoFile = temporaryFolder.newFile();
+            genericModelMojoFile.deleteOnExit();
+            genericModel.getMojo().writeTo(new FileOutputStream(genericModelMojoFile));
+            assertArrayEquals(FileUtils.readFileToByteArray(originalModelMojoFile), FileUtils.readFileToByteArray(genericModelMojoFile));
+
+            // Test scoring
+            final Frame testFrame = parse_test_file("./smalldata/testng/airlines_test.csv");
+            Scope.track(testFrame);
+            final Frame predictions = genericModel.score(testFrame);
+            Scope.track(predictions);
+
+            final boolean equallyScored = genericModel.testJavaScoring(testFrame, predictions, 0);
+
+            final Frame originalModelPredictions = stackedEnsembleModel.score(testFrame);
+            Scope.track(originalModelPredictions);
+            assertTrue(FrameUtilsTest.compareFrames(predictions, originalModelPredictions));
+            
+            assertTrue(equallyScored);
+        } finally {
+            Scope.exit();
+        }
+    }
+
+
+    private GenericModel trainAndCheck(Generic builder) {
+        GenericModel model = builder.trainModel().get();
+        assertNotNull(model);
+        assertFalse(model.needsPostProcess());
+        return model;
+    }
+
     private Key<Frame> importMojo(final String mojoAbsolutePath) {
         final ArrayList<String> keys = new ArrayList<>(1);
-        H2O.getPM().importFiles(mojoAbsolutePath, "", new ArrayList<String>(), keys, new ArrayList<String>(),
-                new ArrayList<String>());
+        H2O.getPM().importFiles(mojoAbsolutePath, "", new ArrayList<>(), keys, new ArrayList<>(),
+                new ArrayList<>());
         assertEquals(1, keys.size());
-        return DKV.get(keys.get(0))._key;
+        final Key<Frame> key = Key.make(keys.get(0));
+        Scope.track_generic(key.get());
+        return key;
     }
 
 }

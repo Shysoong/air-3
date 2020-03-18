@@ -6,6 +6,7 @@ import hex.genmodel.algos.deeplearning.DeeplearningMojoModel;
 import hex.genmodel.algos.glrm.GlrmMojoModel;
 import hex.genmodel.algos.targetencoder.TargetEncoderMojoModel;
 import hex.genmodel.algos.tree.SharedTreeMojoModel;
+import hex.genmodel.algos.tree.TreeBackedMojoModel;
 import hex.genmodel.algos.word2vec.WordEmbeddingModel;
 import hex.genmodel.easy.error.VoidErrorConsumer;
 import hex.genmodel.easy.exception.PredictException;
@@ -133,9 +134,9 @@ public class EasyPredictModelWrapper implements Serializable {
     public Config setEnableLeafAssignment(boolean val) throws IOException {
       if (val && (model==null))
         throw new IOException("enableLeafAssignment cannot be set with null model.  Call setModel() first.");
-      if (val && !(model instanceof SharedTreeMojoModel))
-        throw new IOException("enableLeafAssignment can be set to true only with SharedTreeMojoModel," +
-                " i.e. with GBM or DRF.");
+      if (val && !(model instanceof TreeBackedMojoModel))
+        throw new IOException("enableLeafAssignment can be set to true only with TreeBackedMojoModel," +
+                " i.e. with GBM, DRF, Isolation forest or XGBoost.");
 
       enableLeafAssignment = val;
       return this;
@@ -301,22 +302,18 @@ public class EasyPredictModelWrapper implements Serializable {
       predictContributions = null;
     }
 
-    if ((m.getCategoricalEncoding() != CategoricalEncoding.AUTO) && !config.getUseExternalEncoding()) {
-      throw new UnsupportedOperationException("Categorical Encoding `" + m.getCategoricalEncoding() + 
-              "` is currently not supported by EasyPredictModelWrapper. Instantiate the wrapper with `useExternalEncoding=true` " +
-              " and apply the encoding manually before calling the predict function. For more information please refer to https://0xdata.atlassian.net/browse/PUBDEV-6929.");
-    }
+    CategoricalEncoding categoricalEncoding = config.getUseExternalEncoding() ?
+            CategoricalEncoding.AUTO : m.getCategoricalEncoding();
+    Map<String, Integer> columnMapping = categoricalEncoding.createColumnMapping(m);
+    Map<Integer, CategoricalEncoder> domainMap = categoricalEncoding.createCategoricalEncoders(m, columnMapping);
 
-    Map<Integer, CategoricalEncoder> domainMap = new DomainMapConstructor(m).create();
-    // Create map of column names to index number.
-    String[] modelColumnNames = m.getNames();
-    Map<String, Integer> modelColumnNameToIndexMap = new HashMap<>(modelColumnNames.length);
-    for (int i = 0; i < modelColumnNames.length; i++) {
-      modelColumnNameToIndexMap.put(modelColumnNames[i], i);
+    if (m instanceof ConverterFactoryProvidingModel) {
+      rowDataConverter = ((ConverterFactoryProvidingModel) m).makeConverterFactory(columnMapping, domainMap, errorConsumer, config);
+    } else {
+      rowDataConverter = new RowToRawDataConverter(m, columnMapping, domainMap, errorConsumer, config);
     }
-
-    rowDataConverter = RowDataConverterFactory.makeConverter(m, modelColumnNameToIndexMap, domainMap, errorConsumer, config);
   }
+
 
   /**
    * Create a wrapper for a generated model.
@@ -615,13 +612,13 @@ public class EasyPredictModelWrapper implements Serializable {
   public String[] leafNodeAssignment(RowData data) throws PredictException {
     double[] rawData = nanArray(m.nfeatures());
     rawData = fillRawData(data, rawData);
-    return ((SharedTreeMojoModel) m).getDecisionPath(rawData);
+    return ((TreeBackedMojoModel) m).getDecisionPath(rawData);
   }
 
   public SharedTreeMojoModel.LeafNodeAssignments leafNodeAssignmentExtended(RowData data) throws PredictException {
     double[] rawData = nanArray(m.nfeatures());
     rawData = fillRawData(data, rawData);
-    return ((SharedTreeMojoModel) m).getLeafNodeAssignments(rawData);
+    return ((TreeBackedMojoModel) m).getLeafNodeAssignments(rawData);
   }
 
   /**
@@ -862,11 +859,11 @@ public class EasyPredictModelWrapper implements Serializable {
   protected double[] predict(RowData data, double offset, double[] preds) throws PredictException {
     double[] rawData = nanArray(m.nfeatures());
     rawData = fillRawData(data, rawData);
-    if (offset == 0) {
-      preds = m.score0(rawData, preds);
+    if (m.requiresOffset() || offset != 0) {
+      preds = m.score0(rawData, offset, preds);
     }
     else {
-      preds = m.score0(rawData, offset, preds);
+      preds = m.score0(rawData, preds);
     }
     return preds;
   }
