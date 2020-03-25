@@ -11,15 +11,15 @@
     },
     {
       "type": "cs",
-      "input": "importFiles [ \"http://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/titanic.csv\" ]\n\n# steps taken: \n# enter http://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/titanic.csv into the `Search` field\n# hit enter to add the file, click on the file to select it, and then click on `Import`"
+      "input": "importFiles [ \"http://58.220.240.50:22101/air-public-test-data/smalldata/gbm_test/titanic.csv\" ]\n\n# steps taken: \n# enter http://58.220.240.50:22101/air-public-test-data/smalldata/gbm_test/titanic.csv into the `Search` field\n# hit enter to add the file, click on the file to select it, and then click on `Import`"
     },
     {
       "type": "cs",
-      "input": "setupParse paths: [ \"http://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/titanic.csv\" ]\n\n# click `Parse these files...`"
+      "input": "setupParse paths: [ \"http://58.220.240.50:22101/air-public-test-data/smalldata/gbm_test/titanic.csv\" ]\n\n# click `Parse these files...`"
     },
     {
       "type": "cs",
-      "input": "parseFiles\n  paths: [\"http://s3.amazonaws.com/h2o-public-test-data/smalldata/gbm_test/titanic.csv\"]\n  destination_frame: \"titanic.hex\"\n  parse_type: \"CSV\"\n  separator: 44\n  number_columns: 14\n  single_quotes: false\n  column_names: [\"pclass\",\"survived\",\"name\",\"sex\",\"age\",\"sibsp\",\"parch\",\"ticket\",\"fare\",\"cabin\",\"embarked\",\"boat\",\"body\",\"home.dest\"]\n  column_types: [\"Numeric\",\"Enum\",\"String\",\"Enum\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Enum\",\"Enum\",\"Numeric\",\"Numeric\",\"Enum\"]\n  delete_on_done: true\n  check_header: 1\n  chunk_size: 4194304\n\n\n# steps taken:\n# select `enum` from the `survived` response column's dropdown menu to convert it from an integer to a categorical factor\n# then click `Parse`"
+      "input": "parseFiles\n  paths: [\"http://58.220.240.50:22101/air-public-test-data/smalldata/gbm_test/titanic.csv\"]\n  destination_frame: \"titanic.hex\"\n  parse_type: \"CSV\"\n  separator: 44\n  number_columns: 14\n  single_quotes: false\n  column_names: [\"pclass\",\"survived\",\"name\",\"sex\",\"age\",\"sibsp\",\"parch\",\"ticket\",\"fare\",\"cabin\",\"embarked\",\"boat\",\"body\",\"home.dest\"]\n  column_types: [\"Numeric\",\"Enum\",\"String\",\"Enum\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Numeric\",\"Enum\",\"Enum\",\"Numeric\",\"Numeric\",\"Enum\"]\n  delete_on_done: true\n  check_header: 1\n  chunk_size: 4194304\n\n\n# steps taken:\n# select `enum` from the `survived` response column's dropdown menu to convert it from an integer to a categorical factor\n# then click `Parse`"
     },
     {
       "type": "cs",
