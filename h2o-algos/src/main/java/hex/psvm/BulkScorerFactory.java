@@ -20,10 +20,11 @@ public class BulkScorerFactory {
                                                    int svsCount, boolean scoreRawBytes) {
     switch (kt) {
       case gaussian:
-        if (scoreRawBytes)
+        if (scoreRawBytes) {
           return new GaussianScorerRawBytes(parms, svs);
-        else
+        } else {
           return new GaussianScorerParsed(parms, svs, svsCount);
+        }
       default:
         throw new UnsupportedOperationException("Scoring for kernel " + kt + " is not yet implemented");
     }
